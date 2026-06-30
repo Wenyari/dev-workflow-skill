@@ -25,7 +25,7 @@ FEISHU_WIKI_PARENT_NODE_TOKEN
 - 不要把 app secret 写入 Skill、仓库文件、技术方案正文或日志。
 - 不要在最终回复中回显 secret。
 - 如果任一变量缺失，停止发布并告诉用户缺少哪个变量。
-- 发布飞书云文档直接使用飞书 Open API，不需要初始化 `lark-cli`。
+- 飞书发布默认走 Open API（应用身份），不需要初始化 `lark-cli`；设 `FEISHU_BACKEND=larkcli` 可改用 lark-cli 用户身份，`auto` 自动择优。仅 larkcli 模式需先 `lark-cli auth login`；该模式下发布到 Wiki 需用户具备 Wiki 节点创建 scope，缺失时按 `prepare` 回退 openapi。
 
 ## 发布流程
 

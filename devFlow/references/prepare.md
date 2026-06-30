@@ -9,9 +9,20 @@
 - 输出：环境变量清单、变量用途、配置建议和后续检查方式。
 - 目标：让用户在使用 `lark-read`、`lark-doc` 前知道必须准备什么。
 
-## 必需环境变量
+## 后端选择（FEISHU_BACKEND）
 
-读取飞书文档和发布飞书文档都必须配置：
+飞书读写有两个后端，用环境变量 `FEISHU_BACKEND` 选择，下面的变量需求按后端区分：
+
+- 缺省 / `openapi`：应用身份 + 飞书 Open API（现状）。需要 `FEISHU_APP_ID` /
+  `FEISHU_APP_SECRET`，且目标文档 / Wiki 节点要逐一授权给应用。
+- `larkcli`：通过 `lark-cli` 以**用户身份**调用同样的 Open API，免去逐篇授权。不使用
+  `FEISHU_APP_ID/SECRET`，改由 `lark-cli auth login` 登录授权。可选 `FEISHU_LARKCLI_AS`（默认
+  `user`）切换 user / bot 身份，`FEISHU_LARKCLI_BIN` 覆盖 lark-cli 路径。
+- `auto`：`lark-cli` 已登录则用 larkcli，否则回退 openapi；两者都不可用时报清晰错误。
+
+## openapi 模式必需环境变量
+
+openapi（或 auto 回退到 openapi）时必须配置：
 
 ```text
 FEISHU_APP_ID
@@ -27,8 +38,19 @@ FEISHU_APP_SECRET
 
 - 不要把 `FEISHU_APP_SECRET` 写入 Skill、仓库文件、技术方案正文或日志。
 - 不要在最终回复中回显 `FEISHU_APP_SECRET`。
-- 如果缺少任一变量，`lark-read` 和 `lark-doc` 都不能继续执行。
-- 普通飞书文档读写直接使用飞书 Open API，不需要初始化 `lark-cli`。
+- openapi 模式缺少任一变量时，`lark-read` 和 `lark-doc` 都不能继续执行。
+- openapi 模式直接使用飞书 Open API，不需要初始化 `lark-cli`；larkcli 模式不需要 app secret。
+
+## larkcli 模式准备
+
+设 `FEISHU_BACKEND=larkcli`（或 `auto` 且已登录）时：
+
+1. 安装 `lark-cli`（`@larksuite/cli`），确保它在 `PATH` 中（或用 `FEISHU_LARKCLI_BIN` 指定）。
+2. 运行 `lark-cli auth login` 完成用户身份授权，`lark-cli auth status` 确认对应身份为 `ready`。
+3. 用户需具备所需 scope：读取需要 docx / wiki 读取相关 scope；**发布到 Wiki 还需要 Wiki 节点创建
+   scope**。若发布因缺 scope 失败，lark-cli 会返回清晰错误；此时重新 `lark-cli auth login` 扩展
+   scope，或本次改用 openapi 应用身份发布。
+4. larkcli 模式不需要 `FEISHU_APP_ID/SECRET`；`FEISHU_WIKI_PARENT_NODE_TOKEN` 仍是发布所需的目标参数。
 
 ## 发布 Wiki 文档所需变量
 

@@ -4,6 +4,8 @@ import { parseArgs, printJson } from './lark_api.mjs'
 
 const MAX_TEXT_LENGTH = 1800
 const MAX_TABLE_CELLS = 45
+// 飞书 docx 单次创建表格 row_size 上限为 9，超过返回 1770001 invalid param。
+const MAX_TABLE_ROWS = 9
 const CODE_LANGUAGE_MAP = {
   javascript: 3,
   js: 3,
@@ -64,6 +66,22 @@ function createOrderedBlock(text, sequence) {
   }
 }
 
+function createCalloutBlock(text, emoji) {
+  const block = {
+    block_type: 19,
+    callout: { background_color: 1, border_color: 1, emoji_id: emoji || 'memo' }
+  }
+  // 文本作为子块由 writeBlocks 经 descendant API 写入，避免污染 JSON 序列化。
+  Object.defineProperty(block, '__calloutText', { value: text })
+  return block
+}
+
+function createQuoteBlock(text) {
+  const block = { block_type: 34, quote_container: {} }
+  Object.defineProperty(block, '__quoteText', { value: text })
+  return block
+}
+
 function createHeadingBlock(level, text) {
   const blockType = level === 1 ? 3 : level === 2 ? 4 : 5
   const key = level === 1 ? 'heading1' : level === 2 ? 'heading2' : 'heading3'
@@ -78,7 +96,8 @@ function createHeadingBlock(level, text) {
 
 function createTextElements(text) {
   const elements = []
-  const pattern = /`([^`\n]+)`/g
+  // 同时识别行内代码 `code` 与粗体 **bold**。
+  const pattern = /(`[^`\n]+`)|(\*\*[^*\n]+\*\*)/g
   let lastIndex = 0
   let match
 
@@ -87,14 +106,16 @@ function createTextElements(text) {
       elements.push({ text_run: { content: text.slice(lastIndex, match.index) } })
     }
 
-    elements.push({
-      text_run: {
-        content: match[1],
-        text_element_style: {
-          inline_code: true
-        }
-      }
-    })
+    const token = match[0]
+    if (token.startsWith('`')) {
+      elements.push({
+        text_run: { content: token.slice(1, -1), text_element_style: { inline_code: true } }
+      })
+    } else {
+      elements.push({
+        text_run: { content: token.slice(2, -2), text_element_style: { bold: true } }
+      })
+    }
 
     lastIndex = pattern.lastIndex
   }
@@ -129,7 +150,8 @@ function createCodeBlock(language, code) {
 
 function splitTableRow(line) {
   const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '')
-  return trimmed.split('|').map((cell) => cell.trim())
+  // 仅按未转义的 | 切分单元格，再把 \| 还原为字面 |（支持单元格内的联合类型如 'A' \| 'B'）。
+  return trimmed.split(/(?<!\\)\|/).map((cell) => cell.trim().replace(/\\\|/g, '|'))
 }
 
 function isTableSeparator(line) {
@@ -161,7 +183,10 @@ function createTableBlocks(rows) {
     ...row,
     ...Array.from({ length: columnSize - row.length }, () => '')
   ])
-  const maxRows = Math.max(2, Math.floor(MAX_TABLE_CELLS / columnSize))
+  const maxRows = Math.max(
+    2,
+    Math.min(MAX_TABLE_ROWS, Math.floor(MAX_TABLE_CELLS / columnSize))
+  )
   const tables = []
   const header = normalizedRows[0]
   const bodyRows = normalizedRows.slice(1)
@@ -184,6 +209,31 @@ function createTableBlocks(rows) {
   return tables
 }
 
+const TABLE_TOTAL_WIDTH = 760
+const TABLE_MIN_COL_WIDTH = 56
+
+function displayWidth(text) {
+  let width = 0
+  for (const ch of String(text)) {
+    width += /[一-鿿　-〿＀-￯]/.test(ch) ? 2 : 1
+  }
+  return width
+}
+
+function computeColumnWidths(rows, columnSize) {
+  // 满宽自适应：按每列最长内容（中文计 2 宽）分配，归一到 ~760，长枚举名少换行、行更矮。
+  const weights = Array.from({ length: columnSize }, (_, col) =>
+    Math.max(2, ...rows.map((row) => displayWidth(row[col] ?? '')))
+  )
+  const sum = weights.reduce((acc, value) => acc + value, 0) || columnSize
+  const widths = weights.map((weight) =>
+    Math.max(TABLE_MIN_COL_WIDTH, Math.round((TABLE_TOTAL_WIDTH * weight) / sum))
+  )
+  const diff = TABLE_TOTAL_WIDTH - widths.reduce((acc, value) => acc + value, 0)
+  widths[columnSize - 1] = Math.max(TABLE_MIN_COL_WIDTH, widths[columnSize - 1] + diff)
+  return widths
+}
+
 function createTableBlock(rows, columnSize) {
   const block = {
     block_type: 31,
@@ -197,6 +247,10 @@ function createTableBlock(rows, columnSize) {
 
   Object.defineProperty(block, '__tableRows', {
     value: rows
+  })
+  // 表头底色与列宽建表时不被接受，由 writeBlocks 在建表后 PATCH 设置。
+  Object.defineProperty(block, '__columnWidth', {
+    value: computeColumnWidths(rows, columnSize)
   })
 
   return block
@@ -267,9 +321,38 @@ export function markdownToLarkBlocks(markdown) {
       continue
     }
 
+    // 高亮块 callout：`> [!TIP] 文本` / `> [!NOTE] ...` / `> [!WARNING] ...`。
+    const calloutMatch = /^>\s*\[!(\w+)\]\s*(.*)$/.exec(line)
+    if (calloutMatch) {
+      flushParagraph()
+      orderedSequence = 1
+      const type = calloutMatch[1].toUpperCase()
+      const emoji = type === 'WARNING' || type === 'WARN' ? 'warning' : type === 'TIP' ? 'bulb' : 'memo'
+      blocks.push(createCalloutBlock(calloutMatch[2].trim(), emoji))
+      continue
+    }
+
+    // 引用块：`> 文本` → 飞书 quote_container（引用样式），由 writeBlocks 经 descendant API 写入。
+    const quote = /^>\s?(.*)$/.exec(line)
+    if (quote) {
+      flushParagraph()
+      orderedSequence = 1
+      const text = quote[1].trim()
+      if (text) blocks.push(createQuoteBlock(text))
+      continue
+    }
+
     if (line.trim() === '') {
       flushParagraph()
       orderedSequence = 1
+      continue
+    }
+
+    // 分割线：独立的 --- / *** / ___（非表格分隔行）→ 飞书 divider 块。
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) {
+      flushParagraph()
+      orderedSequence = 1
+      blocks.push({ block_type: 22, divider: {} })
       continue
     }
 

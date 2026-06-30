@@ -1,6 +1,166 @@
+import { spawn } from 'node:child_process'
+
 const FEISHU_API_BASE = 'https://open.feishu.cn'
 const RATE_LIMIT_CODE = 99991400
 const DEFAULT_RETRY_DELAYS = [1000, 2000, 4000]
+const LARKCLI_BIN = process.env.FEISHU_LARKCLI_BIN || 'lark-cli'
+
+// 后端选择：openapi（默认，应用身份 + Open API）| larkcli（lark-cli，用户身份）| auto。
+let cachedBackend = null
+
+function larkcliIdentity() {
+  return process.env.FEISHU_LARKCLI_AS || 'user'
+}
+
+// 把 lark-cli 调用包成 Promise；body 经 stdin（--data -）传入，避免大 JSON 的参数长度/转义问题。
+function runLarkcli(args, bodyString = null) {
+  return new Promise((resolve) => {
+    let child
+    try {
+      child = spawn(LARKCLI_BIN, args, { stdio: ['pipe', 'pipe', 'pipe'] })
+    } catch (error) {
+      resolve({ exitCode: -1, stdout: '', stderr: error.message })
+      return
+    }
+
+    let stdout = ''
+    let stderr = ''
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk
+    })
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk
+    })
+    child.on('error', (error) => {
+      resolve({ exitCode: -1, stdout: '', stderr: error.message })
+    })
+    child.on('close', (code) => {
+      resolve({ exitCode: code, stdout, stderr })
+    })
+
+    if (bodyString != null) child.stdin.write(bodyString)
+    child.stdin.end()
+  })
+}
+
+async function larkcliReady() {
+  const { exitCode, stdout } = await runLarkcli(['auth', 'status'])
+  if (exitCode !== 0) return false
+
+  try {
+    const status = JSON.parse(stdout)
+    const identity = status.identities?.[larkcliIdentity()]
+    return Boolean(identity && (identity.status === 'ready' || identity.available))
+  } catch {
+    return false
+  }
+}
+
+export async function getBackend() {
+  if (cachedBackend) return cachedBackend
+
+  const raw = (process.env.FEISHU_BACKEND || 'openapi').toLowerCase()
+
+  if (raw === 'openapi' || raw === 'larkcli') {
+    cachedBackend = raw
+    return raw
+  }
+
+  if (raw !== 'auto') {
+    throw new Error(`Unknown FEISHU_BACKEND: ${raw} (expected openapi | larkcli | auto)`)
+  }
+
+  if (await larkcliReady()) {
+    cachedBackend = 'larkcli'
+    return cachedBackend
+  }
+
+  if (process.env.FEISHU_APP_ID && process.env.FEISHU_APP_SECRET) {
+    cachedBackend = 'openapi'
+    return cachedBackend
+  }
+
+  throw new Error(
+    'FEISHU_BACKEND=auto 无可用后端：lark-cli 未登录，且缺少 FEISHU_APP_ID/FEISHU_APP_SECRET'
+  )
+}
+
+// 拆 path 的 ?query —— lark-cli api 会丢弃 path 内的 query，必须改用 --params 传。
+export function splitPathQuery(path) {
+  const index = path.indexOf('?')
+  if (index === -1) return { path, params: null }
+
+  const params = {}
+  for (const pair of path.slice(index + 1).split('&')) {
+    if (!pair) continue
+    const eq = pair.indexOf('=')
+    const key = decodeURIComponent(eq === -1 ? pair : pair.slice(0, eq))
+    const value = eq === -1 ? '' : decodeURIComponent(pair.slice(eq + 1))
+    params[key] = value
+  }
+
+  return { path: path.slice(0, index), params }
+}
+
+export function buildLarkcliArgs(method, path, { as, hasBody }) {
+  const upper = method.toUpperCase()
+  const { path: cleanPath, params } = splitPathQuery(path)
+  const args = ['api', upper, cleanPath, '--format', 'json', '--as', as]
+
+  if (params) args.push('--params', JSON.stringify(params))
+  if (hasBody) args.push('--data', '-')
+  // 注：lark-cli 的 raw `api` 命令不接受 --yes（那是 typed 域命令的高危写确认标志）；
+  // raw api 的写操作不需要也不识别 --yes。
+
+  return args
+}
+
+export function parseLarkcliSuccess(stdout) {
+  const json = JSON.parse(stdout)
+  return { code: 0, data: json.data }
+}
+
+export function parseLarkcliError(stderr, exitCode) {
+  try {
+    const json = JSON.parse(stderr)
+    const error = json.error || {}
+    return {
+      code: error.code ?? -1,
+      message: error.message || 'lark-cli error',
+      logId: error.log_id
+    }
+  } catch {
+    return { code: -1, message: (stderr || `lark-cli exit ${exitCode}`).trim() }
+  }
+}
+
+async function larkcliRequest(path, options = {}) {
+  const method = (options.method || 'GET').toUpperCase()
+  const body = options.body
+  const retryDelays = options.retryDelays || DEFAULT_RETRY_DELAYS
+  const args = buildLarkcliArgs(method, path, { as: larkcliIdentity(), hasBody: body != null })
+
+  for (let attempt = 0; attempt <= retryDelays.length; attempt += 1) {
+    const { exitCode, stdout, stderr } = await runLarkcli(args, body ?? null)
+
+    if (exitCode === 0) {
+      try {
+        return parseLarkcliSuccess(stdout)
+      } catch {
+        throw new Error(`${path} larkcli: 无法解析输出 ${stdout.slice(0, 200)}`)
+      }
+    }
+
+    const error = parseLarkcliError(stderr, exitCode)
+
+    if (error.code === RATE_LIMIT_CODE && attempt < retryDelays.length) {
+      await delay(retryDelays[attempt])
+      continue
+    }
+
+    throw new Error(`${path} ${error.code} ${error.message}`)
+  }
+}
 
 export function requireEnv(names) {
   const missing = names.filter((name) => !process.env[name])
@@ -33,6 +193,14 @@ export function parseArgs(argv = process.argv.slice(2)) {
 }
 
 export async function getTenantAccessToken() {
+  if ((await getBackend()) === 'larkcli') {
+    if (!(await larkcliReady())) {
+      throw new Error('FEISHU_BACKEND=larkcli：lark-cli 未登录，请运行 lark-cli auth login')
+    }
+    // larkcli 模式由 lark-cli 管理鉴权，无应用 token；返回哨兵，larkRequest 会忽略它。
+    return null
+  }
+
   requireEnv(['FEISHU_APP_ID', 'FEISHU_APP_SECRET'])
 
   const response = await fetch(
@@ -62,6 +230,10 @@ function delay(ms) {
 }
 
 export async function larkRequest(path, options = {}) {
+  if ((await getBackend()) === 'larkcli') {
+    return larkcliRequest(path, options)
+  }
+
   const token = options.token || (await getTenantAccessToken())
   const retryDelays = options.retryDelays || DEFAULT_RETRY_DELAYS
   const requestOptions = { ...options }
