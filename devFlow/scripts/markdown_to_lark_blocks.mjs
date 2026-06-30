@@ -273,6 +273,16 @@ export function markdownToLarkBlocks(markdown) {
       continue
     }
 
+    // 引用块：飞书 docx 无简单引用块类型，去掉 > 标记按普通文本写入，避免字面 > 泄漏。
+    const quote = /^>\s?(.*)$/.exec(line)
+    if (quote) {
+      flushParagraph()
+      orderedSequence = 1
+      const text = quote[1].trim()
+      if (text) blocks.push(createTextBlock(text))
+      continue
+    }
+
     if (line.trim() === '') {
       flushParagraph()
       orderedSequence = 1
