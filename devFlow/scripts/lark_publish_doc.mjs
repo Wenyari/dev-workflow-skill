@@ -195,7 +195,9 @@ function inferTitle(markdown, explicitTitle) {
 
 async function main() {
   const args = parseArgs()
-  requireEnv(['FEISHU_APP_ID', 'FEISHU_APP_SECRET', 'FEISHU_WIKI_PARENT_NODE_TOKEN'])
+  // 应用凭证由后端感知的 getTenantAccessToken 把关（larkcli 用户身份不需要 app secret）；
+  // Wiki 父节点是两种后端都需要的目标参数。
+  requireEnv(['FEISHU_WIKI_PARENT_NODE_TOKEN'])
 
   const markdown = args.file ? readFileSync(args.file, 'utf8') : readFileSync(0, 'utf8')
   const title = inferTitle(markdown, args.title)
