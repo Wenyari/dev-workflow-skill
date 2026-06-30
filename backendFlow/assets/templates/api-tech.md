@@ -1,5 +1,5 @@
-<!-- backendFlow api-tech 模板。章节用 HTML 注释标【必写】/【可选】。 -->
-<!-- 标题禁止手写序号，飞书原生标题自动编号。生成正式文档时请删除本文件中的所有 HTML 注释。 -->
+<!-- backendFlow api-tech 模板（定稿格式）。章节用 HTML 注释标【必写】/【可选】，生成正式文档时删除所有 HTML 注释。 -->
+<!-- 飞书排版语法：> 引用块；> [!WARNING]/[!TIP]/[!NOTE] 高亮块；--- 分隔线；**x** 粗体；表格自动灰底表头+自适应列宽。标题不写编号。 -->
 
 # 背景与目标
 <!-- 【可选】 -->
@@ -15,54 +15,67 @@
 # 接口设计
 <!-- 【必写】 -->
 
-统一约定：写明请求方法、`Content-Type`、统一返回体 `{ code, data, message }`、鉴权方式、时间字段单位等全局约定。
+> 统一约定：`POST`，`Content-Type: application/json`，返回体 `{ code, data }`，时间字段统一 epoch ms。鉴权：Admin 登录态。
 
-## <接口名称>
+## <模块名>
 
-`POST /api/<module>/<action>` — 鉴权：<登录态 / 内部调用 / 开放>
+### <接口名> · POST /api/<module>/<action>
 
-入参（区分 path / query / body）：
+**用途**：用 bullet 列出能力点：
 
-| 位置 | 参数 | 类型 | 必填 | 默认 | 校验 | 说明 |
-| --- | --- | --- | --- | --- | --- | --- |
-| body | page | number | 否 | 1 | ≥ 1 | 页码 |
-| body | keyword | string | 否 | — | ≤ 64 | 名称模糊搜索 |
+- 能力点 1
+- 能力点 2
 
-出参（统一包裹 `{ code, data, message }`，`data` 结构见数据模型）：
+**入参**
 
-```json
-{
-  "code": 0,
-  "message": "ok",
-  "data": { "total": 0, "list": [] }
+| 参数 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| page | number | 是 | 页码（≥ 1） |
+| pageSize | number | 是 | 每页条数（1–100） |
+
+```typescript
+interface ExampleDto {
+  page: number
+  pageSize: number
 }
 ```
 
-错误码：
+> [!WARNING] 标注本期为 mock / 跨模块依赖的字段，需在此提示。
 
-| code | 含义 | 触发条件 |
-| --- | --- | --- |
-| 0 | 成功 | — |
-| 40001 | 参数校验失败 | 入参不满足校验规则 |
-| 40301 | 登录态失效 | 无有效登录态 |
+**出参**（data 结构）
+
+```typescript
+interface ExampleData {
+  total: number
+  list: ExampleItem[]
+}
+```
+
+**说明**
+
+- 副作用 / 事务 / mock 口径等要点，逐条 bullet。
+
+**错误码**：`40001` 参数校验失败 ｜ `40301` 登录态失效
+
+---
 
 # 数据模型 / 数据库设计
 <!-- 【必写】 -->
 
 ## <实体 / 表名>
 
-| 字段 | 类型 | 必填 | 默认 / 约束 | 说明 |
-| --- | --- | --- | --- | --- |
-| id | string | 是 | 主键 | 唯一 ID |
-| name | string | 是 | 长度 1–64 | 名称 |
-| status | enum | 是 | ACTIVE / FROZEN | 状态 |
-| createdAt | number | 是 | epoch ms | 创建时间 |
+> 集合 <name>（用途）。extends Base: sys_status；timestamps。
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| _id | ObjectId | 是 | 主键 |
+| name | string | 是 | 名称，查重唯一 |
+| createdAt | number | 是 | 创建时间，epoch ms |
 
 ```typescript
 interface Entity {
-  id: string
+  _id: string
   name: string
-  status: 'ACTIVE' | 'FROZEN'
   createdAt: number // epoch ms
 }
 ```
@@ -72,7 +85,7 @@ interface Entity {
 # 核心流程 / 时序
 <!-- 【必写】 -->
 
-说明关键业务流程、调用链、事务边界与幂等 / 并发处理。
+说明关键业务流程、调用链、事务边界与幂等 / 并发。状态流转用 mermaid（源码）。
 
 ```mermaid
 sequenceDiagram
@@ -94,7 +107,7 @@ sequenceDiagram
 # 边界与异常
 <!-- 【必写】 -->
 
-- 空数据、请求失败、无权限、重复提交、并发冲突、部分数据缺失等的处理与返回。
+- 空数据、请求失败、无权限、重复提交、并发冲突、部分数据缺失的处理与返回。
 - 回滚、重试、降级策略。
 
 # 完成标准

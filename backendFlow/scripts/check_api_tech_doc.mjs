@@ -73,14 +73,11 @@ export function checkApiTechDoc(markdown, options = {}) {
 
   const apiSection = getSection(markdown, '接口设计')
   if (apiSection) {
-    if (!/\|\s*位置\s*\|/.test(apiSection)) {
-      issues.push('接口设计缺少入参表「位置」列（需区分 path/query/body）')
+    if (!hasTable(apiSection)) {
+      issues.push('接口设计缺少入参表格')
     }
-    if (!/"code"/.test(apiSection) || !/"data"/.test(apiSection)) {
-      issues.push('接口设计出参未使用 { code, data, message } 统一包裹')
-    }
-    if (!/触发条件/.test(apiSection)) {
-      issues.push('接口设计缺少错误码清单（含「触发条件」列）')
+    if (!hasTsBlock(apiSection)) {
+      issues.push('接口设计缺少 TypeScript 代码块（入参 DTO / 出参 data 结构）')
     }
   }
 

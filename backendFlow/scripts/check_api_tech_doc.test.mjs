@@ -3,32 +3,37 @@ import assert from 'node:assert/strict'
 
 import { checkApiTechDoc } from './check_api_tech_doc.mjs'
 
+const API_DTO = '```typescript\ninterface ListDto { page: number }\n```'
+const API_RESP = '```typescript\ninterface ListData { total: number }\n```'
+const MODEL_TS = '```typescript\ninterface Entity { id: string }\n```'
+
 const GOOD = `# 接口设计
 
-## 列表查询
-\`POST /api/x\`
+> 统一约定：POST，返回体 { code, data }。
 
-| 位置 | 参数 | 类型 | 必填 | 默认 | 校验 | 说明 |
-| --- | --- | --- | --- | --- | --- | --- |
-| body | page | number | 否 | 1 | ≥1 | 页码 |
+### 列表查询 · POST /api/x
 
-\`\`\`json
-{ "code": 0, "data": {}, "message": "ok" }
-\`\`\`
+**入参**
 
-| code | 含义 | 触发条件 |
-| --- | --- | --- |
-| 0 | 成功 | — |
+| 参数 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| page | number | 否 | 页码 |
+
+${API_DTO}
+
+**出参**
+
+${API_RESP}
+
+**错误码**：\`40001\` 参数校验失败
 
 # 数据模型 / 数据库设计
 
-| 字段 | 类型 | 必填 | 默认 / 约束 | 说明 |
-| --- | --- | --- | --- | --- |
-| id | string | 是 | — | 主键 |
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| id | string | 是 | 主键 |
 
-\`\`\`typescript
-interface E { id: string }
-\`\`\`
+${MODEL_TS}
 
 # 核心流程 / 时序
 
@@ -65,15 +70,15 @@ test('标题手写序号报错', () => {
 })
 
 test('数据模型缺 TS 报错', () => {
-  const md = GOOD.replace(/```typescript[\s\S]*?```/, '')
+  const md = GOOD.replace(MODEL_TS, '')
   const r = checkApiTechDoc(md)
-  assert.ok(r.issues.some((i) => i.includes('TypeScript')))
+  assert.ok(r.issues.some((i) => i.includes('数据模型') && i.includes('TypeScript')))
 })
 
-test('接口缺错误码报错', () => {
-  const md = GOOD.replace('触发条件', '说明')
+test('接口缺 TS 报错', () => {
+  const md = GOOD.replace(API_DTO, '').replace(API_RESP, '')
   const r = checkApiTechDoc(md)
-  assert.ok(r.issues.some((i) => i.includes('错误码')))
+  assert.ok(r.issues.some((i) => i.includes('接口设计') && i.includes('TypeScript')))
 })
 
 test('已选可选章节缺失报错，未选的不报', () => {
