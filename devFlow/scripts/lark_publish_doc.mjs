@@ -67,7 +67,7 @@ async function createWikiDoc(token, parentNode, title, parentToken) {
   return node
 }
 
-async function writeBlocks(token, docToken, blocks) {
+export async function writeBlocks(token, docToken, blocks) {
   let written = 0
   let buffer = []
 
@@ -220,7 +220,9 @@ async function main() {
   })
 }
 
-main().catch((error) => {
-  console.error(error.message)
-  process.exit(1)
-})
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => {
+    console.error(error.message)
+    process.exit(1)
+  })
+}

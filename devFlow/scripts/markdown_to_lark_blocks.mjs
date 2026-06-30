@@ -4,6 +4,8 @@ import { parseArgs, printJson } from './lark_api.mjs'
 
 const MAX_TEXT_LENGTH = 1800
 const MAX_TABLE_CELLS = 45
+// 飞书 docx 单次创建表格 row_size 上限为 9，超过返回 1770001 invalid param。
+const MAX_TABLE_ROWS = 9
 const CODE_LANGUAGE_MAP = {
   javascript: 3,
   js: 3,
@@ -129,7 +131,8 @@ function createCodeBlock(language, code) {
 
 function splitTableRow(line) {
   const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '')
-  return trimmed.split('|').map((cell) => cell.trim())
+  // 仅按未转义的 | 切分单元格，再把 \| 还原为字面 |（支持单元格内的联合类型如 'A' \| 'B'）。
+  return trimmed.split(/(?<!\\)\|/).map((cell) => cell.trim().replace(/\\\|/g, '|'))
 }
 
 function isTableSeparator(line) {
@@ -161,7 +164,10 @@ function createTableBlocks(rows) {
     ...row,
     ...Array.from({ length: columnSize - row.length }, () => '')
   ])
-  const maxRows = Math.max(2, Math.floor(MAX_TABLE_CELLS / columnSize))
+  const maxRows = Math.max(
+    2,
+    Math.min(MAX_TABLE_ROWS, Math.floor(MAX_TABLE_CELLS / columnSize))
+  )
   const tables = []
   const header = normalizedRows[0]
   const bodyRows = normalizedRows.slice(1)

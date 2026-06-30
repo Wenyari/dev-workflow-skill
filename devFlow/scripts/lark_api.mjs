@@ -109,7 +109,8 @@ export function buildLarkcliArgs(method, path, { as, hasBody }) {
 
   if (params) args.push('--params', JSON.stringify(params))
   if (hasBody) args.push('--data', '-')
-  if (upper !== 'GET') args.push('--yes')
+  // 注：lark-cli 的 raw `api` 命令不接受 --yes（那是 typed 域命令的高危写确认标志）；
+  // raw api 的写操作不需要也不识别 --yes。
 
   return args
 }

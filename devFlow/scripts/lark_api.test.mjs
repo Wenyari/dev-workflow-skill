@@ -34,12 +34,12 @@ test('buildLarkcliArgs: GET 带 query —— 加 --params JSON', () => {
   assert.ok(!args.includes('--yes'))
 })
 
-test('buildLarkcliArgs: POST 带 body —— 加 --data - 和 --yes', () => {
+test('buildLarkcliArgs: POST 带 body —— 加 --data -，且不加 --yes（raw api 不识别）', () => {
   const args = buildLarkcliArgs('POST', '/open-apis/x', { as: 'bot', hasBody: true })
   assert.ok(args.includes('--as'))
   assert.equal(args[args.indexOf('--as') + 1], 'bot')
   assert.deepEqual(args.slice(args.indexOf('--data'), args.indexOf('--data') + 2), ['--data', '-'])
-  assert.ok(args.includes('--yes'))
+  assert.ok(!args.includes('--yes'))
 })
 
 test('parseLarkcliSuccess: {ok,data} 重包成 {code:0,data}', () => {
