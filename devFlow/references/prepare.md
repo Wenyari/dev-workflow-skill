@@ -127,13 +127,13 @@ source /Users/wenjin/.zshenv
 检查目标文档或 Wiki 父节点权限时，优先使用脚本：
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_check_permissions.mjs --url "飞书链接"
+node ~/.claude/skills/devFlow/scripts/lark_check_permissions.mjs --url "飞书链接"
 ```
 
 检查默认 Wiki 父节点权限时：
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_check_permissions.mjs
+node ~/.claude/skills/devFlow/scripts/lark_check_permissions.mjs
 ```
 
 ## 输出要求

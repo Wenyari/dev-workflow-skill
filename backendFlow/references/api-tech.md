@@ -85,7 +85,7 @@
 落地为 Markdown 文件后运行：
 
 ```bash
-node .agent/skills/backendFlow/scripts/check_api_tech_doc.mjs --file <markdown-file> --optional "<本次选中的可选章节，逗号分隔>"
+node ~/.claude/skills/backendFlow/scripts/check_api_tech_doc.mjs --file <markdown-file> --optional "<本次选中的可选章节，逗号分隔>"
 ```
 
 自检覆盖：必写章节齐全、选中可选章节存在、数据模型含表格 + TS、接口设计含表格与 TS 代码块、核心流程含

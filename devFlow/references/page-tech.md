@@ -401,7 +401,7 @@ flowchart LR
 生成页面技术方案后，必须执行一次人工自检；如果已经落地为 Markdown 文件，优先运行：
 
 ```bash
-node .agent/skills/devFlow/scripts/check_page_tech_doc.mjs <markdown-file>
+node ~/.claude/skills/devFlow/scripts/check_page_tech_doc.mjs <markdown-file>
 ```
 
 自检重点：

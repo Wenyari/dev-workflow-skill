@@ -32,7 +32,7 @@ FEISHU_WIKI_PARENT_NODE_TOKEN
 复用 devFlow 的权限检查脚本：
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_check_permissions.mjs --url "飞书链接"
+node ~/.claude/skills/devFlow/scripts/lark_check_permissions.mjs --url "飞书链接"
 ```
 
 ## 输出要求

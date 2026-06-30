@@ -32,7 +32,7 @@ FEISHU_WIKI_PARENT_NODE_TOKEN
 优先使用脚本，不要现场重写发布逻辑。
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_publish_doc.mjs \
+node ~/.claude/skills/devFlow/scripts/lark_publish_doc.mjs \
   --title "客户管理页面开发技术方案" \
   --file /path/to/document.md
 ```
@@ -40,7 +40,7 @@ node .agent/skills/devFlow/scripts/lark_publish_doc.mjs \
 也可以通过 stdin 传入 Markdown：
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_publish_doc.mjs --title "标题" < document.md
+node ~/.claude/skills/devFlow/scripts/lark_publish_doc.mjs --title "标题" < document.md
 ```
 
 脚本固定处理：
@@ -56,7 +56,7 @@ node .agent/skills/devFlow/scripts/lark_publish_doc.mjs --title "标题" < docum
 发布前需要单独检查父节点权限时运行：
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_check_permissions.mjs
+node ~/.claude/skills/devFlow/scripts/lark_check_permissions.mjs
 ```
 
 ## Wiki 节点规则

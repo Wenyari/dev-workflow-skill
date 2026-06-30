@@ -48,7 +48,7 @@ FEISHU_APP_SECRET
 优先使用脚本，不要现场重写飞书读取逻辑。
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_read_docx.mjs \
+node ~/.claude/skills/devFlow/scripts/lark_read_docx.mjs \
   --url "https://example.feishu.cn/wiki/xxxx" \
   --section "客户管理" \
   --level 3
@@ -58,7 +58,7 @@ node .agent/skills/devFlow/scripts/lark_read_docx.mjs \
 `--sections`，不要对同一个飞书文档并发执行多个读取命令：
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_read_docx.mjs \
+node ~/.claude/skills/devFlow/scripts/lark_read_docx.mjs \
   --url "https://example.feishu.cn/wiki/xxxx" \
   --sections "客户管理,新增客户（create-client）,客户列表查询（client-list）"
 ```
@@ -81,7 +81,7 @@ node .agent/skills/devFlow/scripts/lark_read_docx.mjs \
 需要预检查权限时，先运行：
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_check_permissions.mjs --url "飞书链接"
+node ~/.claude/skills/devFlow/scripts/lark_check_permissions.mjs --url "飞书链接"
 ```
 
 只有脚本不满足任务时，才临时补充读取逻辑，并把可复用能力沉淀回脚本。

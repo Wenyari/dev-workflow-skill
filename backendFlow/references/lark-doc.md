@@ -8,7 +8,7 @@
 2. 默认使用 devFlow 脚本发布：
 
    ```bash
-   node .agent/skills/devFlow/scripts/lark_publish_doc.mjs --file <markdown-file> --title "<文档标题>"
+   node ~/.claude/skills/devFlow/scripts/lark_publish_doc.mjs --file <markdown-file> --title "<文档标题>"
    ```
 
 3. 用环境变量读取飞书配置，不在 skill 或仓库写密钥。

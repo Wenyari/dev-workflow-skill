@@ -7,7 +7,7 @@
 1. 默认使用 devFlow 脚本读取：
 
    ```bash
-   node .agent/skills/devFlow/scripts/lark_read_docx.mjs --url "飞书链接"
+   node ~/.claude/skills/devFlow/scripts/lark_read_docx.mjs --url "飞书链接"
    ```
 
 2. 用环境变量读取飞书配置，不在 skill 或仓库写密钥。

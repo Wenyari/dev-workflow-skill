@@ -15,13 +15,13 @@
 默认使用脚本：
 
 ```bash
-node .agent/skills/devFlow/scripts/generate_foundation_summary.mjs --route-dir src/routes/<feature>/<page>
+node ~/.claude/skills/devFlow/scripts/generate_foundation_summary.mjs --route-dir src/routes/<feature>/<page>
 ```
 
 可选指定 service：
 
 ```bash
-node .agent/skills/devFlow/scripts/generate_foundation_summary.mjs \
+node ~/.claude/skills/devFlow/scripts/generate_foundation_summary.mjs \
   --route-dir src/routes/<feature>/<page> \
   --service src/services/<feature>/<page>.ts
 ```
