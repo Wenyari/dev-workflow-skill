@@ -8,7 +8,7 @@ description:
   contract-check 子命令检查页面方案可落地性，支持 page-build
   子命令根据已审核方案或文档上下文创建页面基建计划和占位文件，支持 lark-read
   子命令读取飞书云文档作为上下文，支持 lark-doc 子命令将文档落地到飞书 Wiki
-  文档；未来可扩展组件开发、接口落地、重构方案等子命令。
+  文档，支持 prepare 子命令说明飞书环境变量配置；未来可扩展组件开发、接口落地、重构方案等子命令。
 ---
 
 # 研发工作流
@@ -104,6 +104,27 @@ Mermaid 类型选择：
   和 `lark-doc` 不要求初始化。
 
 ## 子命令路由
+
+### prepare
+
+用途：说明 `devFlow` 使用飞书读写能力前需要配置的环境变量和权限准备。
+
+触发方式：
+
+- 用户显式输入 `$devFlow prepare`
+- 用户要求“初始化 devFlow”
+- 用户要求“配置 devFlow 飞书环境变量”
+- 用户询问“devFlow 需要配置哪些飞书变量”
+- 用户第一次使用 `lark-read` 或 `lark-doc` 前需要准备环境
+
+执行规则：
+
+1. 读取 `references/prepare.md`。
+2. 告诉用户必须配置 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET`。
+3. 如果用户需要发布到飞书 Wiki，说明还必须配置
+   `FEISHU_WIKI_PARENT_NODE_TOKEN`。
+4. 说明普通飞书文档读写直接使用飞书 Open API，不需要初始化 `lark-cli`。
+5. 不要求用户把 secret 写入仓库文件，不在回复中回显 secret。
 
 ### page-tech
 
@@ -240,8 +261,8 @@ Mermaid 类型选择：
 ## 未实现子命令
 
 当前仅实现
-`page-tech`、`contract-check`、`page-build`、`foundation-freeze`、`lark-read` 和
-`lark-doc`。
+`prepare`、`page-tech`、`contract-check`、`page-build`、`foundation-freeze`、`lark-read`
+和 `lark-doc`。
 
 如果用户要求组件开发、重构方案或其他技术文档类型，不要临时发挥。先说明当前
 `devFlow` 尚未定义对应子命令，再与用户确认是否要扩展。
