@@ -22,7 +22,7 @@ description:
 - 代码事实优先：后端仓库可用时，接口、实体、schema 必须基于真实代码；仓库不可用时不写具体路径、不声称某资源存在。
 - 飞书读写、Markdown 转 Docx blocks、权限检查复用 `devFlow/scripts/` 脚本，不重复造脚本，环境变量沿用同一套
   `FEISHU_*`。
-- 读写飞书直接使用飞书 Open API 和环境变量，不需要初始化 `lark-cli`。
+- 飞书读写默认走 Open API（应用身份），不需要初始化 `lark-cli`；可设 `FEISHU_BACKEND=larkcli` 改用 lark-cli 用户身份（免逐篇授权），或 `auto` 自动择优。切换方式与前置准备见 devFlow `prepare`。
 
 ## 格式硬规则
 

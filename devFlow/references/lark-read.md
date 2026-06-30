@@ -23,7 +23,7 @@ FEISHU_APP_SECRET
 - 不要把 app secret 写入 Skill、仓库文件、技术方案正文或日志。
 - 不要在最终回复中回显 secret。
 - 如果任一变量缺失，停止读取并告诉用户缺少哪个变量。
-- 读取飞书云文档直接使用飞书 Open API，不需要初始化 `lark-cli`。
+- 飞书读取默认走 Open API（应用身份），不需要初始化 `lark-cli`；设 `FEISHU_BACKEND=larkcli` 可改用 lark-cli 用户身份，`auto` 自动择优。仅 larkcli 模式需先 `lark-cli auth login`，配置见 `prepare`。
 
 ## 链接类型识别
 
