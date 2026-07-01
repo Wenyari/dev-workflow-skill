@@ -345,6 +345,60 @@ export function textFromElements(elements = []) {
     .join('')
 }
 
+// 把飞书 text_run 的 text_element_style 按固定嵌套顺序 link > strikethrough > bold > italic > inline_code
+// 包装成 Markdown。inline_code 必须在最内层：Markdown 反引号内的内容不会被解析，
+// 若把 `~~x~~` 反过来包就渲染成字面横线而不是删除线。
+// 下划线和颜色忽略（Markdown 无原生语义）。
+function wrapRichText(content, style = {}) {
+  if (!content) return ''
+
+  const trimmed = content.trim()
+  if (!trimmed) return content
+
+  const leading = content.slice(0, content.length - content.trimStart().length)
+  const trailing = content.slice(content.trimEnd().length)
+  let inner = trimmed
+
+  if (style.inline_code) inner = `\`${inner}\``
+  if (style.italic) inner = `*${inner}*`
+  if (style.bold) inner = `**${inner}**`
+  if (style.strikethrough) inner = `~~${inner}~~`
+  if (style.link?.url) {
+    let url = style.link.url
+    try {
+      url = decodeURIComponent(url)
+    } catch {
+      // 保留原样
+    }
+    inner = `[${inner}](${url})`
+  }
+
+  return `${leading}${inner}${trailing}`
+}
+
+export function richTextFromElements(elements = []) {
+  return elements
+    .map((element) => {
+      if (element.text_run) {
+        return wrapRichText(element.text_run.content || '', element.text_run.text_element_style)
+      }
+      if (element.mention_user) return element.mention_user.name || '@用户'
+      if (element.docs_link) {
+        const url = element.docs_link.url || ''
+        const title = element.docs_link.title || url
+        return url ? `[${title}](${url})` : title
+      }
+      if (element.file) return element.file.name || ''
+      if (element.equation) {
+        const content = element.equation.content || ''
+        return content ? `$${content}$` : ''
+      }
+      if (element.reminder) return element.reminder.text || ''
+      return ''
+    })
+    .join('')
+}
+
 export function printJson(value) {
   process.stdout.write(`${JSON.stringify(value, null, 2)}\n`)
 }

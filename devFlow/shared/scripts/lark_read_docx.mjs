@@ -8,6 +8,7 @@ import {
   parseArgs,
   printJson,
   resolveDocument,
+  richTextFromElements,
   textFromElements
 } from './lark_api.mjs'
 
@@ -21,7 +22,9 @@ function headingLevel(block) {
   return 0
 }
 
-function blockText(block) {
+function blockText(block, { rich = false } = {}) {
+  const render = rich ? richTextFromElements : textFromElements
+
   for (const key of [
     'page',
     'text',
@@ -37,10 +40,18 @@ function blockText(block) {
     'code',
     'quote'
   ]) {
-    if (block[key]) return textFromElements(block[key].elements || [])
+    if (block[key]) return render(block[key].elements || [])
   }
 
   return ''
+}
+
+function blockPlainText(block) {
+  return blockText(block, { rich: false })
+}
+
+function blockRichText(block) {
+  return blockText(block, { rich: true })
 }
 
 function createRenderer(items) {
@@ -84,7 +95,7 @@ function createRenderer(items) {
     }
 
     const level = headingLevel(block)
-    const text = blockText(block)
+    const text = blockRichText(block)
     let line
 
     if (level) line = `${'#'.repeat(level)} ${text}`
@@ -111,7 +122,7 @@ function createRenderer(items) {
     if (block.table_cell || block.grid || block.grid_column || block.callout) return ''
 
     const level = headingLevel(block)
-    const text = blockText(block)
+    const text = blockRichText(block)
 
     if (level) return `${'#'.repeat(level)} ${text}`
     if (block.bullet) return `- ${text}`
@@ -275,7 +286,7 @@ async function main() {
       blocks.push({
         id: blockId,
         level: headingLevel(block),
-        text: blockText(block).trim(),
+        text: blockPlainText(block).trim(),
         markdown: rendered
       })
     }
