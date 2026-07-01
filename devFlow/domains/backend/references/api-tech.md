@@ -1,12 +1,19 @@
 # api-tech 子命令
 
-`api-tech` 生成后端技术方案文档。它不是仓库调研报告，不是项目入门说明，不是开发排期，也不生成后端代码骨架。
+`api-tech` 生成后端技术方案文档。它不是仓库调研报告，不是项目入门说明，不是开发排期，也不生成后端代码骨架（不产出
+controller / service / dto / entity 代码文件）。
+
+## 代码事实优先
+
+- 后端仓库可用时，接口、实体、schema 必须基于真实代码；写清具体文件路径与关键片段引用。
+- 后端仓库不可用时，不写具体文件路径，不声称某资源存在，涉及具体接口 / 表的字段一律标记为待确认。
+- 飞书 PRD / 需求与仓库代码冲突时，保留冲突并写入「风险与待确认项」，不擅自二选一。
 
 ## 工作流程
 
 1. 收集上下文：PRD / 需求（优先用 `lark-read` 读取飞书文档）、可用的后端仓库代码。
 2. 确认章节：必写章节自动纳入；可选章节逐项让用户勾选。
-3. 用 `assets/templates/api-tech.md` 作为骨架，只生成必写 + 选中可选章节。
+3. 用 `devFlow/domains/backend/templates/api-tech.md` 作为骨架，只生成必写 + 选中可选章节。
 4. 生成正式文档时删除模板中的 HTML 注释（含【必写】/【可选】标记）。
 5. 生成后运行交付前自检。
 
@@ -85,7 +92,7 @@
 落地为 Markdown 文件后运行：
 
 ```bash
-node .agent/skills/backendFlow/scripts/check_api_tech_doc.mjs --file <markdown-file> --optional "<本次选中的可选章节，逗号分隔>"
+node .agent/skills/devFlow/domains/backend/scripts/check_api_tech_doc.mjs --file <markdown-file> --optional "<本次选中的可选章节，逗号分隔>"
 ```
 
 自检覆盖：必写章节齐全、选中可选章节存在、数据模型含表格 + TS、接口设计含表格与 TS 代码块、核心流程含

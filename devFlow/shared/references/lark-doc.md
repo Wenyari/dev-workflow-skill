@@ -32,7 +32,7 @@ FEISHU_WIKI_PARENT_NODE_TOKEN
 优先使用脚本，不要现场重写发布逻辑。
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_publish_doc.mjs \
+node .agent/skills/devFlow/shared/scripts/lark_publish_doc.mjs \
   --title "客户管理页面开发技术方案" \
   --file /path/to/document.md
 ```
@@ -40,7 +40,7 @@ node .agent/skills/devFlow/scripts/lark_publish_doc.mjs \
 也可以通过 stdin 传入 Markdown：
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_publish_doc.mjs --title "标题" < document.md
+node .agent/skills/devFlow/shared/scripts/lark_publish_doc.mjs --title "标题" < document.md
 ```
 
 脚本固定处理：
@@ -56,7 +56,7 @@ node .agent/skills/devFlow/scripts/lark_publish_doc.mjs --title "标题" < docum
 发布前需要单独检查父节点权限时运行：
 
 ```bash
-node .agent/skills/devFlow/scripts/lark_check_permissions.mjs
+node .agent/skills/devFlow/shared/scripts/lark_check_permissions.mjs
 ```
 
 ## Wiki 节点规则
@@ -127,6 +127,13 @@ node .agent/skills/devFlow/scripts/lark_check_permissions.mjs
 - 明确说明失败原因和下一步处理建议。
 - 不要改用其他未知目录。
 - 不要创建到默认根目录。
+
+## 标题与编号规则
+
+- 分节使用原生 Markdown 标题层级（`#`/`##`/`###`），最多三级，对应飞书
+  heading1/2/3。
+- 不在标题文本中手写序号（写 `## 接口设计`，不写 `## 2. 接口设计`）；序号交给飞书文档的「标题自动编号」显示能力。
+- 若发布后未显示蓝色序号，提示用户在飞书文档设置中开启「标题自动编号」，不通过手写序号绕过。
 
 ## 安全规则
 

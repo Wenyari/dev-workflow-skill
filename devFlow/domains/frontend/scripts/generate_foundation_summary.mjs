@@ -120,7 +120,7 @@ function buildSummary({ routeDir, service }) {
 
 - routeDir：${rel(routeDir)}
 - generatedAt：${new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')}
-- generator：.agent/skills/devFlow/scripts/generate_foundation_summary.mjs
+- generator：.agent/skills/devFlow/domains/frontend/scripts/generate_foundation_summary.mjs
 
 ## 2. 文件事实
 

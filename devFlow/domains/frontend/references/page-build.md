@@ -3,9 +3,6 @@
 `page-build`
 用于把已审核的页面方案或可验证上下文转换成 admin-fe 页面基建文件。它只负责创建可 review、可继续开发的占位骨架，不负责完成业务逻辑、最终视觉实现或复杂交互。
 
-执行前必须读取或内化项目根目录
-`ADMIN_FE_WORKFLOW.md`，并遵守其中的路由、请求、状态、Wujie、UI 复用和验证规则。
-
 ## 定位
 
 - 输入：已审核的
@@ -102,9 +99,9 @@
 
 ```text
 src/routes/<feature>/<page>/route.tsx
-src/routes/<feature>/<page>/components/<PageSection>.tsx
-src/routes/<feature>/<page>/types.ts
-src/routes/<feature>/<page>/constants.ts
+src/routes/<feature>/<page>/<component>/<Component>.tsx
+src/routes/<feature>/<page>/<page>-types.ts
+src/routes/<feature>/<page>/<page>-constants.ts
 src/routes/<feature>/<page>/index.ts
 src/services/<feature>/<page>.ts
 ```
@@ -134,7 +131,7 @@ src/routes/sales/<page>/modal/<PageModal>.tsx
 - service 按业务域放在 `src/services` 下，优先复用已有业务域目录。
 - 不手动编辑 `src/routeTree.gen.ts`。
 - 页面仅使用的组件优先靠近 route；真正复用时再抽到公共目录。
-- UI 复用顺序：Apex UI -> `src/common` -> 业务局部组件 -> 新建局部组件。
+- UI 复用顺序：Apex UI -> `src/components` -> 业务局部组件 -> 新建局部组件。
 
 ## Apex UI 组件契约规则
 
