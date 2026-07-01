@@ -139,6 +139,8 @@ Mermaid 类型选择：
 
 ## 子命令路由
 
+每个子命令块只列 **用途 + 触发方式 + 规则/模板/脚本索引**；具体执行规则见对应 references，agent 应在进入子命令后立即读取。
+
 ### prepare（共享）
 
 用途：说明 `devFlow` 使用飞书读写能力前需要配置的环境变量和权限准备。
@@ -146,19 +148,11 @@ Mermaid 类型选择：
 触发方式：
 
 - 用户显式输入 `$devFlow prepare`
-- 用户要求"初始化 devFlow"
-- 用户要求"配置 devFlow 飞书环境变量"
+- 用户要求"初始化 devFlow" / "配置 devFlow 飞书环境变量"
 - 用户询问"devFlow 需要配置哪些飞书变量"
 - 用户第一次使用 `lark-read` 或 `lark-doc` 前需要准备环境
 
-执行规则：
-
-1. 读取 `shared/references/prepare.md`。
-2. 告诉用户必须配置 `FEISHU_APP_ID` 和 `FEISHU_APP_SECRET`。
-3. 如果用户需要发布到飞书 Wiki，说明还必须配置
-   `FEISHU_WIKI_PARENT_NODE_TOKEN`。
-4. 说明普通飞书文档读写直接使用飞书 Open API，不需要初始化 `lark-cli`。
-5. 不要求用户把 secret 写入仓库文件，不在回复中回显 secret。
+规则：`shared/references/prepare.md`
 
 ### lark-read（共享）
 
@@ -172,15 +166,8 @@ Mermaid 类型选择：
 - 用户要求"先读 PRD / 设计说明 / 接口文档"
 - 用户要求"把这个飞书文档作为上下文"
 
-执行规则：
-
-1. 读取 `shared/references/lark-read.md`。
-2. 默认使用 `shared/scripts/lark_read_docx.mjs` 读取 Wiki / Docx 内容。
-3. 使用环境变量读取飞书应用配置，不要在 Skill 或仓库中写入密钥。
-4. 判断链接类型：Wiki 节点、Docx 文档、旧版 Docs 文档或云盘文件夹。
-5. 读取文档内容并整理成结构化上下文。
-6. 按下游子命令选择输出结构：供 `page-tech` 使用输出「前端上下文」；供
-   `api-tech` 使用输出「后端上下文」；两者都需要时分别输出两份。
+规则：`shared/references/lark-read.md`
+脚本：`shared/scripts/lark_read_docx.mjs`
 
 ### lark-doc（共享）
 
@@ -189,37 +176,26 @@ Mermaid 类型选择：
 触发方式：
 
 - 用户显式输入 `$devFlow lark-doc`
-- 用户要求"发布到飞书"
-- 用户要求"写入飞书文档"
+- 用户要求"发布到飞书" / "写入飞书文档"
 - 用户要求"落地到我的飞书个人笔记"
 - 用户要求"在这个飞书 Wiki 节点下创建文档"
 
-执行规则：
-
-1. 读取 `shared/references/lark-doc.md`。
-2. 默认使用 `shared/scripts/lark_publish_doc.mjs` 发布 Markdown 正文。
-3. 使用环境变量读取飞书应用配置，不要在 Skill 或仓库中写入密钥。
-4. 默认使用 `FEISHU_WIKI_PARENT_NODE_TOKEN` 作为父节点。
-5. 创建 Wiki 子文档并写入正文后，返回飞书文档链接。
+规则：`shared/references/lark-doc.md`
+脚本：`shared/scripts/lark_publish_doc.mjs`
 
 ### page-tech（前端）
 
-用途：生成页面级前端技术方案，也就是页面开发落地方案。
+用途：生成页面级前端技术方案（页面开发落地方案）。
 
 触发方式：
 
 - 用户显式输入 `$devFlow page-tech`
-- 用户要求"写页面开发技术方案"
-- 用户要求"写页面落地方案"
+- 用户要求"写页面开发技术方案" / "写页面落地方案"
 - 用户要求"根据前端仓库生成页面技术文档"
 - 用户要求"让 AI 先生成页面方案，我再审核"
 
-执行规则：
-
-1. 读取 `domains/frontend/references/page-tech.md`。
-2. 使用 `domains/frontend/templates/page-tech.md` 作为输出骨架。
-3. 严格按 `page-tech` 规则处理必需上下文、条件上下文和待确认项。
-4. 如果前置上下文来自飞书文档，先用 `lark-read` 脚本抽取结构化内容，再写方案。
+规则：`domains/frontend/references/page-tech.md`
+模板：`domains/frontend/templates/page-tech.md`
 
 ### page-build（前端）
 
@@ -232,25 +208,12 @@ Mermaid 类型选择：
 - 用户要求"根据 page-tech / 飞书文档 / API 文档落地页面骨架"
 - 用户要求"先搭页面 route、components、service、types、constants"
 
-执行规则：
-
-1. 读取 `domains/frontend/references/page-build.md`。
-2. 如果存在
-   `contract-report.md`，先读取报告结论；如果报告不通过或存在阻塞项，不进入 page-build。
-3. 如果没有 `contract-report.md`，提示先执行
-   `contract-check`，或让 Human 明确确认跳过检查。
-4. 根据输入来源收集上下文：本地 Markdown、飞书文档链接、API 文档或可用 MCP 工具读取的 Apifox 项目。
-5. 使用 `domains/frontend/templates/page-build/` 下的模板作为文件占位参考。
-6. 创建文件前必须复述文件清单、每个文件的具体改动内容和待确认项，并等待 Human 明确确认。
-7. 只创建可 review 的基建占位，不写完整业务逻辑，不写最终视觉样式。
-8. API 落地只基于已确认文档或工具读取结果；上下文缺失时写
-   `TODO(api)`，不得补造接口字段。
-9. 不修改 `src/routeTree.gen.ts`，不创建不必要的全局状态。
+规则：`domains/frontend/references/page-build.md`
+模板：`domains/frontend/templates/page-build/`
 
 ### contract-check（前端）
 
-用途：在 `page-tech` 和 `page-build`
-之间检查页面方案是否具备落地条件，避免直接生成错误骨架。
+用途：在 `page-tech` 和 `page-build` 之间检查页面方案是否具备落地条件，避免直接生成错误骨架。
 
 触发方式：
 
@@ -259,58 +222,36 @@ Mermaid 类型选择：
 - 用户要求"检查 page-tech 能不能进入 page-build"
 - 用户要求"生成 contract-report"
 
-执行规则：
-
-1. 读取 `domains/frontend/references/contract-check.md`。
-2. 使用 `domains/frontend/templates/contract-report.md` 作为报告骨架。
-3. 采用 v1 人工 checklist 模式，不承诺自动化脚本能力。
-4. 可运行 `domains/frontend/scripts/contract_check_static.mjs`
-   辅助检查机械规则；脚本结果不能替代业务语义判断。
-5. 逐条检查路由、目录命名、接口契约、页面状态、组件映射和待确认项。
-6. 每条结论必须引用真实证据：文件路径、代码片段、文档章节、飞书读取内容、API 文档或 Apifox
-   MCP 结果。
-7. 检查失败时明确回到 `page-tech` 修正；检查通过时允许进入 `page-build`。
+规则：`domains/frontend/references/contract-check.md`
+模板：`domains/frontend/templates/contract-report.md`
+脚本：`domains/frontend/scripts/contract_check_static.mjs`（辅助机械规则检查，不替代业务语义判断）
 
 ### foundation-freeze（前端）
 
-用途：在 `page-build` 后、`figmaSync plan`
-前生成页面基建事实快照，明确后续视觉阶段可修改范围。
+用途：在 `page-build` 后、`figmaSync plan` 前生成页面基建事实快照，明确后续视觉阶段可修改范围。
 
 触发方式：
 
 - 用户显式输入 `$devFlow foundation-freeze`
-- 用户要求"生成 foundation-summary"
-- 用户要求"冻结页面基建事实"
+- 用户要求"生成 foundation-summary" / "冻结页面基建事实"
 - `figmaSync plan` 前发现目标页面已有基建但缺少最新快照
 
-执行规则：
-
-1. 读取 `domains/frontend/references/foundation-freeze.md`。
-2. 默认使用 `domains/frontend/scripts/generate_foundation_summary.mjs` 扫描目标页面目录。
-3. `foundation-summary.md` 必须机器生成，禁止人工编辑。
-4. 快照不是唯一事实；真实代码仍是最终事实。
-5. 如果重新生成后与上一次内容不一致，必须提示 Human 确认影响。
-6. 快照用于约束 `figmaSync` 只改视觉、布局、Apex UI 选型、CSS 和局部展示细节。
+规则：`domains/frontend/references/foundation-freeze.md`
+脚本：`domains/frontend/scripts/generate_foundation_summary.mjs`
 
 ### api-tech（后端）
 
-用途：生成后端技术方案文档（接口设计、数据模型 / 数据库设计、核心流程时序、边界与异常、风险与待确认项）。不生成
-controller / service / dto / entity 代码骨架。
+用途：生成后端技术方案文档（接口设计、数据模型 / 数据库设计、核心流程时序、边界与异常、风险与待确认项）。不生成 controller / service / dto / entity 代码骨架。
 
 触发方式：
 
 - 用户显式输入 `$devFlow api-tech`
-- 用户要求"写后端技术方案"
-- 用户要求"写接口设计文档"
+- 用户要求"写后端技术方案" / "写接口设计文档"
 - 用户要求"根据 PRD 生成后端落地方案"
 
-执行规则：
-
-1. 读取 `domains/backend/references/api-tech.md`。
-2. 使用 `domains/backend/templates/api-tech.md` 作为骨架，按选择式骨架确认可选章节。
-3. 严格按 `api-tech` 的代码事实优先、标题层级、数据结构与接口呈现硬规则输出。
-4. 如果上下文来自飞书文档，先用 `lark-read` 抽取「后端上下文」结构化内容再写方案。
-5. 生成后运行 `domains/backend/scripts/check_api_tech_doc.mjs` 自检。
+规则：`domains/backend/references/api-tech.md`
+模板：`domains/backend/templates/api-tech.md`
+脚本：`domains/backend/scripts/check_api_tech_doc.mjs`（生成后自检）
 
 ## 未实现子命令
 

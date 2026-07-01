@@ -210,7 +210,7 @@
 
 ## 报告输出
 
-使用 `assets/templates/contract-report.md` 作为报告骨架。
+使用 `domains/frontend/templates/contract-report.md` 作为报告骨架。
 
 报告必须包含：
 

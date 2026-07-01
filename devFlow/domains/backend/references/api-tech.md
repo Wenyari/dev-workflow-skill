@@ -13,7 +13,7 @@ controller / service / dto / entity 代码文件）。
 
 1. 收集上下文：PRD / 需求（优先用 `lark-read` 读取飞书文档）、可用的后端仓库代码。
 2. 确认章节：必写章节自动纳入；可选章节逐项让用户勾选。
-3. 用 `devFlow/domains/backend/templates/api-tech.md` 作为骨架，只生成必写 + 选中可选章节。
+3. 用 `domains/backend/templates/api-tech.md` 作为骨架，只生成必写 + 选中可选章节。
 4. 生成正式文档时删除模板中的 HTML 注释（含【必写】/【可选】标记）。
 5. 生成后运行交付前自检。
 

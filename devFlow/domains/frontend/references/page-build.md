@@ -10,6 +10,14 @@
 - 输出：文件创建计划；Human 确认后，创建 route、页面局部 components、service、types、constants 和必要 index 导出。
 - 不输出：完整业务逻辑、最终样式、真实 mock 数据、未确认接口字段、全局状态重构。
 
+## 前置门槛
+
+进入 `page-build` 前必须校验 `contract-report.md`：
+
+- 如果存在 `contract-report.md`，先读取报告结论；报告不通过或存在阻塞项时，不进入 page-build，回到 `page-tech` 或 `contract-check` 处理后再来。
+- 如果没有 `contract-report.md`，提示先执行 `contract-check`，或让 Human 明确确认跳过检查再继续。
+- "继续"、"看起来可以"等含糊表达不算跳过确认，必须 Human 明确表达"跳过 contract-check"才能继续。
+
 ## 输入来源
 
 ### 本地 Markdown
@@ -170,12 +178,12 @@ node_modules/@frontend/apex-ui--react/dist/index.d.ts
 使用以下模板作为占位参考：
 
 ```text
-assets/templates/page-build/route.tsx.tpl
-assets/templates/page-build/component.tsx.tpl
-assets/templates/page-build/service.ts.tpl
-assets/templates/page-build/types.ts.tpl
-assets/templates/page-build/constants.ts.tpl
-assets/templates/page-build/index.ts.tpl
+domains/frontend/templates/page-build/route.tsx.tpl
+domains/frontend/templates/page-build/component.tsx.tpl
+domains/frontend/templates/page-build/service.ts.tpl
+domains/frontend/templates/page-build/types.ts.tpl
+domains/frontend/templates/page-build/constants.ts.tpl
+domains/frontend/templates/page-build/index.ts.tpl
 ```
 
 模板变量建议：

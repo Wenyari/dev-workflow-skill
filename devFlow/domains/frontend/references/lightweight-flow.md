@@ -50,6 +50,6 @@ Mini Plan 必须包含：
 可使用模板：
 
 ```text
-assets/templates/mini-plan-l0.md
-assets/templates/mini-plan-l1.md
+domains/frontend/templates/mini-plan-l0.md
+domains/frontend/templates/mini-plan-l1.md
 ```
