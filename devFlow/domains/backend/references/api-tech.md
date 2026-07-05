@@ -73,6 +73,89 @@ controller / service / dto / entity 代码文件）。
 - 边界与异常：覆盖空数据、失败、无权限、重复提交、并发冲突、部分数据缺失、回滚 / 重试 / 降级。
 - 风险与待确认项：必写，收敛 PRD / 接口 / 仓库代码冲突，每条具体到可直接提问。
 
+## Mermaid 风格规则
+
+Mermaid 图必须提高技术评审效率，不做装饰。生成时优先保证语义清晰，其次保证层次和可读性。
+
+### sequenceDiagram 调用链模板
+
+接口调用链、多服务协作、前后端链路默认用 `sequenceDiagram`，并遵守：
+
+- 开头使用 `autonumber`。
+- 用户端用 `actor`，系统和服务用 `participant`。
+- participant 别名使用业务可读名称，例如 `supplier-portal · 前端`、`supplier-server · 门户后端`。
+- 按业务阶段使用 `rect rgb(...)` 分组，每个阶段用 `Note over` 写清阶段名和边界。
+- 阶段颜色使用柔和浅色，推荐：
+  - 蓝色 `rgb(219, 234, 254)`：入口 / 登录 / 初始化。
+  - 黄色 `rgb(254, 243, 199)`：填写 / 暂存 / 草稿。
+  - 绿色 `rgb(220, 252, 231)`：提交 / 成功 / 主链路完成。
+  - 紫色 `rgb(243, 232, 255)`：审核 / 回流 / 异步状态。
+  - 红色 `rgb(254, 226, 226)`：失败 / 驳回 / 异常分支。
+- 每个阶段 4-8 条交互为宜；超过 8 条时拆阶段，不把所有细节堆进一块。
+- 消息文案写业务动作和关键接口名，不写长 JSON。
+- 必须表达信任边界、签名验签、事务边界、状态机、回调 / pull 模式等关键架构约束。
+
+示例结构：
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor U as 用户浏览器
+  participant FE as xxx-portal · 前端
+  participant BE as xxx-server · 后端
+  participant AD as admin-be · 管理后台
+
+  rect rgb(219, 234, 254)
+  Note over U,BE: 阶段 1 · 入口 / 登录（止于门户）
+  U->>FE: 进入页面
+  FE->>BE: check-session
+  BE-->>FE: { profileStatus }
+  end
+
+  rect rgb(220, 252, 231)
+  Note over U,AD: 阶段 2 · 提交（后端签名访问管理后台）
+  U->>FE: 点击提交
+  FE->>BE: submit-profile
+  BE->>AD: AdminClient.submit（x-signature 验签）
+  AD-->>BE: { auditStatus: PENDING }
+  BE-->>FE: SUBMITTED
+  end
+```
+
+### flowchart 业务流程模板
+
+事务分支、幂等、异常处理、状态判断默认用 `flowchart TD`，并遵守：
+
+- 使用 `subgraph` 表达层次：入口、校验、核心处理、外部依赖、结果。
+- 节点文本保持短句，复杂规则放正文，不塞进节点。
+- 使用 `classDef` 区分类型：入口/成功/风险/外部依赖。
+- 分支条件写在连线上，避免多个菱形连续堆叠。
+
+示例结构：
+
+```mermaid
+flowchart TD
+  classDef entry fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
+  classDef success fill:#dcfce7,stroke:#22c55e,color:#14532d
+  classDef warn fill:#fef3c7,stroke:#f59e0b,color:#78350f
+  classDef risk fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
+
+  A[接收提交请求]:::entry --> B{幂等键存在?}
+  B -->|是| C[返回已有处理结果]:::warn
+  B -->|否| D[参数与权限校验]
+  D --> E{校验通过?}
+  E -->|否| F[返回业务错误码]:::risk
+  E -->|是| G[开启事务并写入主表]
+  G --> H[提交事务]:::success
+```
+
+### 图放在哪些章节
+
+- `核心流程 / 时序`：至少保留一张 Mermaid 图。主链路优先 `sequenceDiagram`；存在复杂分支时补充 `flowchart TD`。
+- `数据模型 / 数据库设计`：只有实体关系复杂时补充 `erDiagram`，不要替代表格 + TypeScript。
+- `边界与异常`：异常路径多于 3 类时可补充异常流程 `flowchart TD`。
+- `依赖与非功能性`：存在 MQ、缓存、第三方服务、回调 / pull 策略时可补充依赖链路图。
+
 ## 飞书上下文规则
 
 如果用户提供飞书 PRD / 设计 / 接口链接，必须先用 `lark-read`
