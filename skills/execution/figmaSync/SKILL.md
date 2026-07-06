@@ -10,6 +10,58 @@ description:
 
 # Figma to Native CSS (`/figmaSync`)
 
+## 对齐边诊断
+
+| 项 | 值 |
+|---|---|
+| 服务对齐边 | UI↔前端 |
+| 现状分级 | 结构性不健康 |
+| AI 形态 | 兜底 + 校准 |
+| 主战场 | 开发中 |
+
+## 这个 skill 解决什么问题
+
+把 Figma 视觉稿落成可审核的原生 CSS 方案，避免"UI 稿细节 → 前端实现"这条边只靠 UI 评审兜底导致的漏还原。
+
+## 什么时候用
+
+- 用户显式输入 `figmaSync prepare / plan / apply`
+- 用户提供 Figma URL 并要求"还原视觉 / 生成页面样式"
+- 页面基建就绪，进入视觉落地阶段
+
+## 前置产物
+
+| 产物 | 来源 | 是否必需 |
+|---|---|---|
+| Figma URL | 人工提供 | 必需 |
+| `foundation-summary.md` | `devFlow foundation-freeze` | plan 必需 |
+| 已存在的页面 route / components / service | admin-fe 仓库 | 必需 |
+
+## 输出产物
+
+| 产物 | 位置 | 下游消费者 |
+|---|---|---|
+| `PLAN.md` | 项目文档目录 | 人工评审 → apply |
+| `figma-plan.css` | 项目文档目录 | 人工评审(不直接接入业务) |
+| 页面 CSS 与组件代码 | admin-fe 仓库 | 前端开发 |
+
+## 下一步
+
+- `prepare` 通过 → `figmaSync plan <figma-url>`
+- `plan` 输出 `PLAN.md` 人工评审后 → `figmaSync apply`
+- `apply` 完成 → 自测 / 联调
+
+## 明确不做
+
+- 不重新规划路由、不重写 service 契约、不改核心状态模型 —— 归属 `devFlow`
+- 不生成 API 契约文档 —— 归属 `devFlow api-tech`
+- 不做 PM↔UI 一致性检查 —— 归属 `consistency-checker`
+- 不因为 Figma 图层结构重拆业务组件 —— 只补视觉、布局、Apex UI 选型、CSS
+
+---
+
+## 详细规则
+
 此技能用于把 Figma 业务设计稿转换为可审核、可落地的 React + 原生 CSS 方案。
 
 核心原则：

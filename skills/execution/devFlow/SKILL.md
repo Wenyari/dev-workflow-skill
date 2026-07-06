@@ -13,12 +13,67 @@ description:
 
 # 研发工作流
 
+## 对齐边诊断
+
+| 项 | 值 |
+|---|---|
+| 服务对齐边 | 后端↔前端（技术方案文档）· UI↔前端（page-build 落地）· 不涉及对齐边（lark-*、prepare 工具子命令） |
+| 现状分级 | 健康（后端↔前端有 Apifox）/ 结构性不健康（UI↔前端） |
+| AI 形态 | 少做（技术方案：只补语义 / 不改 API 契约本身）· 兜底 + 校准（page-build 落地） |
+| 主战场 | 开发中 |
+
+## 这个 skill 解决什么问题
+
+开发环节的方案生成与代码落地：把 PRD / 设计稿 / 后端接口整理为可审核的技术方案，并在方案通过后生成前端页面基建骨架。
+
+## 什么时候用
+
+- 用户显式输入 `$devFlow <subcommand>`
+- 用户话术："写页面开发技术方案 / 写后端技术方案 / 根据方案创建页面基建 / 检查方案能不能落地"
+- 用户提供 PRD 链接并要求"生成落地方案"
+
+## 前置产物
+
+| 产物 | 来源 | 是否必需 |
+|---|---|---|
+| PRD / 需求文档 | 人工提供 / `lark-read` 读取 | 必需 |
+| 后端接口清单 | Apifox / 后端仓库 | page-tech 必需 |
+| Figma 设计稿 | 人工提供 | page-tech 可选，page-build 推荐 |
+
+## 输出产物
+
+| 产物 | 位置 | 下游消费者 |
+|---|---|---|
+| `page-tech.md` | 项目文档目录 | 人工评审 → contract-check |
+| `contract-report.md` | 项目文档目录 | 人工评审 → page-build |
+| 页面基建代码 | admin-fe 仓库 | 前端开发 |
+| `foundation-summary.md` | 项目文档目录 | figmaSync plan |
+| `api-tech.md` | 项目文档目录 | 后端评审 |
+
+## 下一步
+
+- `page-tech` 完成 → `$devFlow contract-check`
+- `contract-check` 通过 → `$devFlow page-build`
+- `page-build` 完成 → `$devFlow foundation-freeze` → `figmaSync plan`
+- `api-tech` 完成 → 提交后端技术评审
+
+## 明确不做
+
+- 不做 PM↔UI 一致性检查：属于 `consistency-checker` skill 的对齐边
+- 不做视觉还原：由 `figmaSync` 承担
+- 不做未闭环 / 校准清单：由 `artifact/` 层承担
+- 不做后端代码骨架生成：`api-tech` 只出方案不出 controller / service / dto / entity
+
+---
+
+## 详细规则
+
 本 Skill 是研发工作流统一入口，覆盖前端与后端两个 domain，未来可扩展测试、需求分析等。它负责识别任务类型、判断领域、选择子命令、加载对应规则和模板。具体子命令的详细执行规则不要堆在本文件中，应放入对应
 `references/`。
 
 ## 目录约定
 
-- `shared/references/`、`shared/scripts/`：跨 domain 共享的规则和脚本（飞书读写、环境准备）。
+- 飞书读写、环境准备等共享能力已下沉到仓库 `tools/lark/`（相对本 skill 为 `../../../tools/lark/`）。
 - `domains/frontend/{references,templates,scripts}/`：前端专属规则、模板、脚本。
 - `domains/backend/{references,templates,scripts}/`：后端专属规则、模板、脚本。
 - `agents/`：入口 agent 配置。
@@ -39,7 +94,7 @@ description:
 - 读取或写入飞书云文档时，默认直接使用飞书 Open API 和环境变量，不需要初始化
   `lark-cli`。
 - 飞书读写、Markdown 转 Docx blocks、权限检查等重复且易错的操作必须优先使用
-  `shared/scripts/` 中的脚本；不要在对话中临时重写大段 Node API 脚本。
+  `../../../tools/lark/scripts/` 中的脚本；不要在对话中临时重写大段 Node API 脚本。
 
 ## 领域判定
 
@@ -49,11 +104,11 @@ description:
 - 子命令名唯一映射到某个 domain 时直接采用：`page-tech` / `page-build` /
   `contract-check` / `foundation-freeze` → frontend；`api-tech` → backend。
 - 子命令名不唯一但用户话语明确（例如"写技术方案"）时，必须先向用户确认前端还是后端，不擅自二选一。
-- 共享子命令 `prepare` / `lark-read` / `lark-doc` 不必判定领域；`lark-read` 供哪个下游使用时按下游领域输出对应结构（见 `shared/references/lark-read.md`）。
+- 共享子命令 `prepare` / `lark-read` / `lark-doc` 不必判定领域；`lark-read` 供哪个下游使用时按下游领域输出对应结构（见 `../../../tools/lark/references/lark-read.md`）。
 
 ## 前端专属工作流
 
-- 先根据 `HUMAN_AGENT_WORKFLOW.md` 判断 L0/L1/L2/L3。
+- 先根据仓库根目录的 `HUMAN_AGENT_WORKFLOW.md` 判断 L0/L1/L2/L3。
 - L0/L1 不强制生成 `page-tech.md`、`contract-report.md` 或
   `foundation-summary.md`；只做最小计划、确认、修改、验证和总结。
 - L2/L3 才进入
@@ -78,7 +133,7 @@ pnpm lint
 
 ## 脚本优先
 
-`shared/scripts/`（跨 domain）：
+`../../../tools/lark/scripts/`（仓库共享工具）：
 
 - `lark_check_permissions.mjs`：检查飞书文档或 Wiki 父节点访问权限。
 - `lark_read_docx.mjs`：读取 Wiki /
@@ -152,7 +207,7 @@ Mermaid 类型选择：
 - 用户询问"devFlow 需要配置哪些飞书变量"
 - 用户第一次使用 `lark-read` 或 `lark-doc` 前需要准备环境
 
-规则：`shared/references/prepare.md`
+规则：`../../../tools/lark/references/prepare.md`
 
 ### lark-read（共享）
 
@@ -166,8 +221,8 @@ Mermaid 类型选择：
 - 用户要求"先读 PRD / 设计说明 / 接口文档"
 - 用户要求"把这个飞书文档作为上下文"
 
-规则：`shared/references/lark-read.md`
-脚本：`shared/scripts/lark_read_docx.mjs`
+规则：`../../../tools/lark/references/lark-read.md`
+脚本：`../../../tools/lark/scripts/lark_read_docx.mjs`
 
 ### lark-doc（共享）
 
@@ -180,8 +235,8 @@ Mermaid 类型选择：
 - 用户要求"落地到我的飞书个人笔记"
 - 用户要求"在这个飞书 Wiki 节点下创建文档"
 
-规则：`shared/references/lark-doc.md`
-脚本：`shared/scripts/lark_publish_doc.mjs`
+规则：`../../../tools/lark/references/lark-doc.md`
+脚本：`../../../tools/lark/scripts/lark_publish_doc.mjs`
 
 ### page-tech（前端）
 

@@ -43,7 +43,7 @@ controller / service / dto / entity 代码文件）。
 
 ## 排版与飞书呈现规范（定稿模板）
 
-排版遵循 [shared/references/lark-doc.md](../../../shared/references/lark-doc.md) 的「排版与飞书呈现规范（定稿模板）」。以下为 `api-tech` 在通用规则之上追加的硬规则。
+排版遵循 [tools/lark/references/lark-doc.md](../../../../../../tools/lark/references/lark-doc.md) 的「排版与飞书呈现规范（定稿模板）」。以下为 `api-tech` 在通用规则之上追加的硬规则。
 
 ## 数据结构硬规则
 
