@@ -62,7 +62,9 @@ description:
 
 ## 1. 上下文准备
 
-通过 Figma MCP 获取目标节点的结构、截图、variables 与 design context：
+通过官方 Figma plugin MCP 获取目标节点的结构、截图、variables 与 design context。
+在 Codex App 中优先使用已安装的 Figma plugin 工具（当前暴露为
+`mcp__codex_apps__figma`），不要再要求用户手动配置旧的 `figma-remote-mcp`。
 
 - `get_metadata`
 - `get_screenshot`

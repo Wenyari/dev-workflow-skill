@@ -19,8 +19,9 @@
 3. 对每条 blocker / warning，按 `fix → ...`
    提示修复。修复后重跑直至没有 blocker。
 
-4. Figma MCP 可用性脚本无法自动测，AI 在执行 `figmaSync plan` 前必须主动调用
-   `mcp__figma-remote-mcp__whoami` 试探。若失败，停止并提示用户登录 Figma MCP。
+4. Figma MCP 可用性脚本无法自动测，AI 在执行 `figmaSync plan` 前必须主动调用官方
+   Figma plugin 的 `mcp__codex_apps__figma._whoami` 试探。若工具未出现，停止并提示
+   用户在 Codex App 插件面板安装/授权 Figma plugin；若授权失败，提示用户重新登录。
 
 ## 检查范围
 

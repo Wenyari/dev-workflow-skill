@@ -106,10 +106,14 @@ node .agent/skills/devFlow/scripts/generate_foundation_summary.mjs --route-dir <
 ### Step 4 — Figma MCP 试探
 
 ```
-mcp__figma-remote-mcp__whoami
+mcp__codex_apps__figma._whoami
 ```
 
-失败则中断，提示用户登录 Figma MCP。
+优先使用 Codex App 官方 Figma plugin 暴露的 MCP 工具。若工具未出现，提示用户在
+Codex App 插件面板安装/授权 Figma plugin，并重启或刷新工具列表；不要默认引导用户
+配置旧的 `figma-remote-mcp`。
+
+`whoami` 成功后，确认当前账号和目标文件所在 team/seat 可访问目标设计稿。
 
 ### Step 5 — 解析 Figma 节点
 
@@ -118,7 +122,8 @@ mcp__figma-remote-mcp__whoami
 1. `get_metadata`：拿节点层级树骨架。
 2. `get_screenshot`：保存为 `figma-snapshot.png` 到 PLAN.md 同目录。
 3. `get_variable_defs`：拿设计稿 variables 字典。
-4. `get_design_context`：拿节点参考代码和样式信息。
+4. `get_design_context`：拿节点参考代码和样式信息；官方建议优先使用该工具作为
+   design-to-code 主入口。
 
 若 `get_design_context` 返回 too-large：
 
