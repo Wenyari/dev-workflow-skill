@@ -9,7 +9,6 @@
 - **第一次用** → [QUICKSTART.md](./QUICKSTART.md)
 - **不确定用哪个** → [DECISION_TREE.md](./DECISION_TREE.md)
 - **已经知道用哪个** → [CHEATSHEET.md](./CHEATSHEET.md)
-- **想理解 why** → [研发协作方法论.md](./研发协作方法论.md)
 
 ## 我要贡献
 
@@ -48,5 +47,3 @@ docs/               维护者深度文档
 ## 相关文档
 
 - [HUMAN_AGENT_WORKFLOW.md](./HUMAN_AGENT_WORKFLOW.md) — L0/L1/L2/L3 分级判断
-- [分享稿.md](./分享稿.md) / [研发协作方法论.md](./研发协作方法论.md) — 方法论叙事与精炼
-- [人机边界地图-骨架.md](./人机边界地图-骨架.md) / [角色对齐地图-骨架.md](./角色对齐地图-骨架.md) — 骨架文档
