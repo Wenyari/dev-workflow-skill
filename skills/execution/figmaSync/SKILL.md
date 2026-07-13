@@ -55,7 +55,7 @@ description:
 
 - 不重新规划路由、不重写 service 契约、不改核心状态模型 —— 归属 `devFlow`
 - 不生成 API 契约文档 —— 归属 `devFlow api-tech`
-- 不做 PM↔UI 一致性检查 —— 归属 `consistency-checker`
+- 不做 PRD↔UI 语义检查 —— 归属 `prd-ui-check`
 - 不因为 Figma 图层结构重拆业务组件 —— 只补视觉、布局、Apex UI 选型、CSS
 
 ---

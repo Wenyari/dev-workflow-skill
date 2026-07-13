@@ -18,7 +18,7 @@
 
    | 层 | 判断 |
    |---|---|
-   | `skills/review/` | 服务评审环节，实现方法论定义的三种 AI 角色（一致性检查器 / 风险扫描器 / 契约对齐器） |
+   | `skills/review/` | 服务评审环节，实现方法论定义的三种 AI 角色（PRD↔UI 检查 / 风险扫描 / 契约对齐） |
    | `skills/execution/` | 服务开发环节（写方案、写代码、视觉还原） |
    | `skills/artifact/` | 承载未闭环清单 / 校准清单等跨环节数据产物 |
 
@@ -114,7 +114,7 @@ tool 是纯能力层，必须有稳定的输入输出契约。schema 写在 tool
 
 | 对象 | 规范 | 示例 |
 |---|---|---|
-| skill 目录 | kebab-case | `consistency-checker` |
+| skill 目录 | kebab-case | `prd-ui-check` |
 | tool 目录 | kebab-case | `figma-mcp` |
 | 子命令 | kebab-case，动宾结构 | `page-tech`, `contract-check` |
 | 产物文件 | kebab-case + `.md` | `contract-report.md` |
@@ -196,7 +196,7 @@ tools/<tool-name>/
 - `docs(<scope>): <描述>` —— 文档
 - `chore(<scope>): <描述>` —— 杂项
 
-`<scope>` 用 skill / tool 目录名，如 `feat(consistency-checker): add rule engine`。
+`<scope>` 用 skill / tool 目录名，如 `feat(prd-ui-check): add semantic workflow`。
 
 **分支**：
 
@@ -204,6 +204,6 @@ tools/<tool-name>/
 <type>/<scope>/<description>
 ```
 
-如 `feat/consistency-checker/rule-engine`。
+如 `feat/prd-ui-check/semantic-workflow`。
 
 **涉及方法论理解**的改动，commit body 必须引用方法论，如 `refs: 研发协作方法论.md`。

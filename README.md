@@ -23,7 +23,7 @@ npx @dev-workflow/skill
 .claude/
 ├── skills/
 │   ├── execution/{devFlow, figmaSync}/
-│   ├── review/consistency-checker/
+│   ├── review/prd-ui-check/
 │   └── artifact/
 └── tools/lark/
 ```
@@ -75,8 +75,8 @@ npm publish
 
 ```
 skills/
-├── review/         评审层：AI 三角色规范（规划中）
-│   ├── consistency-checker/    PM↔UI 一致性检查
+├── review/         评审层：PRD↔UI 检查可用，其余能力规划中
+│   ├── prd-ui-check/           PRD↔UI 语义检查
 │   ├── risk-scanner/           需求评审风险扫描
 │   └── contract-aligner/       技术评审契约对齐
 ├── execution/      开发层：方案生成 + 代码落地

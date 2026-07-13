@@ -1,6 +1,6 @@
 # 快速开始
 
-三条最高频路径。每条附完整命令序列和产物链。
+四条最高频路径。每条附完整命令序列和产物链。
 
 不确定属于哪条 → 查 [DECISION_TREE.md](./DECISION_TREE.md)。
 
@@ -39,7 +39,21 @@ figmaSync apply                       # 落地页面 CSS
 
 ---
 
-## 路径 3：我要写后端技术方案
+## 路径 3：我要检查 PRD 与 UI
+
+```text
+$prd-ui-check <PRD 本地路径或飞书读取结果>
+# → Agent 整理页面与待对照需求点
+# → 人工选择页面并逐步提供 Figma 节点
+# → 每轮确认节点语义，页面节点提供完成后检查差异
+# → 全部页面完成后生成 prd-ui-check-report.md
+```
+
+**产物链**：PRD + 人工指定的 Figma 节点 → `prd-ui-check-report.md`
+
+---
+
+## 路径 4：我要写后端技术方案
 
 ```
 $devFlow lark-read <PRD 飞书链接>    # 读 PRD 作为上下文

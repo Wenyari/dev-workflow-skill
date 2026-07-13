@@ -9,7 +9,7 @@ import { select, confirm, closePrompts } from './prompts.mjs'
 const COPY_PLAN = [
   { srcRel: 'skills/execution/devFlow', destRel: 'skills/execution/devFlow' },
   { srcRel: 'skills/execution/figmaSync', destRel: 'skills/execution/figmaSync' },
-  { srcRel: 'skills/review/consistency-checker', destRel: 'skills/review/consistency-checker' },
+  { srcRel: 'skills/review/prd-ui-check', destRel: 'skills/review/prd-ui-check' },
   { srcRel: 'skills/artifact', destRel: 'skills/artifact' },
   { srcRel: 'tools/lark', destRel: 'tools/lark' }
 ]

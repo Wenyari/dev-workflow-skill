@@ -60,7 +60,7 @@ description:
 
 ## 明确不做
 
-- 不做 PM↔UI 一致性检查：属于 `consistency-checker` skill 的对齐边
+- 不做 PRD↔UI 语义检查：属于 `prd-ui-check` skill 的对齐边
 - 不做视觉还原：由 `figmaSync` 承担
 - 不做未闭环 / 校准清单：由 `artifact/` 层承担
 - 不做后端代码骨架生成：`api-tech` 只出方案不出 controller / service / dto / entity

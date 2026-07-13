@@ -6,7 +6,7 @@
 
 - 不改 PRD：只输出问题清单，让人决策。
 - 不推方案：具体解法留给 `page-tech` / `api-tech`。
-- 不做视觉一致性：属于 `consistency-checker` skill 的对齐边。
+- 不做 PRD↔UI 语义检查：属于 `prd-ui-check` skill 的对齐边。
 - 不做业务价值评估：只从技术侧给判断，产品价值由 PM 或用户拍板。
 - 不做 L0 / L1 的快速审查：那种档位走不到本子命令。
 

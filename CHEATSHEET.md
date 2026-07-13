@@ -23,11 +23,11 @@
 | `figmaSync plan <figma-url>` | 生成落地方案 | Figma URL + `foundation-summary.md` | `PLAN.md`, `figma-plan.css` |
 | `figmaSync apply` | 实施编码 | 已审 `PLAN.md` | 页面 CSS / 组件代码 |
 
-## 评审层（规划中）
+## 评审层
 
 | 命令 | 用途 | 状态 |
 |---|---|---|
-| `consistency-checker` | PM↔UI 一致性检查 | 规划中 |
+| `$prd-ui-check <prd>` | 用户逐页提供 Figma 节点，检查 PRD↔UI 语义 | 可用 |
 | `risk-scanner` | 需求评审风险扫描 | 规划中 |
 | `contract-aligner` | 技术评审契约对齐 | 规划中 |
 
