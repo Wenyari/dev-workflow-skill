@@ -108,7 +108,7 @@ async function runInner() {
     console.log(`⚠️  未在仓库根目录发现 ${HAW_FILENAME}`)
     console.log(`   devFlow / prd-review 等子命令依赖它判断 L0/L1/L2/L3 分档`)
     console.log(`   请从 dev-workflow-skill 源仓库获取并放到项目根目录`)
-    console.log(`   https://github.com/<TODO 待发布后补上仓库地址>/blob/main/${HAW_FILENAME}`)
+    console.log(`   https://github.com/Wenyari/dev-workflow-skill/blob/main/${HAW_FILENAME}`)
   }
 
   console.log('')

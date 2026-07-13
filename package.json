@@ -27,5 +27,13 @@
     "dev-workflow",
     "ai-workflow"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wenyari/dev-workflow-skill.git"
+  },
+  "homepage": "https://github.com/Wenyari/dev-workflow-skill#readme",
+  "bugs": {
+    "url": "https://github.com/Wenyari/dev-workflow-skill/issues"
+  },
   "license": "MIT"
 }

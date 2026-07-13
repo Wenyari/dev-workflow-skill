@@ -4,6 +4,37 @@
 
 **核心思想**：AI 只生成结构化、可审核、可修改的初稿，人是文档与代码的最终决策者。
 
+## 安装到你的仓库
+
+一条命令把 skill 装到项目级目录：
+
+```bash
+npx @dev-workflow/skill
+```
+
+跑起来后交互式选择：
+
+1. **目标 agent**：Claude Code（装到 `.claude/`）或 Codex（装到 `.agents/`）
+2. **冲突策略**：跳过已存在文件 / 全部覆盖 / 逐个决定
+
+装完的目录结构（以 Claude Code 为例）：
+
+```
+.claude/
+├── skills/
+│   ├── execution/{devFlow, figmaSync}/
+│   ├── review/consistency-checker/
+│   └── artifact/
+└── tools/lark/
+```
+
+**装完请手动做两件事**：
+
+1. `git add .claude && git commit -m "chore: install @dev-workflow/skill"`（跟随仓库走，团队共享同一版本）
+2. 从本仓库把 [`HUMAN_AGENT_WORKFLOW.md`](./HUMAN_AGENT_WORKFLOW.md) 复制到目标项目根目录 —— `devFlow` / `prd-review` 依赖它判断 L0/L1/L2/L3 分档；CLI 检测到缺失会打印警告，但不会代你搬。
+
+**升级**：重跑 `npx @dev-workflow/skill`，冲突策略选「全部覆盖」即可。npm 缓存会自动拉最新版；固定版本用 `npx @dev-workflow/skill@0.1.0`。
+
 ## 我要开始用
 
 - **第一次用** → [QUICKSTART.md](./QUICKSTART.md)
