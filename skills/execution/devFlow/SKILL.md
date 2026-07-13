@@ -1,14 +1,15 @@
 ---
 name: devFlow
 description:
-  研发工作流入口，覆盖前端与后端。按子命令读取上下文、检查契约、生成方案、创建基建并发布可审核产物。适用于用户要求
+  研发工作流入口，覆盖前端、后端与需求。按子命令读取上下文、检查契约、生成方案、创建基建并发布可审核产物。适用于用户要求
   Codex
-  编写、审查、改进、标准化或落地研发文档、技术方案、页面开发技术方案、后端技术方案、页面基建、AI
-  生成文档模板时。前端子命令：page-tech 生成页面级前端技术方案，contract-check
+  编写、审查、改进、标准化或落地研发文档、技术方案、页面开发技术方案、后端技术方案、页面基建、PRD
+  审查、AI 生成文档模板时。前端子命令：page-tech 生成页面级前端技术方案，contract-check
   检查页面方案可落地性，page-build 根据已审核方案创建页面基建，foundation-freeze
-  生成基建事实快照。后端子命令：api-tech 生成后端技术方案文档。共享子命令：lark-read
+  生成基建事实快照。后端子命令：api-tech 生成后端技术方案文档。需求子命令：prd-review
+  审查 PRD 找缺失、风险、技术冲突并输出问题清单。共享子命令：lark-read
   读取飞书云文档作为上下文，lark-doc 发布到飞书 Wiki，prepare
-  说明飞书环境变量配置。未来可扩展测试、需求分析等 domain。
+  说明飞书环境变量配置。未来可扩展测试等 domain。
 ---
 
 # 研发工作流
@@ -68,7 +69,7 @@ description:
 
 ## 详细规则
 
-本 Skill 是研发工作流统一入口，覆盖前端与后端两个 domain，未来可扩展测试、需求分析等。它负责识别任务类型、判断领域、选择子命令、加载对应规则和模板。具体子命令的详细执行规则不要堆在本文件中，应放入对应
+本 Skill 是研发工作流统一入口，覆盖前端、后端与需求三个 domain，未来可扩展测试等。它负责识别任务类型、判断领域、选择子命令、加载对应规则和模板。具体子命令的详细执行规则不要堆在本文件中，应放入对应
 `references/`。
 
 ## 目录约定
@@ -76,9 +77,10 @@ description:
 - 飞书读写、环境准备等共享能力已下沉到仓库 `tools/lark/`（相对本 skill 为 `../../../tools/lark/`）。
 - `domains/frontend/{references,templates,scripts}/`：前端专属规则、模板、脚本。
 - `domains/backend/{references,templates,scripts}/`：后端专属规则、模板、脚本。
+- `domains/requirement/{references,templates}/`：需求专属规则与模板；本 domain 目前无脚本。
 - `agents/`：入口 agent 配置。
 
-新增 domain（如 `test`、`requirement`）时按同样结构建 `domains/<name>/{references,templates,scripts}/`。
+新增 domain（如 `test`）时按同样结构建 `domains/<name>/{references,templates,scripts}/`。
 
 ## 通用原则
 
@@ -98,11 +100,11 @@ description:
 
 ## 领域判定
 
-用户请求进入子命令前必须判定领域（frontend / backend）：
+用户请求进入子命令前必须判定领域（frontend / backend / requirement）：
 
-- 用户显式带前缀或指定领域（"后端技术方案"、"前端页面方案"）时直接采用。
+- 用户显式带前缀或指定领域（"后端技术方案"、"前端页面方案"、"审查 PRD"）时直接采用。
 - 子命令名唯一映射到某个 domain 时直接采用：`page-tech` / `page-build` /
-  `contract-check` / `foundation-freeze` → frontend；`api-tech` → backend。
+  `contract-check` / `foundation-freeze` → frontend；`api-tech` → backend；`prd-review` → requirement。
 - 子命令名不唯一但用户话语明确（例如"写技术方案"）时，必须先向用户确认前端还是后端，不擅自二选一。
 - 共享子命令 `prepare` / `lark-read` / `lark-doc` 不必判定领域；`lark-read` 供哪个下游使用时按下游领域输出对应结构（见 `../../../tools/lark/references/lark-read.md`）。
 
@@ -114,6 +116,13 @@ description:
 - L2/L3 才进入
   `page-tech -> contract-check -> page-build -> foundation-freeze -> figmaSync`
   标准链路。
+
+## 需求专属工作流
+
+- L0 / L1 不跑 `prd-review`：小改动不需要 PRD 审查。
+- L2 建议在 `page-tech` / `api-tech` 之前跑 `prd-review`；产物形态由用户选择（对话内出或落 `prd-review.md`）。
+- L3 强制在 `page-tech` / `api-tech` 之前跑 `prd-review`，且必须落 `prd-review.md` 作为可审核产物。
+- 🔴 阻塞项未消除，不得进入 `page-tech` / `api-tech`；🟡 严重项必须在下游文档的「风险与待确认项」中原样带过去。
 
 ## 验证策略
 
@@ -308,10 +317,25 @@ Mermaid 类型选择：
 模板：`domains/backend/templates/api-tech.md`
 脚本：`domains/backend/scripts/check_api_tech_doc.mjs`（生成后自检）
 
+### prd-review（需求）
+
+用途：在需求进入 `page-tech` / `api-tech` 之前，按固定 checklist 审查一份 PRD，找出缺失、风险和技术冲突，产出分档（🔴 阻塞 / 🟡 严重 / 🟢 商榷）的问题清单。不改 PRD、不推方案、不做视觉一致性检查、不做业务价值评估。
+
+触发方式：
+
+- 用户显式输入 `$devFlow prd-review`
+- 用户要求"审查 PRD" / "看看这份需求有什么问题"
+- 用户要求"找出 PRD 的缺失 / 风险 / 技术冲突"
+- 用户要求"PRD 能不能进入技术方案阶段"
+- 进入 `page-tech` / `api-tech` 前发现 PRD 尚未审查（L3 强制）
+
+规则：`domains/requirement/references/prd-review.md`
+模板：`domains/requirement/templates/prd-review.md`
+
 ## 未实现子命令
 
 当前实现：
-`prepare`、`lark-read`、`lark-doc`（共享）；`page-tech`、`contract-check`、`page-build`、`foundation-freeze`（前端）；`api-tech`（后端）。
+`prepare`、`lark-read`、`lark-doc`（共享）；`page-tech`、`contract-check`、`page-build`、`foundation-freeze`（前端）；`api-tech`（后端）；`prd-review`（需求）。
 
-如果用户要求组件开发、重构方案、测试方案、需求分析或其他技术文档类型，不要临时发挥。先说明当前
+如果用户要求组件开发、重构方案、测试方案或其他技术文档类型，不要临时发挥。先说明当前
 `devFlow` 尚未定义对应子命令或 domain，再与用户确认是否要扩展。
