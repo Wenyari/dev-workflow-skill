@@ -1,5 +1,4 @@
 // 递归复制目录：镜像仓库层级，逐文件冲突处理。
-// 冲突策略（Step 2 只实现 skip；Step 3 补 overwrite / prompt）。
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
@@ -7,6 +6,14 @@ export const CONFLICT = {
   SKIP: 'skip',
   OVERWRITE: 'overwrite',
   PROMPT: 'prompt'
+}
+
+// 单文件冲突时的处理结果码（供 onConflict 回调返回）
+export const CONFLICT_DECISION = {
+  SKIP_ONE: 'skip_one',
+  OVERWRITE_ONE: 'overwrite_one',
+  SKIP_REST: 'skip_rest',
+  OVERWRITE_REST: 'overwrite_rest'
 }
 
 async function pathExists(p) {
@@ -18,7 +25,6 @@ async function pathExists(p) {
   }
 }
 
-// 递归收集 srcRoot 下的所有文件（返回相对路径列表）。
 async function walkFiles(srcRoot) {
   const out = []
   async function walk(dir) {
@@ -36,10 +42,14 @@ async function walkFiles(srcRoot) {
   return out
 }
 
+async function writeFile(from, to) {
+  await fs.mkdir(path.dirname(to), { recursive: true })
+  await fs.copyFile(from, to)
+}
+
 // 复制单个源目录到目标目录，返回统计。
-// srcAbs: 源目录绝对路径
-// destAbs: 目标目录绝对路径（镜像后的位置）
-export async function copyDir(srcAbs, destAbs, { conflict = CONFLICT.SKIP } = {}) {
+// state 让「本次全部这样」的决定跨目录延续；调用方在整个安装流程内共享一个 state 对象。
+export async function copyDir(srcAbs, destAbs, { conflict = CONFLICT.SKIP, onConflict, state = {} } = {}) {
   const stats = { copied: 0, skipped: 0, overwritten: 0 }
   if (!(await pathExists(srcAbs))) {
     throw new Error(`源目录不存在：${srcAbs}`)
@@ -49,24 +59,37 @@ export async function copyDir(srcAbs, destAbs, { conflict = CONFLICT.SKIP } = {}
     const from = path.join(srcAbs, rel)
     const to = path.join(destAbs, rel)
     const exists = await pathExists(to)
-    if (exists) {
-      if (conflict === CONFLICT.SKIP) {
-        stats.skipped++
-        continue
-      }
-      if (conflict === CONFLICT.OVERWRITE) {
-        await fs.mkdir(path.dirname(to), { recursive: true })
-        await fs.copyFile(from, to)
-        stats.overwritten++
-        continue
-      }
-      // PROMPT 交由 Step 3 补
-      stats.skipped++
+    if (!exists) {
+      await writeFile(from, to)
+      stats.copied++
       continue
     }
-    await fs.mkdir(path.dirname(to), { recursive: true })
-    await fs.copyFile(from, to)
-    stats.copied++
+    // 冲突分派
+    let mode = conflict
+    if (mode === CONFLICT.PROMPT) {
+      if (state.restOverride) {
+        mode = state.restOverride
+      } else {
+        const decision = await onConflict(to)
+        if (decision === CONFLICT_DECISION.SKIP_REST) {
+          state.restOverride = CONFLICT.SKIP
+          mode = CONFLICT.SKIP
+        } else if (decision === CONFLICT_DECISION.OVERWRITE_REST) {
+          state.restOverride = CONFLICT.OVERWRITE
+          mode = CONFLICT.OVERWRITE
+        } else if (decision === CONFLICT_DECISION.OVERWRITE_ONE) {
+          mode = CONFLICT.OVERWRITE
+        } else {
+          mode = CONFLICT.SKIP
+        }
+      }
+    }
+    if (mode === CONFLICT.OVERWRITE) {
+      await writeFile(from, to)
+      stats.overwritten++
+    } else {
+      stats.skipped++
+    }
   }
   return stats
 }
