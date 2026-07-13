@@ -1,0 +1,31 @@
+{
+  "name": "@dev-workflow/skill",
+  "version": "0.1.0",
+  "description": "研发工作流 skill 库：一条 npx 命令把 devFlow / figmaSync / consistency-checker / artifact 等 skill 装到 Claude Code 或 Codex 的项目级目录。",
+  "type": "module",
+  "bin": {
+    "@dev-workflow/skill": "./bin/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "skills",
+    "tools",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "claude-code",
+    "codex",
+    "skill",
+    "dev-workflow",
+    "ai-workflow"
+  ],
+  "license": "MIT"
+}
