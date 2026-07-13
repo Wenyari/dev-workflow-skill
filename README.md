@@ -35,6 +35,31 @@ npx @dev-workflow/skill
 
 **升级**：重跑 `npx @dev-workflow/skill`，冲突策略选「全部覆盖」即可。npm 缓存会自动拉最新版；固定版本用 `npx @dev-workflow/skill@0.1.0`。
 
+## 发新版本（维护者）
+
+改完代码，按语义化版本发新版：
+
+```bash
+# 1. 视变更幅度选一个
+npm version patch    # 0.1.0 → 0.1.1  bug fix
+npm version minor    # 0.1.0 → 0.2.0  新功能，向下兼容
+npm version major    # 0.1.0 → 1.0.0  破坏性变更
+
+# 上面这条会自动改 package.json + git commit + 打 tag v0.1.1
+
+# 2. 推 tag 和代码到 GitHub
+git push origin main --tags
+
+# 3. 发到 npm（会弹浏览器要 Touch ID / OTP）
+npm publish
+```
+
+**常见坑**：
+
+- 首次发布前没 `npm login --auth-type=web` → 报 401，先登录
+- `npm publish` 后立刻跑 `npx` 拉不到 → CDN 生效需要 30 秒到 2 分钟
+- `npm publish` 在使用私有 registry 的仓库里会报 404 → 加 `--registry=https://registry.npmjs.org/`
+
 ## 我要开始用
 
 - **第一次用** → [QUICKSTART.md](./QUICKSTART.md)
