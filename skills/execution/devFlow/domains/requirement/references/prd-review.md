@@ -61,7 +61,7 @@
 | --- | --- | --- |
 | C1 | 技术无法实现 | 例：依赖飞书 Open API 不支持的能力；依赖浏览器不允许的 API |
 | C2 | 与代码 / 组件契约冲突 | 与仓库中现有 route、service、组件 props、状态模式冲突 |
-| C3 | 与产品设计规范冲突 | 与 `domains/frontend/references/product-design-specs/` 中已确定的字段、交互、反馈规范冲突 |
+| C3 | 与产品设计规范冲突 | 与 `tools/product-design-specs/` 中已确定的字段、交互、反馈规范冲突 |
 | C4 | 需求内部矛盾 | A 章节说 X，B 章节说非 X；表格与正文表述不一致 |
 | C5 | 与接口能力冲突 | 需求依赖某接口能力但接口文档或仓库代码显示不支持 |
 

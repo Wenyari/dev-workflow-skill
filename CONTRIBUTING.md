@@ -150,6 +150,7 @@ tools/<tool-name>/
 - **禁止跨层反向依赖**：`tools/` 不引用 `skills/`
 - **禁止 skill 之间直接调用**：review / execution / artifact 三层的 skill 只能通过**产物文件**传递数据，不允许 A skill 内部脚本读 B skill 目录
 - **共享能力必须走 tools/**：多个 skill 用到同一能力时，抽到 tools/
+- **tools/ 内资源被引用时，路径统一从仓库根开始写**：如 `tools/product-design-specs/index.md`，不用相对路径
 
 ---
 

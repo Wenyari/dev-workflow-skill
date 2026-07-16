@@ -110,7 +110,7 @@ admin-fe 必须遵守：
 当页面涉及字段、表单、筛选、列表展示、详情展示、上传、选择器、弹窗或操作反馈时，必须读取产品设计规范索引：
 
 ```text
-references/product-design-specs/index.md
+tools/product-design-specs/index.md
 ```
 
 读取规则：
