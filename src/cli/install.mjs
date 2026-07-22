@@ -7,15 +7,24 @@ import { copyDir, CONFLICT, CONFLICT_DECISION } from './copy.mjs'
 import { select, confirm, closePrompts } from './prompts.mjs'
 
 const COPY_PLAN = [
-  { srcRel: 'skills/execution/devFlow', destRel: 'skills/execution/devFlow' },
-  { srcRel: 'skills/execution/figmaSync', destRel: 'skills/execution/figmaSync' },
-  { srcRel: 'skills/review/prd-ui-check', destRel: 'skills/review/prd-ui-check' },
+  { srcRel: 'skills/execution', destRel: 'skills/execution' },
+  { srcRel: 'skills/review', destRel: 'skills/review' },
   { srcRel: 'skills/artifact', destRel: 'skills/artifact' },
-  { srcRel: 'tools/lark', destRel: 'tools/lark' }
+  { srcRel: 'tools/lark', destRel: 'tools/lark' },
+  { srcRel: 'tools/product-design-specs', destRel: 'tools/product-design-specs' }
 ]
 
 // 提示消费者：SKILL.md 里引用了根目录 HUMAN_AGENT_WORKFLOW.md，用户仓库根缺这个文件时打印警告。
 const HAW_FILENAME = 'HUMAN_AGENT_WORKFLOW.md'
+
+export const DEV_WORKFLOW_LOGO = `
+[38;5;45m██████╗ [38;5;51m███████╗[38;5;87m██╗   ██╗[0m       [38;5;45m██╗    ██╗ [38;5;51m██████╗ [38;5;87m██████╗ [38;5;123m██╗  ██╗[38;5;159m███████╗[38;5;195m██╗      ██████╗ ██╗    ██╗[0m
+[38;5;39m██╔══██╗[38;5;45m██╔════╝[38;5;51m██║   ██║[0m       [38;5;39m██║    ██║[38;5;45m██╔═══██╗[38;5;51m██╔══██╗[38;5;87m██║ ██╔╝[38;5;123m██╔════╝[38;5;159m██║     ██╔═══██╗██║    ██║[0m
+[38;5;33m██║  ██║[38;5;39m█████╗  [38;5;45m██║   ██║[0m       [38;5;33m██║ █╗ ██║[38;5;39m██║   ██║[38;5;45m██████╔╝[38;5;51m█████╔╝ [38;5;87m█████╗  [38;5;123m██║     ██║   ██║██║ █╗ ██║[0m
+[38;5;27m██║  ██║[38;5;33m██╔══╝  [38;5;39m╚██╗ ██╔╝[0m [1;90m█████╗[0m [38;5;27m██║███╗██║[38;5;33m██║   ██║[38;5;39m██╔══██╗[38;5;45m██╔═██╗ [38;5;51m██╔══╝  [38;5;87m██║     ██║   ██║██║███╗██║[0m
+[38;5;21m██████╔╝[38;5;27m███████╗[38;5;33m ╚████╔╝ [0m [1;90m╚════╝[0m [38;5;21m╚███╔███╔╝[38;5;27m╚██████╔╝[38;5;33m██║  ██║[38;5;39m██║  ██╗[38;5;45m██║     [38;5;51m███████╗╚██████╔╝╚███╔███╔╝[0m
+[38;5;18m╚═════╝ [38;5;21m╚══════╝[38;5;27m  ╚═══╝  [0m       [38;5;18m ╚══╝╚══╝ [38;5;21m ╚═════╝ [38;5;27m╚═╝  ╚═╝[38;5;33m╚═╝  ╚═╝[38;5;39m╚═╝     [38;5;45m╚══════╝ ╚═════╝  ╚══╝╚══╝ [0m
+[2;90m  ░▒▓  DEV-WORKFLOW  ·  ENGINEERING SKILLS  ▓▒░[0m`
 
 function packageRoot() {
   const here = path.dirname(fileURLToPath(import.meta.url))
@@ -40,7 +49,7 @@ export async function run() {
 }
 
 async function runInner() {
-  console.log('')
+  console.log(DEV_WORKFLOW_LOGO)
   console.log('📦 @dev-workflow/skill installer')
 
   const agentId = await select(

@@ -1,8 +1,10 @@
 # 快速开始
 
-四条最高频路径。每条附完整命令序列和产物链。
+五条最高频路径。每条附完整命令序列和产物链。
 
 不确定属于哪条 → 查 [DECISION_TREE.md](./DECISION_TREE.md)。
+
+通过 `npx @dev-workflow/skill` 安装时，使用方向键切换目标和冲突策略，按 `Enter` 确认。
 
 ---
 
@@ -63,6 +65,23 @@ $devFlow lark-doc                     # 发布到飞书 Wiki
 ```
 
 **产物链**：`api-tech.md` → 飞书 Wiki 文档
+
+---
+
+## 路径 5：我要检查冗余、抽象机会和结构耦合
+
+前提：仓库已有 Graphify 生成的 `graphify-out/.graphify_extract.json` 或 `graphify-out/graph.json`。
+
+```text
+$code-structure-review start <scope>  # 生成图分析结果和源码复核计划
+$code-structure-review review 1       # 按批定点读取候选源码
+# → 继续 review 2 ... review N
+$code-structure-review finalize       # 输出最终结构 Review 报告
+```
+
+**产物链**：Graphify 图数据 → `structure-analysis.json` → 批次复核记录 → `code-structure-review-report.md`
+
+该流程不会自动安装 Graphify，也不会自动修改业务代码。
 
 ---
 

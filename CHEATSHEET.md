@@ -31,6 +31,9 @@
 | `$frontend-code-review start <scope>` | 声明范围，扫描代码识别字段类型，生成批次计划 | 可用 |
 | `$frontend-code-review batch <n>` | 跑第 n 批规范比对，产出批次中间记录 | 可用 |
 | `$frontend-code-review finalize` | 合并批次记录，输出 `code-review-report.md` | 可用 |
+| `$code-structure-review start <scope>` | 读取 Graphify 图数据，生成结构候选和批次计划 | 可用 |
+| `$code-structure-review review <n>` | 定点读取第 n 批候选源码并复核 | 可用 |
+| `$code-structure-review finalize` | 输出冗余、抽象和耦合结构 Review 报告 | 可用 |
 | `risk-scanner` | 需求评审风险扫描 | 规划中 |
 | `contract-aligner` | 技术评审契约对齐 | 规划中 |
 

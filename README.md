@@ -12,7 +12,7 @@
 npx @dev-workflow/skill
 ```
 
-跑起来后交互式选择：
+进入安装命令后会先显示 `DEV-WORKFLOW` 3D 字符 LOGO，再进入交互式选择。菜单使用 `↑`、`↓` 或 `←`、`→` 切换，按 `Enter` 确认：
 
 1. **目标 agent**：Claude Code（装到 `.claude/`）或 Codex（装到 `.agents/`）
 2. **冲突策略**：跳过已存在文件 / 全部覆盖 / 逐个决定
@@ -22,11 +22,17 @@ npx @dev-workflow/skill
 ```
 .claude/
 ├── skills/
-│   ├── execution/{devFlow, figmaSync}/
-│   ├── review/prd-ui-check/
+│   ├── execution/
+│   │   ├── SKILL.md
+│   │   └── {devFlow, figmaSync}/
+│   ├── review/
+│   │   ├── SKILL.md
+│   │   └── {prd-ui-check, frontend-code-review, code-structure-review}/
 │   └── artifact/
-└── tools/lark/
+└── tools/{lark, product-design-specs}/
 ```
+
+`execution/SKILL.md` 和 `review/SKILL.md` 是分类导航入口，用于先识别任务类型，再加载对应子技能。
 
 **装完请手动做两件事**：
 
@@ -75,9 +81,10 @@ npm publish
 
 ```
 skills/
-├── review/         评审层：PRD↔UI 检查 + 前端代码 review 可用，其余能力规划中
+├── review/         评审层：PRD↔UI、产品规范和代码结构 Review
 │   ├── prd-ui-check/           PRD↔UI 语义检查
 │   ├── frontend-code-review/   前端业务代码 vs 产品设计规范
+│   ├── code-structure-review/  基于 Graphify 的冗余、抽象与耦合候选分析
 │   ├── risk-scanner/           需求评审风险扫描
 │   └── contract-aligner/       技术评审契约对齐
 ├── execution/      开发层：方案生成 + 代码落地
