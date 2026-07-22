@@ -21,6 +21,7 @@
 ### 我要检查一致性
 
 - 检查 **PRD 和 UI 稿语义是否一致** → `$prd-ui-check <prd>`（用户逐页提供 Figma 节点）
+- 检查 **前端业务代码是否遵循产品设计规范** → `$frontend-code-review start <scope>` → `batch <n>` → `finalize`
 - 检查 **PRD 缺失态 / 边界值 / 权限** → `risk-scanner`（需求评审用）
 - 检查 **PRD 和 API 语义对齐** → `contract-aligner`（技术评审用）
 

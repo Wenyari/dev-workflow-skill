@@ -28,6 +28,9 @@
 | 命令 | 用途 | 状态 |
 |---|---|---|
 | `$prd-ui-check <prd>` | 用户逐页提供 Figma 节点，检查 PRD↔UI 语义 | 可用 |
+| `$frontend-code-review start <scope>` | 声明范围，扫描代码识别字段类型，生成批次计划 | 可用 |
+| `$frontend-code-review batch <n>` | 跑第 n 批规范比对，产出批次中间记录 | 可用 |
+| `$frontend-code-review finalize` | 合并批次记录，输出 `code-review-report.md` | 可用 |
 | `risk-scanner` | 需求评审风险扫描 | 规划中 |
 | `contract-aligner` | 技术评审契约对齐 | 规划中 |
 

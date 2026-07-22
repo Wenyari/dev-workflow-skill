@@ -75,8 +75,9 @@ npm publish
 
 ```
 skills/
-├── review/         评审层：PRD↔UI 检查可用，其余能力规划中
+├── review/         评审层：PRD↔UI 检查 + 前端代码 review 可用，其余能力规划中
 │   ├── prd-ui-check/           PRD↔UI 语义检查
+│   ├── frontend-code-review/   前端业务代码 vs 产品设计规范
 │   ├── risk-scanner/           需求评审风险扫描
 │   └── contract-aligner/       技术评审契约对齐
 ├── execution/      开发层：方案生成 + 代码落地
@@ -88,6 +89,7 @@ skills/
 
 tools/              共享能力（不对用户暴露）
 ├── lark/                       飞书读写、Markdown 转 blocks、权限检查
+├── product-design-specs/       产品设计规范（字段/交互/反馈）
 ├── figma-mcp/                  Figma 元数据封装（规划中）
 ├── prd-loader/                 PRD 全文加载（规划中）
 └── rules/                      规则库、业务词表（规划中）
