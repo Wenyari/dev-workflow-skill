@@ -9,7 +9,6 @@ import { select, confirm, closePrompts } from './prompts.mjs'
 const COPY_PLAN = [
   { srcRel: 'skills/execution', destRel: 'skills/execution' },
   { srcRel: 'skills/review', destRel: 'skills/review' },
-  { srcRel: 'skills/artifact', destRel: 'skills/artifact' },
   { srcRel: 'tools/lark', destRel: 'tools/lark' },
   { srcRel: 'tools/product-design-specs', destRel: 'tools/product-design-specs' }
 ]
@@ -115,7 +114,7 @@ async function runInner() {
   if (!hasHaw) {
     console.log('')
     console.log(`⚠️  未在仓库根目录发现 ${HAW_FILENAME}`)
-    console.log(`   devFlow / prd-review 等子命令依赖它判断 L0/L1/L2/L3 分档`)
+    console.log(`   frontend / backend / prd-review 等 skill 依赖它判断 L0/L1/L2/L3 分档`)
     console.log(`   请从 dev-workflow-skill 源仓库获取并放到项目根目录`)
     console.log(`   https://github.com/Wenyari/dev-workflow-skill/blob/main/${HAW_FILENAME}`)
   }

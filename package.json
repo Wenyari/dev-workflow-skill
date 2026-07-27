@@ -12,6 +12,7 @@
     "skills",
     "tools",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "engines": {

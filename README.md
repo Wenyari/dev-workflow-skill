@@ -1,6 +1,6 @@
 # dev-workflow-skill
 
-研发协作 AI 工具库。方法论基础：[研发协作方法论.md](./研发协作方法论.md)。
+研发协作 AI 工具库。分层和维护约束见 [CONTRIBUTING.md](./CONTRIBUTING.md)，L0/L1/L2/L3 人机协作分级见 [HUMAN_AGENT_WORKFLOW.md](./HUMAN_AGENT_WORKFLOW.md)。
 
 **核心思想**：AI 只生成结构化、可审核、可修改的初稿，人是文档与代码的最终决策者。
 
@@ -24,11 +24,10 @@ npx @dev-workflow/skill
 ├── skills/
 │   ├── execution/
 │   │   ├── SKILL.md
-│   │   └── {devFlow, figmaSync}/
+│   │   └── {frontend, backend, figmaSync, devFlow}/
 │   ├── review/
 │   │   ├── SKILL.md
-│   │   └── {prd-ui-check, frontend-code-review, code-structure-review}/
-│   └── artifact/
+│   │   └── {prd-review, prd-ui-check, frontend-code-review, code-structure-review}/
 └── tools/{lark, product-design-specs}/
 ```
 
@@ -37,7 +36,7 @@ npx @dev-workflow/skill
 **装完请手动做两件事**：
 
 1. `git add .claude && git commit -m "chore: install @dev-workflow/skill"`（跟随仓库走，团队共享同一版本）
-2. 从本仓库把 [`HUMAN_AGENT_WORKFLOW.md`](./HUMAN_AGENT_WORKFLOW.md) 复制到目标项目根目录 —— `devFlow` / `prd-review` 依赖它判断 L0/L1/L2/L3 分档；CLI 检测到缺失会打印警告，但不会代你搬。
+2. 从本仓库把 [`HUMAN_AGENT_WORKFLOW.md`](./HUMAN_AGENT_WORKFLOW.md) 复制到目标项目根目录 —— `frontend` / `backend` / `prd-review` 依赖它判断 L0/L1/L2/L3 分档；CLI 检测到缺失会打印警告，但不会代你搬。
 
 **升级**：重跑 `npx @dev-workflow/skill`，冲突策略选「全部覆盖」即可。npm 缓存会自动拉最新版；固定版本用 `npx @dev-workflow/skill@0.1.0`。
 
@@ -82,28 +81,24 @@ npm publish
 ```
 skills/
 ├── review/         评审层：PRD↔UI、产品规范和代码结构 Review
+│   ├── prd-review/              PRD 缺失、风险与技术冲突检查
 │   ├── prd-ui-check/           PRD↔UI 语义检查
 │   ├── frontend-code-review/   前端业务代码 vs 产品设计规范
-│   ├── code-structure-review/  基于 Graphify 的冗余、抽象与耦合候选分析
-│   ├── risk-scanner/           需求评审风险扫描
-│   └── contract-aligner/       技术评审契约对齐
-├── execution/      开发层：方案生成 + 代码落地
-│   ├── devFlow/                页面 / 后端方案 + 页面基建
-│   └── figmaSync/              Figma → 原生 CSS
-└── artifact/       产物层：跨环节数据收口（规划中）
-    ├── open-issues/            未闭环清单
-    └── calibration/            校准清单 + 回喂
+│   └── code-structure-review/  基于 Graphify 的冗余、抽象与耦合候选分析
+└── execution/      开发层：方案生成 + 代码落地
+│   ├── frontend/               前端方案 → 页面基建 → Foundation Review
+│   ├── backend/                后端方案 + 接口测试生成 / 执行 + 正式报告
+│   ├── figmaSync/              Figma → 原生 CSS
+│   └── devFlow/                旧 devFlow 命令兼容导航
 
 tools/              共享能力（不对用户暴露）
 ├── lark/                       飞书读写、Markdown 转 blocks、权限检查
-├── product-design-specs/       产品设计规范（字段/交互/反馈）
-├── figma-mcp/                  Figma 元数据封装（规划中）
-├── prd-loader/                 PRD 全文加载（规划中）
-└── rules/                      规则库、业务词表（规划中）
+└── product-design-specs/       产品设计规范（字段/交互/反馈）
 
 docs/               维护者深度文档
 ├── skill-template/             SKILL.md 五段式骨架
 ├── adr/                        架构决策记录
+├── roadmap/                    尚未投产能力的规划
 └── superpowers/                历史文档
 ```
 

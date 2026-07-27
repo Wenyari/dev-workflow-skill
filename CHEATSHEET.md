@@ -2,18 +2,21 @@
 
 所有可用命令一览。第一次使用请先看 [QUICKSTART.md](./QUICKSTART.md)。
 
-## devFlow · 开发层
+## frontend · 前端开发流程
 
 | 命令 | 用途 | 前置产物 | 输出产物 |
 |---|---|---|---|
-| `$devFlow prepare` | 配置飞书环境变量 | — | 环境变量 |
-| `$devFlow lark-read <url>` | 读飞书文档 | 飞书链接 | 上下文 |
-| `$devFlow lark-doc` | 发布到飞书 Wiki | 已有文档 | 飞书文档链接 |
-| `$devFlow page-tech` | 生成页面前端方案 | PRD / 需求 | `page-tech.md` |
-| `$devFlow contract-check` | 检查方案可落地性 | `page-tech.md` | `contract-report.md` |
-| `$devFlow page-build` | 创建页面基建 | `contract-report.md` 通过 | 前端代码 |
-| `$devFlow foundation-freeze` | 生成基建快照 | 已落地页面 | `foundation-summary.md` |
-| `$devFlow api-tech` | 生成后端方案 | PRD / 后端仓库 | `api-tech.md` |
+| `$frontend page-tech` | 生成页面前端方案，不修改代码 | PRD / 需求 / 接口事实 | `page-tech.md` |
+| `$frontend page-build check` | 只检查方案是否具备落地条件 | `page-tech.md` 或可验证上下文 | `contract-report.md` |
+| `$frontend page-build` | 契约检查 → 人工确认 → 创建基建 → 最小验证 → Foundation Review | 已确认方案或 L0/L1 最小计划 | 页面代码 + `foundation-summary.md`；L2/L3 含 `contract-report.md` |
+
+## backend · 后端开发流程
+
+| 命令 | 用途 | 前置产物 | 输出产物 |
+|---|---|---|---|
+| `$backend api-tech` | 生成后端技术方案；不生成后端业务代码 | PRD / 后端仓库 | `api-tech.md` |
+| `$backend integration-test run [scope]` | 执行已有接口集成测试；缺省 scope 时先根据代码变更识别并等待确认 | 后端仓库 / 已有测试 | `backend-integration-test-report.md` |
+| `$backend integration-test generate [scope]` | 为缺失接口生成或补充测试；写入前确认文件、用例和命令 | 后端接口实现 / 契约 | `*_test.go` + `backend-integration-test-report.md` |
 
 ## figmaSync · 开发层
 
@@ -27,6 +30,7 @@
 
 | 命令 | 用途 | 状态 |
 |---|---|---|
+| `$prd-review <prd>` | 检查 PRD 缺失、边界、风险和技术冲突 | 可用 |
 | `$prd-ui-check <prd>` | 用户逐页提供 Figma 节点，检查 PRD↔UI 语义 | 可用 |
 | `$frontend-code-review start <scope>` | 声明范围，扫描代码识别字段类型，生成批次计划 | 可用 |
 | `$frontend-code-review batch <n>` | 跑第 n 批规范比对，产出批次中间记录 | 可用 |
@@ -34,12 +38,3 @@
 | `$code-structure-review start <scope>` | 读取 Graphify 图数据，生成结构候选和批次计划 | 可用 |
 | `$code-structure-review review <n>` | 定点读取第 n 批候选源码并复核 | 可用 |
 | `$code-structure-review finalize` | 输出冗余、抽象和耦合结构 Review 报告 | 可用 |
-| `risk-scanner` | 需求评审风险扫描 | 规划中 |
-| `contract-aligner` | 技术评审契约对齐 | 规划中 |
-
-## 产物层（规划中）
-
-| 命令 | 用途 | 状态 |
-|---|---|---|
-| `open-issues` | 未闭环清单管理 | 规划中 |
-| `calibration` | 校准清单管理 + 回喂 | 规划中 |

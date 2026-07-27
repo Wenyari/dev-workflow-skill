@@ -1,35 +1,77 @@
 ---
 name: execution
-description: 研发执行类技能导航。用户需要生成前后端技术方案、落地页面基建、读取或发布飞书文档、同步 Figma 设计稿时，先使用本导航选择 devFlow 或 figmaSync，再读取对应子技能的 SKILL.md。
+description: 研发执行技能导航。用户要生成前端或后端技术方案、落地页面基建、生成或执行后端接口集成测试，或进行 Figma 视觉还原时，先判断前后端领域和当前研发阶段，再选择对应 skill。
 ---
 
 # Execution 技能导航
 
-本文件只负责识别意图和选择子技能，不包含具体执行流程。选定子技能后，必须完整读取对应 `SKILL.md`，不得根据本导航直接执行。
+## 对齐边诊断
+
+| 项 | 值 |
+|---|---|
+| 服务对齐边 | 不涉及对齐边（导航） |
+| 现状分级 | 不适用 |
+| AI 形态 | 不适用 |
+| 主战场 | 开发中 |
+
+## 这个 skill 解决什么问题
+
+只判断请求属于前端还是后端、当前处于哪个开发阶段，并选择对应执行 skill，避免在导航入口混入具体生成和检查规则。
+
+## 什么时候用
+
+- 用户显式输入 `$execution frontend` 或 `$execution backend`
+- 用户要求“从技术方案开始完成前端页面开发流程”
+- 用户要求“继续后端技术方案、接口实现后的集成测试流程”
+
+## 前置产物
+
+| 产物 | 来源 | 是否必需 |
+|---|---|---|
+| 用户目标与当前阶段 | 当前对话 | 必需 |
+| 已有技术文档、代码或测试 | 当前工作区 / 用户 | 有则用于精确路由 |
+
+## 输出产物
+
+| 产物 | 位置 | 下游消费者 |
+|---|---|---|
+| 领域与阶段路由结果 | 当前对话上下文 | 被选中的 execution 子技能 / 用户 |
+
+## 下一步
+
+- 前端技术方案或页面基建 → [frontend/SKILL.md](./frontend/SKILL.md)
+- 后端技术方案或阶段判断 → [backend/SKILL.md](./backend/SKILL.md)
+- 明确要求后端接口测试 → [backend/SKILL.md](./backend/SKILL.md) 的 `integration-test` 阶段
+- 明确要求 Figma 视觉还原 → [figmaSync/SKILL.md](./figmaSync/SKILL.md)
+
+## 明确不做
+
+- 不在导航层生成文档、代码或报告：具体规则属于选中的子技能。
+- 不把 Review 请求当成执行请求：PRD、产品规范和代码结构评审由 review 导航选择。
+- 不读取所有领域规则再做选择：只读取足以判定领域和阶段的上下文。
+
+---
 
 ## 路由表
 
-| 用户目标 | 使用技能 | 入口 |
-|---|---|---|
-| 读取飞书 PRD 或技术文档 | `devFlow` | [`devFlow/SKILL.md`](./devFlow/SKILL.md) |
-| 生成前端页面技术方案 | `devFlow` | [`devFlow/SKILL.md`](./devFlow/SKILL.md) |
-| 检查前端方案契约 | `devFlow` | [`devFlow/SKILL.md`](./devFlow/SKILL.md) |
-| 创建页面基建代码 | `devFlow` | [`devFlow/SKILL.md`](./devFlow/SKILL.md) |
-| 生成后端接口技术方案 | `devFlow` | [`devFlow/SKILL.md`](./devFlow/SKILL.md) |
-| 发布文档到飞书 Wiki | `devFlow` | [`devFlow/SKILL.md`](./devFlow/SKILL.md) |
-| 根据 Figma 落地页面样式 | `figmaSync` | [`figmaSync/SKILL.md`](./figmaSync/SKILL.md) |
-| 检查 Figma token 和图标映射 | `figmaSync` | [`figmaSync/SKILL.md`](./figmaSync/SKILL.md) |
+| 用户目标 | 使用技能 |
+|---|---|
+| 前端页面技术方案 | `frontend` → `page-tech` |
+| 前端方案检查、页面基建或基建 Review | `frontend` → `page-build` |
+| 后端技术方案或后端阶段判断 | `backend` |
+| 后端接口测试生成或执行 | `backend` → `integration-test` |
+| Figma 视觉还原 | `figmaSync` |
 
 ## 路由规则
 
-- 用户显式指定 `$devFlow` 或 `figmaSync` 时，直接进入对应子技能。
-- 同时涉及页面基建和视觉还原时，先执行 `devFlow`，基建确认完成后再执行 `figmaSync`。
-- 用户只要求评审现有产物时，不使用本分类，转到 `review` 技能导航。
-- 无法判断执行目标时，只询问会改变子技能选择的必要问题。
+- 用户明确说前端或后端时直接采用，不擅自切换领域。
+- “技术方案”未说明领域时，询问前端还是后端。
+- 前端 `page-build` 内部包含契约检查、写入确认、最小验证和 Foundation Review。
+- backend 只编排已经定义的阶段；后端代码生成与交付 Review 当前未实现。
+- 同时涉及多个阶段时，先选择当前最早且前置产物满足的阶段，不越过人工确认门禁。
 
 ## 分类边界
 
-- 本分类负责生成方案、创建基建和同步设计。
-- 本分类不负责 PRD 与 UI 一致性、产品规范检查或代码结构 Review。
-- 本分类不在导航层创建、修改或删除文件。
-
+- 共享飞书读取、发布和环境准备属于 `tools/lark/`，不是前端或后端业务阶段。
+- PRD Review 属于 review 层；execution 只消费其报告，不直接运行其规则。
+- skill 之间只通过文档、代码、快照和测试报告交接，不由一个执行 skill 直接调用另一个。

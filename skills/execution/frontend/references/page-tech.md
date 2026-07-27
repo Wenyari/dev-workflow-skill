@@ -13,13 +13,13 @@
 3. 判断每个章节的上下文是否足够。
 4. 必需上下文缺失时，向用户确认，或写入“风险与待确认项”。
 5. 只有在需要确认路径、可复用资源、UI 库用法、状态模式、接口封装、相似页面时，才读取仓库代码。
-6. 使用 `domains/frontend/templates/page-tech.md` 作为文档骨架。
+6. 使用 `../templates/page-tech.md` 作为文档骨架。
 7. 页面不涉及的条件章节写“不涉及”，不要强行展开。
 8. 判断哪些内容需要配图，先生成 Mermaid 源码；需要飞书落地时交给
    `design-lark-chart` 渲染。
 
 如果用户要求最终发布到飞书，先生成完整 Markdown，再交给
-`scripts/lark_publish_doc.mjs`。不要一边写方案一边拼飞书 blocks。
+`tools/lark/scripts/lark_publish_doc.mjs`。不要一边写方案一边拼飞书 blocks。
 
 ## 结构化表达规则
 
@@ -401,7 +401,7 @@ flowchart LR
 生成页面技术方案后，必须执行一次人工自检；如果已经落地为 Markdown 文件，优先运行：
 
 ```bash
-node .agent/skills/devFlow/domains/frontend/scripts/check_page_tech_doc.mjs <markdown-file>
+node <agent-root>/skills/execution/frontend/scripts/check_page_tech_doc.mjs <markdown-file>
 ```
 
 自检重点：
