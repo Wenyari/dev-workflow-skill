@@ -11,9 +11,9 @@ controller / service / dto / entity 代码文件）。
 
 ## 工作流程
 
-1. 收集上下文：PRD / 需求（优先用 `lark-read` 读取飞书文档）、可用的后端仓库代码。
+1. 收集上下文：PRD / 需求（飞书文档使用 `tools/lark/` 共享能力读取）、可用的后端仓库代码。
 2. 确认章节：必写章节自动纳入；可选章节逐项让用户勾选。
-3. 用 `domains/backend/templates/api-tech.md` 作为骨架，只生成必写 + 选中可选章节。
+3. 用 `../templates/api-tech.md` 作为骨架，只生成必写 + 选中可选章节。
 4. 生成正式文档时删除模板中的 HTML 注释（含【必写】/【可选】标记）。
 5. 生成后运行交付前自检。
 
@@ -43,7 +43,7 @@ controller / service / dto / entity 代码文件）。
 
 ## 排版与飞书呈现规范（定稿模板）
 
-排版遵循 [tools/lark/references/lark-doc.md](../../../../../../tools/lark/references/lark-doc.md) 的「排版与飞书呈现规范（定稿模板）」。以下为 `api-tech` 在通用规则之上追加的硬规则。
+排版遵循 [tools/lark/references/lark-doc.md](../../../../tools/lark/references/lark-doc.md) 的「排版与飞书呈现规范（定稿模板）」。以下为 `api-tech` 在通用规则之上追加的硬规则。
 
 ## 数据结构硬规则
 
@@ -158,7 +158,7 @@ flowchart TD
 
 ## 飞书上下文规则
 
-如果用户提供飞书 PRD / 设计 / 接口链接，必须先用 `lark-read`
+如果用户提供飞书 PRD / 设计 / 接口链接，必须先使用 `tools/lark/` 的读取规则
 读取并结构化，再写方案；不得只凭链接标题或转述猜测。读取失败时停止依赖该文档的生成并说明原因。飞书内容与仓库代码冲突时写入风险与待确认项。
 
 ## 交付前自检
@@ -166,7 +166,7 @@ flowchart TD
 落地为 Markdown 文件后运行：
 
 ```bash
-node .agent/skills/devFlow/domains/backend/scripts/check_api_tech_doc.mjs --file <markdown-file> --optional "<本次选中的可选章节，逗号分隔>"
+node <agent-root>/skills/execution/backend/scripts/check_api_tech_doc.mjs --file <markdown-file> --optional "<本次选中的可选章节，逗号分隔>"
 ```
 
 自检覆盖：必写章节齐全、选中可选章节存在、数据模型含表格 + TS、接口设计含表格与 TS 代码块、核心流程含

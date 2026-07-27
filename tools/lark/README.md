@@ -1,6 +1,6 @@
 # tools/lark
 
-飞书能力共享工具。为 devFlow 及后续 skill（如 prd-ui-check 读飞书 PRD）提供飞书 Open API 封装。
+飞书能力共享工具。为 frontend、backend、prd-review 等 skill 提供飞书 Open API 封装。
 
 ## 目录
 
@@ -67,7 +67,9 @@ node --test tools/lark/scripts/lark_api.test.mjs
 
 ## 消费者
 
-- `skills/execution/devFlow/` — `prepare` / `lark-read` / `lark-doc` 子命令
+- `skills/execution/devFlow/` — 旧 `prepare` / `lark-read` / `lark-doc` 命令的兼容规则
+- `skills/execution/frontend/`、`skills/execution/backend/` — 按需读取或发布研发文档
+- `skills/review/prd-review/` — 按需读取 PRD 全文
 - `skills/review/prd-ui-check/` — 读飞书 PRD
 - 未来其他需要飞书读写的 skill
 

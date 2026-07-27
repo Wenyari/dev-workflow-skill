@@ -1,7 +1,7 @@
 interface:
-  display_name: '研发工作流'
-  short_description: '读取上下文、检查契约、生成方案并创建可审核基建'
-  default_prompt: '使用 $devFlow page-tech 读取需求上下文，为当前前端页面生成技术方案，并按需进入 contract-check 和 page-build。'
+  display_name: '研发工作流（兼容）'
+  short_description: '将旧 devFlow 命令映射到拆分后的前后端工作流'
+  default_prompt: '解析用户显式提供的旧 $devFlow 命令，并按兼容表路由到新的前端、后端、PRD Review 或飞书共享规则。'
 
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

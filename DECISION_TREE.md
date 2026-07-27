@@ -8,29 +8,34 @@
 
 ### 我要写文档 / 方案
 
-- 写**前端页面开发方案** → `$devFlow page-tech`
-- 写**后端接口 / 数据方案** → `$devFlow api-tech`
-- 检查已有方案能不能落地 → `$devFlow contract-check`
+- 写**前端页面开发方案** → `$frontend page-tech`
+- 写**后端接口 / 数据方案** → `$backend api-tech`
+- 只检查前端方案能不能落地 → `$frontend page-build check`
 
 ### 我要写代码
 
-- 根据已审方案**创建页面基建** → `$devFlow page-build`
+- 根据已审方案**创建页面基建** → `$frontend page-build`，内部完成契约检查、确认、验证和 Foundation Review
 - 还原 **Figma 视觉稿** → `figmaSync plan` → `figmaSync apply`
 - 生成 **API 骨架代码** → ❌ 目前不支持，`api-tech` 只出方案
 
+### 我要执行测试
+
+- 已指定**接口、包、测试文件或测试名称** → `$backend integration-test run <scope>`
+- 未指定范围，希望根据**当前代码变更自动识别接口集成测试** → `$backend integration-test run`，确认候选清单后再执行
+- 接口缺少 `*_test.go` 或已有场景不完整 → `$backend integration-test generate <scope>`，确认文件与用例计划后生成并验证
+- 统计单元测试覆盖率、管理 Postman/Apipost 截图 → ❌ 当前 skill 不负责
+
 ### 我要检查一致性
 
+- 检查 **PRD 本身是否完整、能否进入技术方案** → `$prd-review <prd>`
 - 检查 **PRD 和 UI 稿语义是否一致** → `$prd-ui-check <prd>`（用户逐页提供 Figma 节点）
 - 检查 **前端业务代码是否遵循产品设计规范** → `$frontend-code-review start <scope>` → `batch <n>` → `finalize`
 - 检查 **代码冗余、抽象机会、循环依赖和结构耦合** → `$code-structure-review start <scope>` → `review <n>` → `finalize`
-- 检查 **PRD 缺失态 / 边界值 / 权限** → `risk-scanner`（需求评审用）
-- 检查 **PRD 和 API 语义对齐** → `contract-aligner`（技术评审用）
 
 ### 我要处理飞书
 
-- 读飞书 PRD 作为上下文 → `$devFlow lark-read <url>`
-- 把文档发到飞书 Wiki → `$devFlow lark-doc`
-- 配置飞书环境变量 → `$devFlow prepare`
+- 读飞书 PRD 作为上下文 → 在前端、后端或 PRD Review 请求中提供链接，由对应 skill 使用 `tools/lark/`
+- 把文档发到飞书 Wiki → 明确提出发布请求，由对应 skill 使用共享飞书能力
 
 ---
 
@@ -48,12 +53,12 @@
 - 需求简单、就一个入口、一个接口 → 可直接 `page-build`（L0/L1 允许跳过）
 - 判断规则见 `HUMAN_AGENT_WORKFLOW.md` 的 L0/L1/L2/L3 分级
 
-### `contract-check` 是必需的吗？
+### Contract Check 是必需的吗？
 
-- L2/L3 需求：**必需**。跳过会导致 `page-build` 直接生成错误骨架
-- L0/L1 需求：可跳过
+- L2/L3 需求：**必需**，由 `$frontend page-build` 自动作为写入前门禁
+- L0/L1 需求：按轻量流程执行最小检查，不要求单独生成完整报告
 
-### 后端 skill 为什么只有 `api-tech`，没有 `api-build`？
+### 后端 skill 为什么没有 `backend-build` / `api-build`？
 
 因为后端↔前端边已经健康（Apifox 兜底契约验证），方法论明确说健康的边不叠 AI。`api-build`目前无 ROI，不做。
 

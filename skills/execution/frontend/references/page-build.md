@@ -12,11 +12,12 @@
 
 ## 前置门槛
 
-进入 `page-build` 前必须校验 `contract-report.md`：
+`page-build` 必须先完成 Contract Check 阶段：
 
-- 如果存在 `contract-report.md`，先读取报告结论；报告不通过或存在阻塞项时，不进入 page-build，回到 `page-tech` 或 `contract-check` 处理后再来。
-- 如果没有 `contract-report.md`，提示先执行 `contract-check`，或让 Human 明确确认跳过检查再继续。
-- "继续"、"看起来可以"等含糊表达不算跳过确认，必须 Human 明确表达"跳过 contract-check"才能继续。
+- 如果存在最新 `contract-report.md`，先读取报告结论；报告不通过或存在阻塞项时，不进入写入阶段，回到 `page-tech` 修正或补充上下文。
+- 如果没有最新 `contract-report.md`，按 `references/contract-check.md` 在本次工作流内生成。
+- L0/L1 可以使用轻量检查，但不能完全跳过接口、路径、文件范围和写入授权门禁。
+- “继续”“看起来可以”等含糊表达不算写入确认。
 
 ## 输入来源
 
@@ -36,7 +37,7 @@
 
 读取规则：
 
-1. 先按 `lark-read` 子命令读取飞书文档。
+1. 先按 `tools/lark/references/lark-read.md` 读取飞书文档。
 2. 将读取结果整理为 page-build 上下文。
 3. 不得根据链接标题、URL 或用户转述猜测内容。
 4. 如果读取失败，停止依赖该文档生成文件计划。
@@ -178,12 +179,12 @@ node_modules/@frontend/apex-ui--react/dist/index.d.ts
 使用以下模板作为占位参考：
 
 ```text
-domains/frontend/templates/page-build/route.tsx.tpl
-domains/frontend/templates/page-build/component.tsx.tpl
-domains/frontend/templates/page-build/service.ts.tpl
-domains/frontend/templates/page-build/types.ts.tpl
-domains/frontend/templates/page-build/constants.ts.tpl
-domains/frontend/templates/page-build/index.ts.tpl
+../templates/page-build/route.tsx.tpl
+../templates/page-build/component.tsx.tpl
+../templates/page-build/service.ts.tpl
+../templates/page-build/types.ts.tpl
+../templates/page-build/constants.ts.tpl
+../templates/page-build/index.ts.tpl
 ```
 
 模板变量建议：

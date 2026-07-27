@@ -1,7 +1,6 @@
-# contract-check 子命令
+# page-build · Contract Check 阶段
 
-`contract-check` 用于在 `page-tech` 和 `page-build`
-之间做可落地性检查。它的目标不是生成代码，而是判断页面方案是否已经具备创建 admin-fe 页面基建的条件。
+Contract Check 是 `page-build` 的前置门禁，用于在写入代码前做可落地性检查。它的目标不是生成代码，而是判断页面方案是否已经具备创建 admin-fe 页面基建的条件。
 
 执行 admin-fe 检查时，必须读取或内化项目根目录
 `ADMIN_FE_WORKFLOW.md`，并把其中规则作为检查标准。
@@ -210,7 +209,7 @@
 
 ## 报告输出
 
-使用 `domains/frontend/templates/contract-report.md` 作为报告骨架。
+使用 `../templates/contract-report.md` 作为报告骨架。
 
 报告必须包含：
 
@@ -247,7 +246,7 @@
 不通过后输出：
 
 ```text
-结论：不通过，需回到 page-tech 修正后重新 contract-check。
+结论：不通过，需回到 page-tech 修正后重新执行 Contract Check。
 ```
 
 ### 阻塞
@@ -257,12 +256,12 @@
 阻塞后输出：
 
 ```text
-结论：阻塞，需补充上下文后重新 contract-check。
+结论：阻塞，需补充上下文后重新执行 Contract Check。
 ```
 
 ## 禁止项
 
-- 不把自动化脚本结果当作完整 contract-check 结论。
+- 不把自动化脚本结果当作完整 Contract Check 结论。
 - 不创建页面基建文件。
 - 不修改业务源码。
 - 不跳过证据要求。

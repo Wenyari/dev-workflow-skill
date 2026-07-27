@@ -217,10 +217,10 @@ L1 的计划可以保留在对话中，不强制落 Markdown。
 
 ```Plain Text
 Context Intake
-page-tech
-contract-check
-page-build
-foundation-freeze
+$frontend page-tech
+$frontend page-build · Contract Check
+$frontend page-build · Build
+$frontend page-build · Foundation Review
 figmaSync plan
 figmaSync apply
 Human 验收
@@ -262,10 +262,10 @@ L2 是标准页面开发的主流程，但不等于所有需求的默认流程�
 flowchart LR
     A["业务目标定义"] --> B["Context Intake"]
     B --> C["需求澄清与范围裁剪"]
-    C --> D["page-tech"]
-    D --> E["contract-check"]
-    E --> F["page-build"]
-    F --> G["foundation-freeze"]
+    C --> D["frontend · page-tech"]
+    D --> E["frontend · page-build · Contract Check"]
+    E --> F["frontend · page-build · Build"]
+    F --> G["frontend · page-build · Foundation Review"]
     G --> H["figmaSync plan"]
     H --> I["figmaSync apply 与验收"]
 ```
@@ -277,10 +277,10 @@ flowchart LR
 |业务目标定义|明确为什么做、给谁用、成功标准|Human|90%|10%|是|
 |Context Intake|收集 PRD、接口、设计、代码上下文|Agent|40%|60%|是|
 |需求澄清与范围裁剪|决定做什么、不做什么|Human|70%|30%|是|
-|page\-tech|生成页面级技术方案|Agent|35%|65%|是|
-|contract\-check|检查方案是否可落地|Agent|20%|80%|是|
-|page\-build|创建页面基建文件|Agent|25%|75%|是|
-|foundation\-freeze|冻结后续可修改范围|Human \+ Agent|50%|50%|是|
+|frontend page\-tech|生成页面级技术方案|Agent|35%|65%|是|
+|page\-build · Contract Check|检查方案是否可落地|Agent|20%|80%|是|
+|page\-build · Build|创建页面基建文件|Agent|25%|75%|是|
+|page\-build · Foundation Review|复核实际改动并生成基建快照|Human \+ Agent|50%|50%|是|
 |figmaSync plan|生成视觉实施计划|Agent|30%|70%|是|
 |figmaSync apply 与验收|实施视觉并验收体验|Agent 执行，Human 验收|45%|55%|是|
 
@@ -364,7 +364,7 @@ flowchart LR
 
 - 可以建议文件路径，但不能把建议当成已存在事实。
 
-### **5\.3 contract\-check**
+### **5\.3 page\-build · Contract Check**
 
 
 
@@ -412,7 +412,7 @@ flowchart LR
 
 - 检查失败时回到 page\-tech 修正。
 
-### **5\.4 page\-build**
+### **5\.4 page\-build · Build**
 
 
 
@@ -460,7 +460,7 @@ flowchart LR
 
 - 不修改自动生成文件。
 
-### **5\.5 foundation\-freeze**
+### **5\.5 page\-build · Foundation Review**
 
 
 
@@ -472,11 +472,19 @@ flowchart LR
 
 
 
+- Foundation Review 结论。
+
 - `foundation-summary.md`。
 
 要求：
 
 
+
+- 对照 Human 确认的文件计划复核实际 diff。
+
+- 检查计划内基建是否存在、是否出现计划外修改。
+
+- 记录最小验证结果；存在失败或未消除阻塞项时不得进入视觉阶段。
 
 - 必须由脚本或 Agent 扫描真实目录树、组件 props、service 签名、types 导出后生成。
 
@@ -819,6 +827,4 @@ Human 决策业务和验收，Agent 生成、实施、检查和提示风险。
 - review 从“看一大坨改动”变成“按阶段验收产物”。
 
 - 返工减少，页面交付更稳定，团队产出质量更一致。
-
-
 

@@ -83,13 +83,9 @@ sed -n '1,220p' <target-route-dir>/constants.ts 2>/dev/null
 如果存在 service 文件，必须读取 service 签名；如果存在
 `foundation-summary.md`，必须读取它并说明其是否最新。
 
-如果缺少 `foundation-summary.md`，优先运行：
-
-```bash
-node .agent/skills/devFlow/scripts/generate_foundation_summary.mjs --route-dir <target-route-dir> --service <service-file>
-```
-
-如果无法确定 service 文件，可以先生成 route 目录快照，并把 service 缺口写入 PLAN.md 待确认项。
+如果缺少或无法确认 `foundation-summary.md` 为最新版本，停止 `plan`，提示用户先完成
+`$frontend page-build` 的 Foundation Review。`figmaSync` 不直接运行 frontend
+目录中的脚本；两个 skill 只通过 `foundation-summary.md` 交接。
 
 ### Step 3 — 询问用户存放位置
 
@@ -214,7 +210,7 @@ PLAN.md 的 `## 2. 组件映射决策` 必须体现最终归属；`## 5. CSS 草
    `List`、`Header`、`ItemCard`
    等），则分析 Figma 节点并将其映射到现有的拆分边界上。计划中说明复用哪些已有的组件骨架，以及对应 CSS 的存放位置。不能因为 Figma 图层结构改变业务组件边界。
 2. **无基建文件**：如果是一个全新的复杂页面，必须提示用户先执行
-   `$devFlow page-build`。只有 Human 明确确认允许轻量 plan 时，才能基于设计稿提出临时视觉拆分；该拆分只能作为待确认建议，不能直接作为业务骨架事实。
+   `$frontend page-build`。只有 Human 明确确认允许轻量 plan 时，才能基于设计稿提出临时视觉拆分；该拆分只能作为待确认建议，不能直接作为业务骨架事实。
 
 在 PLAN.md `## 3. 组件与模块拆分规划` 必须详细列出：
 

@@ -33,20 +33,19 @@ description: 检查已写完的前端业务代码是否遵循 `tools/product-des
 |---|---|---|
 | 已写完的前端业务代码 | 用户指定目录 / 文件 / PR diff | 必需 |
 | `tools/product-design-specs/` | 仓库内共享 tool（PR1 已抽出） | 必需 |
-| `foundation-summary.md` | `$devFlow foundation-freeze` | 可选，帮助确认组件库上下文 |
+| `foundation-summary.md` | `$frontend page-build` 的 Foundation Review | 可选，帮助确认组件库上下文 |
 
 ## 输出产物
 
 | 产物 | 位置 | 下游消费者 |
 |---|---|---|
-| `code-review-report.md` | 用户在 `start` 阶段指定的目录 | 人工修改代码；未闭环问题可进入 `artifact/open-issues` |
+| `code-review-report.md` | 用户在 `start` 阶段指定的目录 | 人工修改代码与复核未闭环问题 |
 | 批次中间记录 | 用户在 `start` 阶段指定的工作目录 | 本 skill 的 `finalize` 阶段消费 |
 
 ## 下一步
 
 - 报告中的问题由人工修改代码后自测；不由 Agent 自动改代码。
-- 未闭环问题进入 `artifact/open-issues`。
-- 误报、漏报及人工修正结果可进入 `artifact/calibration`。
+- 未闭环问题和人工修正结果保留在报告或团队现有问题系统中；本仓库当前不提供独立收口能力。
 
 ## 明确不做
 

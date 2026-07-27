@@ -2,7 +2,7 @@
 
 本仓库承载研发协作 AI 工具库。所有 skill 和 tool 的新增、修改都必须遵守本指南。
 
-方法论基础：`研发协作方法论.md`。凡涉及"对齐边"、"AI 形态"、"评审环节"术语，一律以方法论为准，不允许在 skill 内私自定义。
+分层、命名、依赖和交付约束以本指南为准；L0/L1/L2/L3 协作分级以 [`HUMAN_AGENT_WORKFLOW.md`](./HUMAN_AGENT_WORKFLOW.md) 为准；架构例外必须通过 `docs/adr/` 记录，不在单个 skill 内私自定义。
 
 ---
 
@@ -11,16 +11,15 @@
 先回答三个问题，再动手：
 
 1. **新需求是新建 skill，还是给现有 skill 加子命令？**
-   - 新增能力属于现有 skill 的对齐边、且不改变输出产物 → 加子命令
-   - 服务新的对齐边、或改变输出产物结构 → 新建 skill
+   - 新增能力属于现有 skill 的职责边界、且不改变核心输出产物 → 加子命令
+   - 服务新的评审或执行对象、或改变输出产物结构 → 新建 skill
 
 2. **新建 skill 属于哪一层？**
 
    | 层 | 判断 |
    |---|---|
-   | `skills/review/` | 服务评审环节，实现方法论定义的三种 AI 角色（PRD↔UI 检查 / 风险扫描 / 契约对齐） |
+   | `skills/review/` | 服务评审环节，例如 PRD 完整性、PRD↔UI、产品规范和代码结构 Review |
    | `skills/execution/` | 服务开发环节（写方案、写代码、视觉还原） |
-   | `skills/artifact/` | 承载未闭环清单 / 校准清单等跨环节数据产物 |
 
 3. **能否复用现有 tools/，还是要新增 tool？**
    - 至少两个 skill 会用到 → 抽为 tool
@@ -32,14 +31,14 @@
 
 **步骤 1：对齐边诊断**
 
-先填五段式头部的"对齐边诊断"表格。填不出来说明还不该建这个 skill，回去读方法论。
+先按模板中的受控值填写五段式头部的"对齐边诊断"表格。现有值无法表达职责时，先提交 ADR 讨论，不在新 skill 内自行扩展词表。
 
-**步骤 2：检查方法论边界**
+**步骤 2：检查仓库边界**
 
-参照方法论：
+确认：
 
-- 该边是否已有工具化契约（如 Apifox）？有 → 不新建 skill
-- 该问题是否属于姿态问题、PRD 隐含约定？属于 → 不新建 skill
+- 该职责是否已有稳定工具化契约（如 Apifox）？有 → 优先复用，不新建重复 skill
+- 该问题是否已有 review、execution 或 tools 能力覆盖？有 → 扩展现有入口或共享工具
 - 该环节 ROI 是否已被验证？未验证 → 建 skill 时明确"投产验证策略"
 
 **步骤 3：复制模板**
@@ -148,7 +147,8 @@ tools/<tool-name>/
 **分层依赖硬规则**：
 
 - **禁止跨层反向依赖**：`tools/` 不引用 `skills/`
-- **禁止 skill 之间直接调用**：review / execution / artifact 三层的 skill 只能通过**产物文件**传递数据，不允许 A skill 内部脚本读 B skill 目录
+- **禁止 skill 之间直接调用**：review / execution skill 只能通过**产物文件**传递数据，不允许 A skill 内部脚本读 B skill 目录
+- **导航例外**：分类导航和迁移期兼容导航可以选择并加载目标 `SKILL.md`，但不得代替目标 skill 执行业务脚本、修改文件或绕过其确认门禁
 - **共享能力必须走 tools/**：多个 skill 用到同一能力时，抽到 tools/
 - **tools/ 内资源被引用时，路径统一从仓库根开始写**：如 `tools/product-design-specs/index.md`，不用相对路径
 
@@ -156,8 +156,7 @@ tools/<tool-name>/
 
 ## 7. 产物 schema 变更规则
 
-- `artifact/` 层的未闭环清单、校准清单字段由**方法论定义**，不允许 skill 内部私自增删字段
-- 修改 artifact schema 必须在 `docs/adr/` 记录决策（一份 ADR 一个决策）
+- 规划中的 artifact 能力见 `docs/roadmap/artifact.md`；投产前必须先用 ADR 定义 schema 和读写边界
 - 输出产物 schema 变更必须同步更新所有下游 skill 的"前置产物"声明
 - 破坏性 schema 变更需在 `CHANGELOG.md` 明确标注
 
@@ -207,4 +206,4 @@ tools/<tool-name>/
 
 如 `feat/prd-ui-check/semantic-workflow`。
 
-**涉及方法论理解**的改动，commit body 必须引用方法论，如 `refs: 研发协作方法论.md`。
+**涉及架构边界**的改动，commit body 必须引用对应 ADR，如 `refs: docs/adr/0001-split-execution-by-domain.md`。

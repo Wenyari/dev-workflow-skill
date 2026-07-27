@@ -100,8 +100,8 @@ node .agent/tools/lark/scripts/lark_check_permissions.mjs --url "飞书链接"
 
 ## 给下游子命令的上下文格式
 
-读取结果按下游子命令选择输出结构。触发场景默认对应关系：`page-tech` /
-`page-build` / `contract-check` 用「前端上下文」；`api-tech` 用「后端上下文」。
+读取结果按下游阶段选择输出结构。触发场景默认对应关系：frontend 的 `page-tech` /
+`page-build` 用「前端上下文」；backend 的 `api-tech` 用「后端上下文」。
 如果同一文档同时供前后端使用，分别输出两份，不合并成一份。
 
 ### 前端上下文（page-tech 等前端子命令）

@@ -6,8 +6,8 @@
 
 | skill | 用途 |
 |---|---|
-| `skills/execution/devFlow/`（frontend 域） | 写 `page-tech.md` 时按字段类型引用规范 |
-| `skills/execution/devFlow/`（requirement 域） | `prd-review` 判断 C3 冲突（与产品设计规范冲突） |
+| `skills/execution/frontend/` | 写 `page-tech.md` 时按字段类型引用规范 |
+| `skills/review/prd-review/` | 判断 C3 冲突（与产品设计规范冲突） |
 | `skills/review/frontend-code-review/` | review 前端业务代码是否遵循产品设计规范 |
 
 新增消费者时，遵循「按字段类型 lazy load」的读取约束，不要一次性加载全部规范。
@@ -49,6 +49,6 @@ tools/product-design-specs/field-common.md
 
 ## 变更规则
 
-- 本目录内容是 devFlow 与 frontend-code-review 共同依赖的事实源，任何改动都会同时影响两侧。
+- 本目录内容是 frontend、prd-review 与 frontend-code-review 共同依赖的事实源，任何改动都会同时影响这些消费者。
 - 增删字段类型或改动分册命名时，必须同步更新 `index.md` 的路由表和所有消费者 skill 内引用规范的文档。
 - 破坏性变更（删分册、重命名分册、改约束语义）在 `CHANGELOG.md` 标注。
