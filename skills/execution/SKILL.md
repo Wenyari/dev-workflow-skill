@@ -1,6 +1,6 @@
 ---
 name: execution
-description: 研发执行技能导航。用户要生成前端或后端技术方案、落地页面基建、生成或执行后端接口集成测试，或进行 Figma 视觉还原时，先判断前后端领域和当前研发阶段，再选择对应 skill。
+description: 研发执行技能导航。用户要拆分前端工作量、生成前端或后端技术方案、落地页面基建、生成或执行后端接口集成测试，或进行 Figma 视觉还原时，先判断前后端领域和当前研发阶段，再选择对应 skill。
 ---
 
 # Execution 技能导航
@@ -21,6 +21,7 @@ description: 研发执行技能导航。用户要生成前端或后端技术方�
 ## 什么时候用
 
 - 用户显式输入 `$execution frontend` 或 `$execution backend`
+- 用户要求“拆分前端工作量、复杂度、并行开发和交付里程碑”
 - 用户要求“从技术方案开始完成前端页面开发流程”
 - 用户要求“继续后端技术方案、接口实现后的集成测试流程”
 
@@ -39,7 +40,7 @@ description: 研发执行技能导航。用户要生成前端或后端技术方�
 
 ## 下一步
 
-- 前端技术方案或页面基建 → [frontend/SKILL.md](./frontend/SKILL.md)
+- 前端工作量拆分、技术方案或页面基建 → [frontend/SKILL.md](./frontend/SKILL.md)
 - 后端技术方案或阶段判断 → [backend/SKILL.md](./backend/SKILL.md)
 - 明确要求后端接口测试 → [backend/SKILL.md](./backend/SKILL.md) 的 `integration-test` 阶段
 - 明确要求 Figma 视觉还原 → [figmaSync/SKILL.md](./figmaSync/SKILL.md)
@@ -56,6 +57,7 @@ description: 研发执行技能导航。用户要生成前端或后端技术方�
 
 | 用户目标 | 使用技能 |
 |---|---|
+| 前端工作量拆分与复杂度评估 | `frontend` → `workload-plan` |
 | 前端页面技术方案 | `frontend` → `page-tech` |
 | 前端方案检查、页面基建或基建 Review | `frontend` → `page-build` |
 | 后端技术方案或后端阶段判断 | `backend` |

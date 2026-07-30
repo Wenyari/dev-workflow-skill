@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: 前端研发执行工作流。适用于生成页面技术方案，或把已确认方案经过契约检查、人工确认、页面基建生成、最小验证和基建 Review 落成可交接给视觉还原的前端代码。
+description: 前端研发执行工作流。适用于根据 PRD、UI、API 和目标仓库生成工作量拆分报告或页面技术方案，或把已确认方案经过契约检查、人工确认、页面基建生成、最小验证和基建 Review 落成可交接给视觉还原的前端代码。
 ---
 
 # 前端研发工作流
@@ -16,11 +16,12 @@ description: 前端研发执行工作流。适用于生成页面技术方案，�
 
 ## 这个 skill 解决什么问题
 
-把需求和代码事实整理为页面技术方案，并将已确认方案通过门禁、写入、验证与基建 Review 落成可审核、可继续视觉还原的页面基建。
+把 PRD、UI、API 和代码事实整理为工作量拆分报告或页面技术方案，并将已确认方案通过门禁、写入、验证与基建 Review 落成可审核、可继续视觉还原的页面基建。
 
 ## 什么时候用
 
-- 用户显式输入 `$frontend page-tech`、`$frontend page-build` 或 `$frontend page-build check`
+- 用户显式输入 `$frontend workload-plan`、`$frontend page-tech`、`$frontend page-build` 或 `$frontend page-build check`
+- 用户要求“拆分前端工作量”“评估页面和组件复杂度”“规划并行开发链路和交付里程碑”
 - 用户要求“生成前端页面技术方案”或“根据需求写页面落地方案”
 - 用户要求“检查方案后创建页面基建”或“把已审核方案落到前端代码”
 
@@ -29,15 +30,17 @@ description: 前端研发执行工作流。适用于生成页面技术方案，�
 | 产物 | 来源 | 是否必需 |
 |---|---|---|
 | PRD / 需求说明 | 用户或共享文档读取工具 | 必需 |
+| 目标前端仓库 | 用户指定或当前工作区 | `workload-plan` 必需 |
 | PRD Review 报告 | 独立 Review 流程 | L3 必需，L2 推荐 |
-| 后端接口清单 | Apifox、后端仓库或用户确认 | `page-tech` 与 `page-build` 必需 |
+| 后端接口清单 | Apifox、后端仓库或用户确认 | `workload-plan` 用于判断就绪度；`page-tech` 与 `page-build` 必需 |
 | `page-tech.md` | `$frontend page-tech` 或人工方案 | L2/L3 的 `page-build` 必需 |
-| Figma 设计稿 | 用户提供 | `page-tech` 可选，视觉交接推荐 |
+| Figma 设计稿或等价 UI | 用户提供 | `workload-plan` 用于判断就绪度；`page-tech` 可选，视觉交接推荐 |
 
 ## 输出产物
 
 | 产物 | 位置 | 下游消费者 |
 |---|---|---|
+| `workload-plan.md` | 用户确认的项目文档目录 | 开发负责人 / 排期评审 |
 | `page-tech.md` | 用户确认的项目文档目录 | 人工评审 / `$frontend page-build` |
 | `contract-report.md` | 用户确认的项目文档目录 | `page-build check` / L2/L3 写入门禁 / 人工评审 |
 | 页面基建代码 | 用户确认的前端页面目录 | 前端开发 / Code Review |
@@ -45,6 +48,7 @@ description: 前端研发执行工作流。适用于生成页面技术方案，�
 
 ## 下一步
 
+- `workload-plan.md` 完成 → 开发负责人填写单人工时并确定并行开发安排
 - `page-tech.md` 审核完成 → `$frontend page-build`
 - `page-build` 完成且基建 Review 通过 → 由用户进入 `figmaSync plan`
 - 基建 Review 未通过 → 保留问题与实际验证结果，修复后重新执行确认范围
@@ -54,6 +58,7 @@ description: 前端研发执行工作流。适用于生成页面技术方案，�
 - 不做 PRD↔UI 语义检查：该能力属于独立 Review 流程。
 - 不做最终视觉还原：本工作流只产出可交接基建，视觉实现由 `figmaSync` 承担。
 - 不生成或修改后端接口：接口事实来自后端契约或仓库，前端流程不得反向臆造。
+- 不在 `workload-plan` 中代替开发负责人填写具体工时。
 - 不在未确认文件计划时写代码：`page-build` 的写入必须经过人工确认。
 
 ---
@@ -69,6 +74,17 @@ description: 前端研发执行工作流。适用于生成页面技术方案，�
 - L3 的 PRD Review 存在阻塞项时不得进入 `page-tech`；严重项必须保留在方案的风险与待确认项中。
 
 ## 命令路由
+
+### `$frontend workload-plan`
+
+用途：根据 PRD、UI、API 契约和目标仓库生成工作量拆分报告，不修改业务代码。
+
+必须读取：
+
+- [references/workload-plan.md](./references/workload-plan.md)
+- [templates/workload-plan.md](./templates/workload-plan.md)
+
+生成后使用 [scripts/check_workload_plan_doc.mjs](./scripts/check_workload_plan_doc.mjs) 做文档静态检查。
 
 ### `$frontend page-tech`
 

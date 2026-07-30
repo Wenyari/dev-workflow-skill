@@ -12,66 +12,134 @@ if (!filePath) {
 const markdown = fs.readFileSync(filePath, 'utf8')
 const issues = []
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 function hasSection(title) {
   return new RegExp(`^#{2,4}\\s+${escapeRegExp(title)}\\s*$`, 'm').test(markdown)
 }
 
 function getSection(title) {
-  const pattern = new RegExp(`^#{2,4}\\s+${escapeRegExp(title)}\\s*$`, 'm')
+  const pattern = new RegExp(`^(#{2,4})\\s+${escapeRegExp(title)}\\s*$`, 'm')
   const match = pattern.exec(markdown)
   if (!match) return ''
 
   const start = match.index + match[0].length
   const rest = markdown.slice(start)
-  const next = /^#{2,4}\s+/m.exec(rest)
+  const headingLevel = match[1].length
+
+  // 子章节属于当前章节，遇到同级或更高级标题时才结束截取。
+  const next = new RegExp(`^#{2,${headingLevel}}\\s+`, 'm').exec(rest)
   return next ? rest.slice(0, next.index) : rest
 }
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-function countApiMentions() {
-  const matches = markdown.match(/\b(GET|POST|PUT|PATCH|DELETE)\s+[\w./:-]+|\bapi\/[\w./:-]+/g)
-  return matches ? matches.length : 0
-}
-
 function hasMarkdownTable(section) {
-  return /\|.+\|\s*\n\|[\s:-]+\|/.test(section)
+  return /\|.+\|\s*\n\|[\s|:-]+\|/.test(section)
 }
 
-function hasMermaid(section) {
-  return /```mermaid[\s\S]*?```/.test(section)
+function getTableHeader(section) {
+  return section
+    .split('\n')
+    .find((line) => line.trim().startsWith('|'))
+    ?.split('|')
+    .map((cell) => cell.trim())
+    .filter(Boolean) ?? []
 }
 
-const mappingSection = getSection('3.1 功能与接口映射')
-if (!mappingSection) {
-  issues.push('缺少 3.1 功能与接口映射章节')
-} else if (!hasMarkdownTable(mappingSection)) {
-  issues.push('3.1 功能与接口映射必须使用 Markdown 表格')
+function getMermaidBlocks() {
+  return [...markdown.matchAll(/```mermaid\s*\n([\s\S]*?)```/g)].map((match) => match[1])
 }
 
-const interactionSection = getSection('3.3 关键交互')
-if (!interactionSection) {
-  issues.push('缺少 3.3 关键交互章节')
-} else if (!hasMarkdownTable(interactionSection) && interactionSection.trim().length < 80) {
-  issues.push('3.3 关键交互内容不足，需逐项覆盖 PRD 交互')
+const requiredSections = [
+  '目标与范围',
+  '功能与接口',
+  '前端实现方案',
+  '非功能性需求与埋点监控',
+  '风险与待确认项',
+]
+
+for (const title of requiredSections) {
+  if (!hasSection(title)) {
+    issues.push(`缺少 ${title} 章节`)
+  }
 }
 
-const dataFlowSection = getSection('5.6 数据流')
-const apiCount = countApiMentions()
-if (!dataFlowSection) {
-  issues.push('缺少 5.6 数据流章节')
-} else if (apiCount >= 2 && !hasMermaid(dataFlowSection)) {
-  issues.push('检测到多个接口，但 5.6 数据流缺少 Mermaid 数据流转图')
+const mappingSection = getSection('功能与接口')
+const requiredHeaders = ['页面能力', '接口', '关键入参', '使用的响应数据', '状态或刷新影响']
+
+if (mappingSection && !hasMarkdownTable(mappingSection)) {
+  issues.push('功能与接口必须使用 Markdown 表格')
+} else if (mappingSection) {
+  // 固定表头保证页面能力、接口契约和状态影响在同一处完成映射。
+  const headers = getTableHeader(mappingSection)
+  const missingHeaders = requiredHeaders.filter((header) => !headers.includes(header))
+
+  if (missingHeaders.length > 0) {
+    issues.push(`功能与接口缺少表头：${missingHeaders.join('、')}`)
+  }
 }
 
-if (!hasSection('10. 风险与待确认项')) {
-  issues.push('缺少 10. 风险与待确认项章节')
+const requiredImplementationSections = [
+  '目录结构与产物路径',
+  '组件与复用方案',
+  '状态设计',
+  '数据流',
+]
+
+for (const title of requiredImplementationSections) {
+  if (!hasSection(title)) {
+    issues.push(`缺少 ${title} 章节`)
+  }
 }
 
-if (!/PRD|prd/.test(markdown)) {
-  issues.push('正文未出现 PRD 标识，请确认是否已对齐需求来源和交互项')
+const requiredDecisionSections = ['非功能性需求', '埋点与监控']
+
+for (const title of requiredDecisionSections) {
+  if (!hasSection(title)) {
+    issues.push(`缺少 ${title} 章节`)
+  }
+}
+
+const nonFunctionalSection = getSection('非功能性需求与埋点监控')
+
+// 本章必须留下用户确认状态，避免生成器静默替用户决定是否建设。
+if (nonFunctionalSection && !nonFunctionalSection.includes('用户确认')) {
+  issues.push('非功能性需求与埋点监控缺少用户确认记录')
+}
+
+for (const [index, block] of getMermaidBlocks().entries()) {
+  const diagramNumber = index + 1
+  const isFlowchart = /^\s*(flowchart|graph)\b/m.test(block)
+  const isStateDiagram = /^\s*stateDiagram-v2\b/m.test(block)
+  const isSequenceDiagram = /^\s*sequenceDiagram\b/m.test(block)
+
+  // flowchart 必须显式选择方向，避免依赖默认布局产生不稳定结果。
+  if (isFlowchart && !/^\s*(flowchart|graph)\s+(TB|TD|BT|LR|RL)\b/m.test(block)) {
+    issues.push(`第 ${diagramNumber} 个 Mermaid flowchart 未声明方向`)
+  }
+
+  if (isStateDiagram && !/^\s*direction\s+(TB|BT|LR|RL)\b/m.test(block)) {
+    issues.push(`第 ${diagramNumber} 个 Mermaid stateDiagram-v2 未声明方向`)
+  }
+
+  if (isFlowchart || isStateDiagram) {
+    const hasClassDefinition = /\bclassDef\s+\w+\s+/.test(block)
+    const hasClassBinding = /:::\w+|\bclass\s+[\w,\s-]+\s+\w+/.test(block)
+
+    if (!hasClassDefinition || !hasClassBinding) {
+      issues.push(`第 ${diagramNumber} 个 Mermaid 图缺少 classDef 或语义颜色绑定`)
+    }
+  }
+
+  if (isSequenceDiagram) {
+    const hasTheme = /%%\{init:\s*\{[\s\S]*themeVariables/.test(block)
+    const hasSemanticBlock = /\brect\s+(rgb|rgba)\s*\(/.test(block)
+
+    if (!hasTheme && !hasSemanticBlock) {
+      issues.push(`第 ${diagramNumber} 个 Mermaid sequenceDiagram 缺少主题或语义色块`)
+    }
+  }
 }
 
 if (issues.length > 0) {

@@ -1,6 +1,6 @@
 ---
 name: devFlow
-description: 旧版研发工作流命令兼容导航。仅当用户显式输入 $devFlow 旧命令时使用，把 page-tech、page-build、api-tech、prd-review 和飞书子命令映射到拆分后的前端、后端、Review 或共享工具规则。
+description: 旧版研发工作流命令兼容导航。仅当用户显式输入 $devFlow 旧命令时使用，把 workload-plan、page-tech、page-build、api-tech、prd-review 和飞书子命令映射到拆分后的前端、后端、Review 或共享工具规则。
 ---
 
 # devFlow 兼容导航
@@ -39,6 +39,7 @@ description: 旧版研发工作流命令兼容导航。仅当用户显式输入 
 
 ## 下一步
 
+- 新前端工作量拆分改用 `$frontend workload-plan`
 - 新前端任务改用 `$frontend page-tech` 或 `$frontend page-build`
 - 新后端方案改用 `$backend api-tech`
 - 新 PRD 评审改用 `$prd-review`
@@ -56,6 +57,7 @@ description: 旧版研发工作流命令兼容导航。仅当用户显式输入 
 
 | 旧命令 | 新入口或规则 |
 |---|---|
+| `$devFlow workload-plan` | 读取 [../frontend/SKILL.md](../frontend/SKILL.md)，按 `$frontend workload-plan` 执行 |
 | `$devFlow page-tech` | 读取 [../frontend/SKILL.md](../frontend/SKILL.md)，按 `$frontend page-tech` 执行 |
 | `$devFlow contract-check` | 读取 [../frontend/SKILL.md](../frontend/SKILL.md)，按 `$frontend page-build check` 执行 |
 | `$devFlow page-build` | 读取 [../frontend/SKILL.md](../frontend/SKILL.md)，按 `$frontend page-build` 执行 |

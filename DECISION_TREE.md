@@ -8,6 +8,7 @@
 
 ### 我要写文档 / 方案
 
+- 拆分**前端工作量、复杂度、并行链路和交付里程碑** → `$frontend workload-plan`
 - 写**前端页面开发方案** → `$frontend page-tech`
 - 写**后端接口 / 数据方案** → `$backend api-tech`
 - 只检查前端方案能不能落地 → `$frontend page-build check`
