@@ -1,5 +1,11 @@
 import { readFileSync } from 'node:fs'
 
+import {
+  extractMermaidBlocks,
+  inspectMermaidMarkdown,
+  SUPPORTED_MERMAID_TYPES
+} from '../../../../tools/mermaid/inspect.mjs'
+
 const REQUIRED_SECTIONS = [
   '核心流程 / 时序',
   '数据模型 / 数据库设计',
@@ -82,49 +88,6 @@ function hasNonemptyErrorCodes(section) {
 
 function getProseWithoutFences(markdown) {
   return markdown.replace(/```[^\n]*\n[\s\S]*?```/g, '')
-}
-
-function getMermaidBlocks(markdown) {
-  const blocks = []
-  const pattern = /```mermaid[^\n]*\n([\s\S]*?)```/g
-  let match
-
-  while ((match = pattern.exec(markdown)) !== null) {
-    blocks.push({
-      source: match[1].trim(),
-      start: match.index,
-      end: pattern.lastIndex
-    })
-  }
-
-  return blocks
-}
-
-function getMermaidType(source) {
-  const firstLine = source.split('\n').map((line) => line.trim()).find(Boolean) || ''
-
-  if (/^sequenceDiagram\b/.test(firstLine)) return 'sequenceDiagram'
-  if (/^flowchart\s+(?:TD|TB|BT|LR|RL)\b/.test(firstLine)) return 'flowchart'
-  if (/^stateDiagram-v2\b/.test(firstLine)) return 'stateDiagram-v2'
-  if (/^erDiagram\b/.test(firstLine)) return 'erDiagram'
-  return ''
-}
-
-function hasStructuralStatement(source, type) {
-  const body = source
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('%%'))
-    .slice(1)
-    .join('\n')
-
-  if (type === 'sequenceDiagram') return /(?:-{1,2}>>|-{1,2}\))/.test(body)
-  if (type === 'flowchart') return /(?:--+>|-{3,}|-\.+->|={2,}>)/.test(body)
-  if (type === 'stateDiagram-v2') return /-->/.test(body)
-  if (type === 'erDiagram') {
-    return /(?:\|\||o\{|o\||\}\||\{o|\|o).*(?:--|\.\.).*(?:\|\||o\{|o\||\}\||\{o|\|o)/.test(body)
-  }
-  return false
 }
 
 function hasDiagramGoal(segment) {
@@ -223,14 +186,13 @@ export function checkApiTechDoc(markdown, options = {}) {
   }
 
   const flowSection = getSection(markdown, '核心流程 / 时序')
-  if (flowSection && getMermaidBlocks(flowSection).length === 0) {
+  if (flowSection && extractMermaidBlocks(flowSection).length === 0) {
     issues.push('核心流程 / 时序缺少 Mermaid 主图')
   }
 
-  const mermaidBlocks = getMermaidBlocks(markdown)
+  const mermaidBlocks = inspectMermaidMarkdown(markdown).diagrams
   for (let index = 0; index < mermaidBlocks.length; index += 1) {
     const block = mermaidBlocks[index]
-    const type = getMermaidType(block.source)
     const previousEnd = index === 0 ? 0 : mermaidBlocks[index - 1].end
     const nextStart = index === mermaidBlocks.length - 1 ? markdown.length : mermaidBlocks[index + 1].start
     const localStart = Math.max(previousEnd, getPreviousHeadingEnd(markdown, block.start))
@@ -239,9 +201,9 @@ export function checkApiTechDoc(markdown, options = {}) {
     const after = markdown.slice(block.end, localEnd)
     const label = `第 ${index + 1} 张 Mermaid 图`
 
-    if (!type) {
-      issues.push(`${label}类型不受支持，仅支持 sequenceDiagram、flowchart、stateDiagram-v2、erDiagram`)
-    } else if (!hasStructuralStatement(block.source, type)) {
+    if (!block.supported) {
+      issues.push(`${label}类型不受支持，仅支持 ${SUPPORTED_MERMAID_TYPES.join('、')}`)
+    } else if (!block.hasStructure) {
       issues.push(`${label}缺少有效的关系、交互或状态流转，不能只保留图型空壳`)
     }
 

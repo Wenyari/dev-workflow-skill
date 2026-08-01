@@ -3,6 +3,13 @@
 import fs from 'node:fs'
 import { pathToFileURL } from 'node:url'
 
+import {
+  extractMermaidBlocks,
+  inspectMermaidMarkdown,
+  normalizeMermaidSource,
+  SUPPORTED_MERMAID_TYPES
+} from '../../../../tools/mermaid/inspect.mjs'
+
 const DEFAULT_DATA_FLOW_SOURCE = `flowchart LR
   A["用户操作"] --> B["页面状态"]
   B --> C["接口请求"]
@@ -37,57 +44,6 @@ function getSection(markdown, title) {
 
 function hasMarkdownTable(section) {
   return /\|.+\|\s*\n\|[\s:|-]+\|/.test(section)
-}
-
-function getMermaidBlocks(markdown) {
-  const blocks = []
-  const pattern = /```mermaid[^\n]*\n([\s\S]*?)```/g
-  let match
-
-  while ((match = pattern.exec(markdown)) !== null) {
-    blocks.push({
-      source: match[1].trim(),
-      start: match.index,
-      end: pattern.lastIndex
-    })
-  }
-
-  return blocks
-}
-
-function getMermaidType(source) {
-  const firstLine = source.split('\n').map((line) => line.trim()).find(Boolean) || ''
-
-  if (/^sequenceDiagram\b/.test(firstLine)) return 'sequenceDiagram'
-  if (/^flowchart\s+(?:TD|TB|BT|LR|RL)\b/.test(firstLine)) return 'flowchart'
-  if (/^stateDiagram-v2\b/.test(firstLine)) return 'stateDiagram-v2'
-  if (/^erDiagram\b/.test(firstLine)) return 'erDiagram'
-  return ''
-}
-
-function hasStructuralStatement(source, type) {
-  const body = source
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('%%'))
-    .slice(1)
-    .join('\n')
-
-  if (type === 'sequenceDiagram') return /(?:-{1,2}>>|-{1,2}\))/.test(body)
-  if (type === 'flowchart') return /(?:--+>|-{3,}|-\.+->|={2,}>)/.test(body)
-  if (type === 'stateDiagram-v2') return /-->/.test(body)
-  if (type === 'erDiagram') {
-    return /(?:\|\||o\{|o\||\}\||\{o|\|o).*(?:--|\.\.).*(?:\|\||o\{|o\||\}\||\{o|\|o)/.test(body)
-  }
-  return false
-}
-
-function normalizeDiagram(source) {
-  return source
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .join('\n')
 }
 
 function hasNoDiagramReason(section) {
@@ -169,7 +125,7 @@ export function checkPageTechDoc(markdown) {
   if (!dataFlowSection) {
     issues.push('缺少 5.6 数据流章节')
   } else {
-    const dataFlowDiagrams = getMermaidBlocks(dataFlowSection)
+    const dataFlowDiagrams = extractMermaidBlocks(dataFlowSection)
     const noDiagramReason = hasNoDiagramReason(dataFlowSection)
 
     if (endpointCount >= 2 && dataFlowDiagrams.length === 0) {
@@ -186,10 +142,9 @@ export function checkPageTechDoc(markdown) {
     }
   }
 
-  const mermaidBlocks = getMermaidBlocks(markdown)
+  const mermaidBlocks = inspectMermaidMarkdown(markdown).diagrams
   for (let index = 0; index < mermaidBlocks.length; index += 1) {
     const block = mermaidBlocks[index]
-    const type = getMermaidType(block.source)
     const previousEnd = index === 0 ? 0 : mermaidBlocks[index - 1].end
     const nextStart = index === mermaidBlocks.length - 1 ? markdown.length : mermaidBlocks[index + 1].start
     const localStart = Math.max(previousEnd, getPreviousHeadingEnd(markdown, block.start))
@@ -198,9 +153,9 @@ export function checkPageTechDoc(markdown) {
     const after = markdown.slice(block.end, localEnd)
     const label = `第 ${index + 1} 张 Mermaid 图`
 
-    if (!type) {
-      issues.push(`${label}类型不受支持，仅支持 sequenceDiagram、flowchart、stateDiagram-v2、erDiagram`)
-    } else if (!hasStructuralStatement(block.source, type)) {
+    if (!block.supported) {
+      issues.push(`${label}类型不受支持，仅支持 ${SUPPORTED_MERMAID_TYPES.join('、')}`)
+    } else if (!block.hasStructure) {
       issues.push(`${label}缺少有效的关系、交互或状态流转，不能只保留图型空壳`)
     }
 
@@ -210,7 +165,7 @@ export function checkPageTechDoc(markdown) {
     if (!hasDiagramConclusion(after)) {
       issues.push(`${label}后缺少非空的“关键结论 / 不变量” bullet`)
     }
-    if (normalizeDiagram(block.source) === normalizeDiagram(DEFAULT_DATA_FLOW_SOURCE)) {
+    if (normalizeMermaidSource(block.source) === normalizeMermaidSource(DEFAULT_DATA_FLOW_SOURCE)) {
       issues.push(`${label}仍是模板默认数据流图，必须替换为当前页面的真实业务节点和关系`)
     }
   }
