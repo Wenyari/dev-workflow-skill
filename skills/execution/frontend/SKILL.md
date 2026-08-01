@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: 前端研发执行工作流。适用于生成页面技术方案，或把已确认方案经过契约检查、人工确认、页面基建生成、最小验证和基建 Review 落成可交接给视觉还原的前端代码。
+description: 前端研发执行工作流。用户显式输入 `$frontend page-tech`、`$frontend page-build`、`$frontend page-build check`，或要生成页面技术方案、检查方案后创建页面基建、把已确认方案经过契约检查、人工确认、最小验证和基建 Review 落成可交接给视觉还原的前端代码时使用。
 ---
 
 # 前端研发工作流
@@ -17,12 +17,6 @@ description: 前端研发执行工作流。适用于生成页面技术方案，�
 ## 这个 skill 解决什么问题
 
 把需求和代码事实整理为页面技术方案，并将已确认方案通过门禁、写入、验证与基建 Review 落成可审核、可继续视觉还原的页面基建。
-
-## 什么时候用
-
-- 用户显式输入 `$frontend page-tech`、`$frontend page-build` 或 `$frontend page-build check`
-- 用户要求“生成前端页面技术方案”或“根据需求写页面落地方案”
-- 用户要求“检查方案后创建页面基建”或“把已审核方案落到前端代码”
 
 ## 前置产物
 
@@ -46,13 +40,13 @@ description: 前端研发执行工作流。适用于生成页面技术方案，�
 ## 下一步
 
 - `page-tech.md` 审核完成 → `$frontend page-build`
-- `page-build` 完成且基建 Review 通过 → 由用户进入 `figmaSync plan`
+- `page-build` 完成且基建 Review 通过 → 由用户进入 `figma-sync plan`
 - 基建 Review 未通过 → 保留问题与实际验证结果，修复后重新执行确认范围
 
 ## 明确不做
 
 - 不做 PRD↔UI 语义检查：该能力属于独立 Review 流程。
-- 不做最终视觉还原：本工作流只产出可交接基建，视觉实现由 `figmaSync` 承担。
+- 不做最终视觉还原：本工作流只产出可交接基建，视觉实现由 `figma-sync` 承担。
 - 不生成或修改后端接口：接口事实来自后端契约或仓库，前端流程不得反向臆造。
 - 不在未确认文件计划时写代码：`page-build` 的写入必须经过人工确认。
 

@@ -1,6 +1,6 @@
-# `figmaSync apply [path/to/PLAN.md]`
+# `figma-sync apply [path/to/PLAN.md]`
 
-基于 `figmaSync plan` 产出的 PLAN.md 与 `figma-plan.css` 实施页面编码。
+基于 `figma-sync plan` 产出的 PLAN.md 与 `figma-plan.css` 实施页面编码。
 
 ## apply 边界
 

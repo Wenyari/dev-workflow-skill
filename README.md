@@ -24,11 +24,11 @@ npx @dev-workflow/skill
 ├── skills/
 │   ├── execution/
 │   │   ├── SKILL.md
-│   │   └── {frontend, backend, figmaSync, devFlow}/
+│   │   └── {frontend, backend, figma-sync}/
 │   ├── review/
 │   │   ├── SKILL.md
 │   │   └── {prd-review, prd-ui-check, frontend-code-review, code-structure-review}/
-└── tools/{lark, product-design-specs}/
+└── tools/{lark, mermaid, product-design-specs}/
 ```
 
 `execution/SKILL.md` 和 `review/SKILL.md` 是分类导航入口，用于先识别任务类型，再加载对应子技能。
@@ -88,11 +88,11 @@ skills/
 └── execution/      开发层：方案生成 + 代码落地
 │   ├── frontend/               前端方案 → 页面基建 → Foundation Review
 │   ├── backend/                后端方案 + 接口测试生成 / 执行 + 正式报告
-│   ├── figmaSync/              Figma → 原生 CSS
-│   └── devFlow/                旧 devFlow 命令兼容导航
+│   └── figma-sync/              Figma → 原生 CSS
 
 tools/              共享能力（不对用户暴露）
 ├── lark/                       飞书读写、Markdown 转 blocks、权限检查
+├── mermaid/                    Mermaid 提取、图型识别和通用结构检查
 └── product-design-specs/       产品设计规范（字段/交互/反馈）
 
 docs/               维护者深度文档

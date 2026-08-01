@@ -67,7 +67,6 @@ node --test tools/lark/scripts/lark_api.test.mjs
 
 ## 消费者
 
-- `skills/execution/devFlow/` — 旧 `prepare` / `lark-read` / `lark-doc` 命令的兼容规则
 - `skills/execution/frontend/`、`skills/execution/backend/` — 按需读取或发布研发文档
 - `skills/review/prd-review/` — 按需读取 PRD 全文
 - `skills/review/prd-ui-check/` — 读飞书 PRD

@@ -1,11 +1,11 @@
 /**
  * Icon Inventory
  *
- * 扫描仓库中真实存在的 icon 资产源，供 figmaSync plan 做语义匹配。
+ * 扫描仓库中真实存在的 icon 资产源，供 figma-sync plan 做语义匹配。
  *
  * 用法:
- *   node .agent/skills/figmaSync/scripts/icon-inventory.mjs
- *   node .agent/skills/figmaSync/scripts/icon-inventory.mjs --pretty
+ *   node .agent/skills/figma-sync/scripts/icon-inventory.mjs
+ *   node .agent/skills/figma-sync/scripts/icon-inventory.mjs --pretty
  */
 import fs from 'node:fs'
 import path from 'node:path'

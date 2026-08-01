@@ -1,10 +1,10 @@
 /**
  * Figma Sync Report
  *
- * 把本次 figmaSync 任务的「AI 做了什么」与「产物长什么样」交叉量化输出。
+ * 把本次 figma-sync 任务的「AI 做了什么」与「产物长什么样」交叉量化输出。
  *
  * 用法:
- *   pnpm figma:report                                # 默认 plan 命令、写到 .agent/skills/figmaSync/
+ *   pnpm figma:report                                # 默认 plan 命令、写到 .agent/skills/figma-sync/
  *   pnpm figma:report --command=plan|apply           # 报告文件名前缀：session-report-<command>.md
  *   pnpm figma:report --target-dir=src/foo           # 同时把报告复制一份到指定目录
  *   pnpm figma:report --plan=src/foo/PLAN.md         # 解析该 PLAN.md §4 表格，统计 variables 来源
@@ -25,7 +25,7 @@ import path from 'node:path'
 
 import { readSessionLog, resetSessionLog } from './_shared/session-log.mjs'
 
-const DEFAULT_REPORT_DIR = '.agent/skills/figmaSync'
+const DEFAULT_REPORT_DIR = '.agent/skills/figma-sync'
 const FAST_PATH_LOW_THRESHOLD = 0.5
 
 function parseArgs(argv) {
@@ -226,7 +226,7 @@ function renderReport({
   forbiddenFiles
 }) {
   const lines = []
-  lines.push(`# figmaSync Session Report (${command}) — ${generatedAt}`)
+  lines.push(`# figma-sync Session Report (${command}) — ${generatedAt}`)
   lines.push('')
 
   lines.push('## Review 摘要')

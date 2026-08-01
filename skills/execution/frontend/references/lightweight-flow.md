@@ -17,7 +17,7 @@
 - 不生成 `page-tech.md`。
 - 不生成 `contract-report.md`。
 - 不生成 `foundation-summary.md`。
-- 不进入 figmaSync。
+- 不进入 figma-sync。
 - 读代码、复述最小计划、等待确认、修改、验证、总结。
 
 ## L1 轻量流程

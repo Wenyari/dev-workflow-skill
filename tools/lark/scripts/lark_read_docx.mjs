@@ -13,7 +13,7 @@ import {
 } from './lark_api.mjs'
 
 const CACHE_TTL_MS = 5 * 60 * 1000
-const CACHE_DIR = path.join(os.tmpdir(), 'devFlow-lark-cache')
+const CACHE_DIR = path.join(os.tmpdir(), 'dev-workflow-lark-cache')
 
 function headingLevel(block) {
   for (let level = 1; level <= 6; level += 1) {

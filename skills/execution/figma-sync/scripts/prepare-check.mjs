@@ -1,7 +1,7 @@
 /**
  * Prepare Check
  *
- * 检查 figmaSync 原生 CSS 工作流依赖的技术栈与资源。分级输出：
+ * 检查 figma-sync 原生 CSS 工作流依赖的技术栈与资源。分级输出：
  *   - blocker: 缺失会阻塞 plan/apply
  *   - warning: 不影响运行但建议修复
  *   - info:    诊断信息
@@ -174,15 +174,15 @@ function checkPackageScripts() {
           level: 'blocker',
           name: `script:${name}`,
           message: `package.json scripts 缺少 "${name}"`,
-          fix: '参考 figmaSync SKILL.md 速查表补齐 scripts'
+          fix: '参考 figma-sync SKILL.md 速查表补齐 scripts'
         }
   )
 }
 
 const REQUIRED_GITIGNORE = [
-  '.agent/skills/figmaSync/.session-log.jsonl',
-  '.agent/skills/figmaSync/session-report-plan.md',
-  '.agent/skills/figmaSync/session-report-apply.md'
+  '.agent/skills/figma-sync/.session-log.jsonl',
+  '.agent/skills/figma-sync/session-report-plan.md',
+  '.agent/skills/figma-sync/session-report-apply.md'
 ]
 
 function checkGitignore() {
@@ -192,7 +192,7 @@ function checkGitignore() {
       level: 'warning',
       name: 'gitignore',
       message: '.gitignore 不存在',
-      fix: '至少忽略 figmaSync session 文件'
+      fix: '至少忽略 figma-sync session 文件'
     }
   }
   const text = fs.readFileSync(p, 'utf-8')

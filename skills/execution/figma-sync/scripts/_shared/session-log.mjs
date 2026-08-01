@@ -1,11 +1,11 @@
 /**
  * Session Log
  *
- * figmaSync 任务期间，每次调用 lookup-var / match-token 都追加一行 JSONL，
+ * figma-sync 任务期间，每次调用 lookup-var / match-token 都追加一行 JSONL，
  * 供 figma-sync-report.mjs 汇总。session 边界：AI 在任务开始时跑
  * `pnpm figma:report --reset` 清空。
  *
- * 路径：.agent/skills/figmaSync/.session-log.jsonl（git 忽略）
+ * 路径：.agent/skills/figma-sync/.session-log.jsonl（git 忽略）
  *
  * 去重契约：
  *   - 把 (script, canonicalInput) 视为同一查询
@@ -19,7 +19,7 @@
  */
 import fs from 'node:fs'
 
-const LOG_PATH = '.agent/skills/figmaSync/.session-log.jsonl'
+const LOG_PATH = '.agent/skills/figma-sync/.session-log.jsonl'
 
 function canonicalize(raw) {
   if (raw === undefined || raw === null) return ''

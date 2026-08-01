@@ -5,9 +5,9 @@
  * 不做反向哈希搜索，只做查表。
  *
  * 用法:
- *   node .agent/skills/figmaSync/scripts/lookup-var.mjs "--fill-neutral-primary"
- *   node .agent/skills/figmaSync/scripts/lookup-var.mjs "var(--fill-neutral-primary, #090A0B)"
- *   node .agent/skills/figmaSync/scripts/lookup-var.mjs "--apex-spacing-8"
+ *   node .agent/skills/figma-sync/scripts/lookup-var.mjs "--fill-neutral-primary"
+ *   node .agent/skills/figma-sync/scripts/lookup-var.mjs "var(--fill-neutral-primary, #090A0B)"
+ *   node .agent/skills/figma-sync/scripts/lookup-var.mjs "--apex-spacing-8"
  *
  * 支持的变量命名:
  *   --apex-fill-neutral-primary   (apex-ui 实际产出)

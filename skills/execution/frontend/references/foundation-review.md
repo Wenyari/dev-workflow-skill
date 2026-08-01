@@ -77,8 +77,8 @@ src/routes/<feature>/<page>/foundation-summary.md
 - service 函数签名。
 - types 导出。
 - constants 导出。
-- figmaSync 允许修改范围。
-- figmaSync 禁止修改范围。
+- figma-sync 允许修改范围。
+- figma-sync 禁止修改范围。
 
 ## 视觉阶段允许修改范围
 

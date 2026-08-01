@@ -1,6 +1,6 @@
 ---
 name: execution
-description: 研发执行技能导航。用户要生成前端或后端技术方案、落地页面基建、生成或执行后端接口集成测试，或进行 Figma 视觉还原时，先判断前后端领域和当前研发阶段，再选择对应 skill。
+description: 研发执行技能导航。用户显式输入 `$execution frontend` 或 `$execution backend`，或要从技术方案开始推进前端页面开发、后端技术方案、接口实现后的集成测试、Figma 视觉还原时，先判断领域和当前阶段，再选择对应 skill。
 ---
 
 # Execution 技能导航
@@ -17,12 +17,6 @@ description: 研发执行技能导航。用户要生成前端或后端技术方�
 ## 这个 skill 解决什么问题
 
 只判断请求属于前端还是后端、当前处于哪个开发阶段，并选择对应执行 skill，避免在导航入口混入具体生成和检查规则。
-
-## 什么时候用
-
-- 用户显式输入 `$execution frontend` 或 `$execution backend`
-- 用户要求“从技术方案开始完成前端页面开发流程”
-- 用户要求“继续后端技术方案、接口实现后的集成测试流程”
 
 ## 前置产物
 
@@ -42,7 +36,7 @@ description: 研发执行技能导航。用户要生成前端或后端技术方�
 - 前端技术方案或页面基建 → [frontend/SKILL.md](./frontend/SKILL.md)
 - 后端技术方案或阶段判断 → [backend/SKILL.md](./backend/SKILL.md)
 - 明确要求后端接口测试 → [backend/SKILL.md](./backend/SKILL.md) 的 `integration-test` 阶段
-- 明确要求 Figma 视觉还原 → [figmaSync/SKILL.md](./figmaSync/SKILL.md)
+- 明确要求 Figma 视觉还原 → [figma-sync/SKILL.md](./figma-sync/SKILL.md)
 
 ## 明确不做
 
@@ -60,7 +54,7 @@ description: 研发执行技能导航。用户要生成前端或后端技术方�
 | 前端方案检查、页面基建或基建 Review | `frontend` → `page-build` |
 | 后端技术方案或后端阶段判断 | `backend` |
 | 后端接口测试生成或执行 | `backend` → `integration-test` |
-| Figma 视觉还原 | `figmaSync` |
+| Figma 视觉还原 | `figma-sync` |
 
 ## 路由规则
 

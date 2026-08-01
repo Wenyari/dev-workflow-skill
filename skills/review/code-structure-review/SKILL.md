@@ -1,6 +1,6 @@
 ---
 name: code-structure-review
-description: 基于 Graphify 的函数、类、文件和依赖图发现疑似冗余代码、重复职责、过度封装、高耦合节点、循环依赖与模块边界泄漏，再定点读取源码进行语义复核。适用于大型仓库、跨目录结构 Review、重构前候选发现，以及普通逐文件扫描容易漏检的场景。
+description: 基于 Graphify 的函数、类、文件和依赖图发现疑似冗余代码、重复职责、过度封装、高耦合节点、循环依赖与模块边界泄漏，再定点读取源码进行语义复核。用户显式输入 `$code-structure-review start <scope>`、`review <n>`、`finalize`，或要在大型仓库、跨目录范围、重构前发现带证据的候选，而普通逐文件扫描容易漏检时使用。
 ---
 
 # 代码结构 Review
@@ -10,14 +10,6 @@ description: 基于 Graphify 的函数、类、文件和依赖图发现疑似冗
 普通 Code Review 容易受上下文窗口和文件读取顺序影响，无法稳定建立仓库级调用关系。本 skill 使用 Graphify 的结构化提取结果执行确定性图分析，先收敛候选项，再读取候选源码判断是否确实需要重构。
 
 Graphify 只负责提供结构证据，不作为最终结论。任何“建议抽象、合并、拆分或移除”的结论都必须经过源码复核。
-
-## 什么时候用
-
-- 用户显式输入 `$code-structure-review start <scope>`
-- 用户显式输入 `$code-structure-review review <n>`
-- 用户显式输入 `$code-structure-review finalize`
-- 用户要求跨目录发现冗余函数、重复职责、可抽象代码或架构耦合
-- 重构前希望生成带证据的候选清单
 
 ## 前置产物
 

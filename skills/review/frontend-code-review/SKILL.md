@@ -1,6 +1,6 @@
 ---
 name: frontend-code-review
-description: 检查已写完的前端业务代码是否遵循 `tools/product-design-specs/` 中的产品设计规范。用户按目录、文件或 PR diff 声明范围，分批 review 字段布局、必填标识、校验触发、错误提示、只读态、列表操作、交互反馈等语义级约束，最终一次性输出问题清单。适用于 page-build 完成后补充完业务代码、PR 合入前的自查、要求细致 review 场景。
+description: 检查已写完的前端业务代码是否遵循 `tools/product-design-specs/` 中的产品设计规范。用户显式输入 `$frontend-code-review start <scope>`、`batch <n>`、`finalize`，或在 page-build 后、PR 合入前、补充大量业务代码后要求按目录、文件或 PR diff 细致 review 字段与交互语义并最终汇总问题时使用。
 ---
 
 # 前端代码 Review
@@ -19,13 +19,6 @@ description: 检查已写完的前端业务代码是否遵循 `tools/product-des
 ## 这个 skill 解决什么问题
 
 在前端业务代码写完后、自测联调前，按产品设计规范逐项检查代码是否遵循字段、交互、反馈的语义级约束，提前发现 ESLint / Prettier / TypeScript 覆盖不了的规范违规。
-
-## 什么时候用
-
-- 用户显式输入 `$frontend-code-review start <scope>` / `$frontend-code-review batch <n>` / `$frontend-code-review finalize`
-- 用户话术：「帮我 review 一下这些页面代码符不符合产品设计规范」
-- 用户话术：「page-build 完的代码我补了业务逻辑，帮我细致 review 一下」
-- PR 合入前的自查场景，或补充完 5000-10000 行业务代码后统一检查
 
 ## 前置产物
 
@@ -54,7 +47,7 @@ description: 检查已写完的前端业务代码是否遵循 `tools/product-des
 - 不做单元测试生成：测试属于开发环节其他工具的范畴，不塞进 review。
 - 不做架构级重构建议：如「应该拆组件」「应该改状态管理」，属于设计决策而非规范 review。
 - 不做后端代码 review：backend 规范集不同，需另开独立 skill。
-- 不做视觉还原、像素、颜色、字号检查：属于 `figmaSync` 的范畴。
+- 不做视觉还原、像素、颜色、字号检查：属于 `figma-sync` 的范畴。
 - 不做 PRD ↔ 代码语义对齐：属于 `prd-ui-check` 的范畴。
 - 不自动打 P0 / P1 / P2 优先级：报告描述影响，由开发者与评审者确定处理时机。
 

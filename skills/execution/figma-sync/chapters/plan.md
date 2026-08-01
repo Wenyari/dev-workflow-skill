@@ -1,4 +1,4 @@
-# `figmaSync plan <figma-url>`
+# `figma-sync plan <figma-url>`
 
 输入 Figma URL（含 `node-id`），输出可审核的落地计划：
 
@@ -11,7 +11,7 @@
 
 ## 代码事实优先原则
 
-`figmaSync plan` 必须以真实代码文件为事实来源，不能根据 Figma 图层或
+`figma-sync plan` 必须以真实代码文件为事实来源，不能根据 Figma 图层或
 `page-tech.md` 重新拆业务结构。
 
 必须读取：
@@ -84,7 +84,7 @@ sed -n '1,220p' <target-route-dir>/constants.ts 2>/dev/null
 `foundation-summary.md`，必须读取它并说明其是否最新。
 
 如果缺少或无法确认 `foundation-summary.md` 为最新版本，停止 `plan`，提示用户先完成
-`$frontend page-build` 的 Foundation Review。`figmaSync` 不直接运行 frontend
+`$frontend page-build` 的 Foundation Review。`figma-sync` 不直接运行 frontend
 目录中的脚本；两个 skill 只通过 `foundation-summary.md` 交接。
 
 ### Step 3 — 询问用户存放位置
@@ -127,7 +127,7 @@ mcp__figma-remote-mcp__whoami
 运行：
 
 ```bash
-node .agent/skills/figmaSync/scripts/icon-inventory.mjs --pretty
+node .agent/skills/figma-sync/scripts/icon-inventory.mjs --pretty
 ```
 
 扫描范围只允许来自真实存在的目录：
@@ -164,6 +164,9 @@ PLAN.md `## 2. 组件映射决策` 必须说明：
 - 是否需要自定义 CSS。
 - 样式归属：`Apex UI props`、`业务组件 CSS`、`页面 CSS`、`待确认`。
 - 不复用的原因。
+
+如果计划扩展已有 common component，必须列出扩展点、影响范围和回归范围，并在
+`apply` 前取得用户明确确认；不得把公共组件修改混入普通页面 CSS 落地。
 
 #### Step 7.5 — 样式归属判定
 
@@ -218,7 +221,7 @@ PLAN.md 的 `## 2. 组件映射决策` 必须体现最终归属；`## 5. CSS 草
 - 每个拆分出的子模块/组件所对应的文件路径及 CSS 拆分安排。
 - 现有基建事实来源：route、components、service、types、constants 或
   `foundation-summary.md`。
-- figmaSync 允许修改和禁止修改的范围。
+- figma-sync 允许修改和禁止修改的范围。
 
 ### Step 9 — CSS 变量匹配
 
@@ -230,6 +233,13 @@ PLAN.md 的 `## 2. 组件映射决策` 必须体现最终归属；`## 5. CSS 草
 | 节点 CSS 含 `var(--xxx)` 但 variables 字典没给 | 跑 `lookup-var.mjs`               | `Fast Path 1 (lookup-var)` |
 | 设计师写死裸 `#hex` / `Npx`                    | 跑 `match-token.mjs`              | `Slow Path (value-match)`  |
 | 未命中                                         | 写入 CSS 草案 TODO 注释和确认清单 | `未命中`                   |
+
+`/theme` 匹配遵守以下层级：
+
+- 颜色优先使用 `foundation` 语义变量，只有缺少合适语义变量时才考虑 `palette`。
+- spacing、radius、border、size、fontSize 等数值优先使用 `baseValue`。
+- 只有明确跨页面复用且现有 `/theme` 无合适变量时，才在 PLAN.md 建议新增变量并记录名称、来源值、用途和影响面。
+- `plan` 不直接修改 `/theme`；`apply` 也只有在用户明确确认后才能修改。
 
 仅对归属为 `业务组件 CSS` 或 `页面 CSS` 的样式执行本步骤。归属为 `Apex UI props`
 的样式不进入变量匹配表的 CSS 草案实现清单；如需记录来源，只在 PLAN.md 组件映射备注中说明由哪个 prop 接管。
@@ -281,7 +291,7 @@ designContextStatus 取值约定：
   gap: var(--spacing-12);
 }
 
-/* TODO(figmaSync): unmatched border color #d7d9df from node 10:18; needs user confirmation */
+/* TODO(figma-sync): unmatched border color #d7d9df from node 10:18; needs user confirmation */
 ```
 
 ### Step 11 — 计算 frontmatter 锚点
