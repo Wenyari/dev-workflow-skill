@@ -53,6 +53,12 @@ controller / service / dto / entity 代码文件）。
 - 实体说明（collection、extends 等）写在表格上方的**引用块** `> …`。
 - TypeScript interface：可空字段用 `?`，时间等注明单位（如 `// epoch ms`）。
 
+TypeScript interface 是用于技术评审的语言中立结构表达，不表示项目必须使用 TypeScript：
+
+- 字段名、可空性、枚举、嵌套关系和时间单位必须与真实契约一致。
+- 仓库不是 TypeScript 时，在表格或紧邻说明中标注关键的原生类型、精度、序列化或零值语义差异。
+- 不得声称仓库存在虚构的 TypeScript DTO / entity；代码事实引用仍使用项目原生类型和真实文件路径。
+
 ## 接口呈现硬规则
 
 接口设计章节每个接口条目按以下结构、label 全部加粗：
@@ -95,4 +101,4 @@ controller / service / dto / entity 代码文件）。
 node <agent-root>/skills/execution/backend/scripts/check_api_tech_doc.mjs --file <markdown-file> --optional "<本次选中的可选章节，逗号分隔>"
 ```
 
-自检覆盖：必写章节齐全、核心流程 → 数据模型 → 接口设计的顺序正确、选中可选章节存在、数据模型含表格 + TS、接口设计含表格与 TS 代码块、核心流程含至少一张主图、已有 Mermaid 图类型受支持且包含图示目标与关键结论、风险与待确认项非空、标题为 `#`/`##`/`###` 且无手写序号。脚本输出 JSON，最终回复只摘必要状态。
+自检覆盖：必写章节齐全、核心流程 → 数据模型 → 接口设计的顺序正确、选中可选章节存在、每个数据实体含表格 + TS、每个接口条目包含完整呈现要素、核心流程含至少一张主图、已有 Mermaid 图类型受支持且包含图示目标与关键结论、无模板占位符、风险与待确认项非空、标题为 `#`/`##`/`###` 且无手写序号。脚本输出 JSON，最终回复只摘必要状态。

@@ -1,13 +1,26 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import { JSDOM } from 'jsdom'
 
 import { checkApiTechDoc } from './check_api_tech_doc.mjs'
+
+const dom = new JSDOM('<!doctype html><html><body></body></html>')
+Object.defineProperties(globalThis, {
+  window: { value: dom.window, configurable: true },
+  document: { value: dom.window.document, configurable: true },
+  navigator: { value: dom.window.navigator, configurable: true }
+})
+const { default: mermaid } = await import('mermaid')
 
 const API_DTO = '```typescript\ninterface ListDto { page: number }\n```'
 const API_RESP = '```typescript\ninterface ListData { total: number }\n```'
 const MODEL_TS = '```typescript\ninterface Entity { id: string }\n```'
 const MERMAID_REFERENCE = readFileSync(new URL('../references/mermaid.md', import.meta.url), 'utf8')
+
+function getMermaidSources(markdown) {
+  return [...markdown.matchAll(/```mermaid[^\n]*\n([\s\S]*?)```/g)].map((match) => match[1].trim())
+}
 
 function getH2Section(markdown, title) {
   const heading = `## ${title}`
@@ -35,6 +48,8 @@ sequenceDiagram
 
 # 数据模型 / 数据库设计
 
+## Entity
+
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | id | string | 是 | 主键 |
@@ -47,6 +62,8 @@ ${MODEL_TS}
 
 ### 列表查询 · POST /api/x
 
+**用途**：查询分页列表。
+
 **入参**
 
 | 参数 | 类型 | 必填 | 说明 |
@@ -58,6 +75,10 @@ ${API_DTO}
 **出参**
 
 ${API_RESP}
+
+**说明**
+
+- 无副作用。
 
 **错误码**：\`40001\` 参数校验失败
 
@@ -93,6 +114,15 @@ test('Mermaid 参考文件保留六类可复用模板', () => {
   }
 })
 
+test('Mermaid 参考文件的全部模板通过官方 parser', async () => {
+  const sources = getMermaidSources(MERMAID_REFERENCE)
+  assert.equal(sources.length, 7)
+
+  for (const source of sources) {
+    await assert.doesNotReject(() => mermaid.parse(source), source)
+  }
+})
+
 test('缺必写章节报错', () => {
   const md = GOOD.replace('# 边界与异常', '# 其他')
   const r = checkApiTechDoc(md)
@@ -109,13 +139,29 @@ test('标题手写序号报错', () => {
 test('数据模型缺 TS 报错', () => {
   const md = GOOD.replace(MODEL_TS, '')
   const r = checkApiTechDoc(md)
-  assert.ok(r.issues.some((i) => i.includes('数据模型') && i.includes('TypeScript')))
+  assert.ok(r.issues.some((i) => i.includes('实体 / 表「Entity」') && i.includes('TypeScript')))
 })
 
 test('接口缺 TS 报错', () => {
   const md = GOOD.replace(API_DTO, '').replace(API_RESP, '')
   const r = checkApiTechDoc(md)
-  assert.ok(r.issues.some((i) => i.includes('接口设计') && i.includes('TypeScript')))
+  assert.ok(r.issues.some((i) => i.includes('接口「列表查询') && i.includes('TypeScript')))
+})
+
+test('第二个数据实体不完整时逐条报错', () => {
+  const md = GOOD.replace('# 接口设计', '## Audit\n\n只有文字说明。\n\n# 接口设计')
+  const r = checkApiTechDoc(md)
+
+  assert.ok(r.issues.some((i) => i.includes('实体 / 表「Audit」') && i.includes('字段表格')))
+  assert.ok(r.issues.some((i) => i.includes('实体 / 表「Audit」') && i.includes('TypeScript')))
+})
+
+test('第二个接口不完整时逐条报错', () => {
+  const md = GOOD.replace('# 边界与异常', '### 删除 · POST /api/x/delete\n\n**用途**：删除记录。\n\n# 边界与异常')
+  const r = checkApiTechDoc(md)
+
+  assert.ok(r.issues.some((i) => i.includes('接口「删除') && i.includes('入参表格')))
+  assert.ok(r.issues.some((i) => i.includes('接口「删除') && i.includes('错误码')))
 })
 
 test('核心流程、数据模型、接口设计必须按顺序出现', () => {
@@ -131,7 +177,7 @@ test('核心流程、数据模型、接口设计必须按顺序出现', () => {
   assert.ok(r.issues.some((i) => i.includes('章节顺序错误')))
 })
 
-test('核心流程至少需要一张主图', () => {
+test('核心流程缺少主图时报错', () => {
   const md = GOOD.replace(/\*\*图示目标\*\*[\s\S]*?\*\*关键结论 \/ 不变量\*\*[\s\S]*?- 服务 A 负责发起请求，服务 B 负责处理。/, '仅用文字描述流程。')
   const r = checkApiTechDoc(md)
   assert.ok(r.issues.some((i) => i.includes('缺少 Mermaid 主图')))
@@ -150,6 +196,12 @@ test('不支持的 Mermaid 图型报错', () => {
 
 test('Mermaid 空壳图报错', () => {
   const md = GOOD.replace('sequenceDiagram\n  A->>B: x', 'flowchart LR')
+  const r = checkApiTechDoc(md)
+  assert.ok(r.issues.some((i) => i.includes('不能只保留图型空壳')))
+})
+
+test('Mermaid 非法连线不能冒充有效结构', () => {
+  const md = GOOD.replace('sequenceDiagram\n  A->>B: x', 'flowchart LR\n  A -x-> B')
   const r = checkApiTechDoc(md)
   assert.ok(r.issues.some((i) => i.includes('不能只保留图型空壳')))
 })
@@ -186,6 +238,14 @@ test('Mermaid 图缺少关键结论报错', () => {
   assert.ok(r.issues.some((i) => i.includes('缺少非空的“关键结论 / 不变量” bullet')))
 })
 
+test('Mermaid 关键结论不能跨章节借用', () => {
+  const md = GOOD
+    .replace('**关键结论 / 不变量**\n\n- 服务 A 负责发起请求，服务 B 负责处理。\n', '')
+    .replace('# 数据模型 / 数据库设计', '# 数据模型 / 数据库设计\n\n**关键结论 / 不变量**\n\n- 这是下一章的结论。')
+  const r = checkApiTechDoc(md)
+  assert.ok(r.issues.some((i) => i.includes('缺少非空的“关键结论 / 不变量”')))
+})
+
 test('Mermaid 图的关键结论必须包含非空 bullet', () => {
   const md = GOOD.replace('- 服务 A 负责发起请求，服务 B 负责处理。', '暂无。')
   const r = checkApiTechDoc(md)
@@ -197,4 +257,12 @@ test('已选可选章节缺失报错，未选的不报', () => {
   assert.ok(missing.issues.some((i) => i.includes('完成标准')))
   const none = checkApiTechDoc(GOOD)
   assert.equal(none.ok, true, JSON.stringify(none.issues))
+})
+
+test('正式文档不得保留模板占位符或 HTML 注释', () => {
+  const placeholder = checkApiTechDoc(GOOD.replace('查询分页列表', '<接口名>'))
+  assert.ok(placeholder.issues.some((i) => i.includes('模板占位符')))
+
+  const comment = checkApiTechDoc(GOOD.replace('# 边界与异常', '<!-- TODO -->\n\n# 边界与异常'))
+  assert.ok(comment.issues.some((i) => i.includes('HTML 模板注释')))
 })
