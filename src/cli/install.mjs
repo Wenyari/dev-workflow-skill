@@ -6,10 +6,11 @@ import { AGENTS, AGENT_ORDER } from './agents.mjs'
 import { copyDir, CONFLICT, CONFLICT_DECISION } from './copy.mjs'
 import { select, confirm, closePrompts } from './prompts.mjs'
 
-const COPY_PLAN = [
+export const COPY_PLAN = [
   { srcRel: 'skills/execution', destRel: 'skills/execution' },
   { srcRel: 'skills/review', destRel: 'skills/review' },
   { srcRel: 'tools/lark', destRel: 'tools/lark' },
+  { srcRel: 'tools/mermaid', destRel: 'tools/mermaid' },
   { srcRel: 'tools/product-design-specs', destRel: 'tools/product-design-specs' }
 ]
 
