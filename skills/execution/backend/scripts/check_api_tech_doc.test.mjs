@@ -1,13 +1,47 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 
 import { checkApiTechDoc } from './check_api_tech_doc.mjs'
 
 const API_DTO = '```typescript\ninterface ListDto { page: number }\n```'
 const API_RESP = '```typescript\ninterface ListData { total: number }\n```'
 const MODEL_TS = '```typescript\ninterface Entity { id: string }\n```'
+const MERMAID_REFERENCE = readFileSync(new URL('../references/mermaid.md', import.meta.url), 'utf8')
 
-const GOOD = `# 接口设计
+function getH2Section(markdown, title) {
+  const heading = `## ${title}`
+  const start = markdown.indexOf(heading)
+  if (start < 0) return ''
+
+  const contentStart = start + heading.length
+  const rest = markdown.slice(contentStart)
+  const nextHeading = rest.search(/\n## /)
+  return nextHeading < 0 ? rest : rest.slice(0, nextHeading)
+}
+
+const GOOD = `# 核心流程 / 时序
+
+**图示目标**：说明请求如何从服务 A 到达服务 B。
+
+\`\`\`mermaid
+sequenceDiagram
+  A->>B: x
+\`\`\`
+
+**关键结论 / 不变量**
+
+- 服务 A 负责发起请求，服务 B 负责处理。
+
+# 数据模型 / 数据库设计
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| id | string | 是 | 主键 |
+
+${MODEL_TS}
+
+# 接口设计
 
 > 统一约定：POST，返回体 { code, data }。
 
@@ -27,21 +61,6 @@ ${API_RESP}
 
 **错误码**：\`40001\` 参数校验失败
 
-# 数据模型 / 数据库设计
-
-| 字段 | 类型 | 必填 | 说明 |
-| --- | --- | --- | --- |
-| id | string | 是 | 主键 |
-
-${MODEL_TS}
-
-# 核心流程 / 时序
-
-\`\`\`mermaid
-sequenceDiagram
-  A->>B: x
-\`\`\`
-
 # 边界与异常
 
 - 空数据返回空列表。
@@ -54,6 +73,24 @@ sequenceDiagram
 test('合规文档通过', () => {
   const r = checkApiTechDoc(GOOD)
   assert.equal(r.ok, true, JSON.stringify(r.issues))
+})
+
+test('Mermaid 参考文件保留六类可复用模板', () => {
+  const expected = [
+    ['模块边界图', 'flowchart LR', 1],
+    ['调用时序图', 'sequenceDiagram', 1],
+    ['状态图', 'stateDiagram-v2', 1],
+    ['ER 图', 'erDiagram', 2],
+    ['表数据流转图', 'flowchart LR', 1],
+    ['业务分支流程图', 'flowchart TD', 1]
+  ]
+
+  for (const [sectionTitle, diagramType, minimum] of expected) {
+    const section = getH2Section(MERMAID_REFERENCE, sectionTitle)
+    const count = section.split(diagramType).length - 1
+    assert.ok(section, `缺少 Mermaid 章节：${sectionTitle}`)
+    assert.ok(count >= minimum, `${sectionTitle} 缺少 ${diagramType} 可复用模板`)
+  }
 })
 
 test('缺必写章节报错', () => {
@@ -79,6 +116,80 @@ test('接口缺 TS 报错', () => {
   const md = GOOD.replace(API_DTO, '').replace(API_RESP, '')
   const r = checkApiTechDoc(md)
   assert.ok(r.issues.some((i) => i.includes('接口设计') && i.includes('TypeScript')))
+})
+
+test('核心流程、数据模型、接口设计必须按顺序出现', () => {
+  const flowStart = GOOD.indexOf('# 核心流程 / 时序')
+  const modelStart = GOOD.indexOf('# 数据模型 / 数据库设计')
+  const apiStart = GOOD.indexOf('# 接口设计')
+  const flowSection = GOOD.slice(flowStart, modelStart)
+  const modelSection = GOOD.slice(modelStart, apiStart)
+  const apiSection = GOOD.slice(apiStart, GOOD.indexOf('# 边界与异常'))
+  const md = GOOD.replace(`${flowSection}${modelSection}${apiSection}`, `${apiSection}${modelSection}${flowSection}`)
+  const r = checkApiTechDoc(md)
+
+  assert.ok(r.issues.some((i) => i.includes('章节顺序错误')))
+})
+
+test('核心流程至少需要一张主图', () => {
+  const md = GOOD.replace(/\*\*图示目标\*\*[\s\S]*?\*\*关键结论 \/ 不变量\*\*[\s\S]*?- 服务 A 负责发起请求，服务 B 负责处理。/, '仅用文字描述流程。')
+  const r = checkApiTechDoc(md)
+  assert.ok(r.issues.some((i) => i.includes('缺少 Mermaid 主图')))
+})
+
+test('一张有效主图即可通过，不强制附加图', () => {
+  const r = checkApiTechDoc(GOOD)
+  assert.equal(r.ok, true, JSON.stringify(r.issues))
+})
+
+test('不支持的 Mermaid 图型报错', () => {
+  const md = GOOD.replace('sequenceDiagram\n  A->>B: x', 'gantt\n  title x')
+  const r = checkApiTechDoc(md)
+  assert.ok(r.issues.some((i) => i.includes('类型不受支持')))
+})
+
+test('Mermaid 空壳图报错', () => {
+  const md = GOOD.replace('sequenceDiagram\n  A->>B: x', 'flowchart LR')
+  const r = checkApiTechDoc(md)
+  assert.ok(r.issues.some((i) => i.includes('不能只保留图型空壳')))
+})
+
+test('支持场景化选择 flowchart、stateDiagram-v2 和 erDiagram', () => {
+  const variants = [
+    'flowchart LR\n  A --> B',
+    'stateDiagram-v2\n  [*] --> ACTIVE',
+    'erDiagram\n  MASTER ||--o{ REQUEST : owns'
+  ]
+
+  for (const diagram of variants) {
+    const md = GOOD.replace('sequenceDiagram\n  A->>B: x', diagram)
+    const r = checkApiTechDoc(md)
+    assert.equal(r.ok, true, `${diagram}: ${JSON.stringify(r.issues)}`)
+  }
+})
+
+test('Mermaid 图缺少图示目标报错', () => {
+  const md = GOOD.replace('**图示目标**：说明请求如何从服务 A 到达服务 B。\n\n', '')
+  const r = checkApiTechDoc(md)
+  assert.ok(r.issues.some((i) => i.includes('缺少非空的“图示目标”')))
+})
+
+test('Mermaid 图的图示目标不能为空', () => {
+  const md = GOOD.replace('**图示目标**：说明请求如何从服务 A 到达服务 B。', '**图示目标**：')
+  const r = checkApiTechDoc(md)
+  assert.ok(r.issues.some((i) => i.includes('缺少非空的“图示目标”')))
+})
+
+test('Mermaid 图缺少关键结论报错', () => {
+  const md = GOOD.replace('**关键结论 / 不变量**\n\n- 服务 A 负责发起请求，服务 B 负责处理。\n', '')
+  const r = checkApiTechDoc(md)
+  assert.ok(r.issues.some((i) => i.includes('缺少非空的“关键结论 / 不变量” bullet')))
+})
+
+test('Mermaid 图的关键结论必须包含非空 bullet', () => {
+  const md = GOOD.replace('- 服务 A 负责发起请求，服务 B 负责处理。', '暂无。')
+  const r = checkApiTechDoc(md)
+  assert.ok(r.issues.some((i) => i.includes('缺少非空的“关键结论 / 不变量” bullet')))
 })
 
 test('已选可选章节缺失报错，未选的不报', () => {

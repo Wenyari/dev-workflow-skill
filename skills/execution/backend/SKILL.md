@@ -79,11 +79,12 @@ L3 的 PRD Review 存在阻塞项时不得生成 `api-tech.md`；严重项必须
 
 ### `$backend api-tech`
 
-用途：生成后端技术方案文档，包括接口设计、数据模型、核心流程、边界异常、风险和待确认项。
+用途：生成后端技术方案文档，包括核心流程、数据模型、接口设计、边界异常、风险和待确认项。
 
 必须读取：
 
 - [references/api-tech.md](./references/api-tech.md)
+- [references/mermaid.md](./references/mermaid.md)
 - [templates/api-tech.md](./templates/api-tech.md)
 
 生成后使用 [scripts/check_api_tech_doc.mjs](./scripts/check_api_tech_doc.mjs) 做文档静态检查。
