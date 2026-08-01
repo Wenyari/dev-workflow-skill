@@ -14,6 +14,7 @@ export const COPY_PLAN = [
   { kind: 'dir', target: 'agent', srcRel: 'skills/execution', destRel: 'skills/execution' },
   { kind: 'dir', target: 'agent', srcRel: 'skills/review', destRel: 'skills/review' },
   { kind: 'dir', target: 'agent', srcRel: 'tools/lark', destRel: 'tools/lark' },
+  { kind: 'dir', target: 'agent', srcRel: 'tools/mermaid', destRel: 'tools/mermaid' },
   { kind: 'dir', target: 'agent', srcRel: 'tools/product-design-specs', destRel: 'tools/product-design-specs' },
   { kind: 'file', target: 'workspace', srcRel: HAW_FILENAME, destRel: HAW_FILENAME }
 ]
