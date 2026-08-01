@@ -174,6 +174,7 @@ ER 图只回答表之间的静态关系，不表达请求顺序、跨表写入�
 - 超长物理表名使用短实体别名，图后补充“实体别名—物理表名”映射。
 - 链式关系优先 `direction LR`；中心表关联多个子表时优先 `direction TB`。
 - 不使用 Mermaid init 配置强制像素间距，避免飞书与其他渲染器版本不一致。
+- 详细 ER 图需要着色时，在关系定义后使用逐实体 `style`；不要把属性块与多条 `classDef` 混用，避免 Mermaid parser 兼容问题。
 
 ### 核心字段彩色 ER 图模板
 
@@ -209,14 +210,10 @@ erDiagram
   MASTER ||--o| PROJECTION : "聚合"
   REQUEST ||--o{ AUDIT : "记录"
 
-  classDef master fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,stroke-width:1.5px
-  classDef transaction fill:#fef3c7,stroke:#f59e0b,color:#78350f,stroke-width:1.5px
-  classDef projection fill:#dcfce7,stroke:#22c55e,color:#14532d,stroke-width:1.5px
-  classDef audit fill:#f3e8ff,stroke:#a855f7,color:#581c87,stroke-width:1.5px
-  class MASTER master
-  class REQUEST transaction
-  class PROJECTION projection
-  class AUDIT audit
+  style MASTER fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,stroke-width:2px
+  style REQUEST fill:#fef3c7,stroke:#f59e0b,color:#78350f,stroke-width:2px
+  style PROJECTION fill:#dcfce7,stroke:#22c55e,color:#14532d,stroke-width:2px
+  style AUDIT fill:#f3e8ff,stroke:#a855f7,color:#581c87,stroke-width:2px
 ```
 
 ### 纯关系彩色 ER 图模板

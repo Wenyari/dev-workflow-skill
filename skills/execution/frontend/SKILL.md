@@ -77,6 +77,7 @@ description: 前端研发执行工作流。适用于生成页面技术方案，�
 必须读取：
 
 - [references/page-tech.md](./references/page-tech.md)
+- [references/mermaid.md](./references/mermaid.md)
 - [templates/page-tech.md](./templates/page-tech.md)
 
 生成后使用 [scripts/check_page_tech_doc.mjs](./scripts/check_page_tech_doc.mjs) 做文档静态检查。
