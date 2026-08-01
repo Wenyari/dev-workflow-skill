@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.0 - 2026-08-01
+
 ### Added
 
 - 安装器将 `HUMAN_AGENT_WORKFLOW.md` 纳入 npm 包并复制到消费仓库根目录，沿用 skill 文件相同的跳过、覆盖或逐个确认策略。
