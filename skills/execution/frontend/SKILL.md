@@ -46,13 +46,13 @@ description: 前端研发执行工作流。适用于生成页面技术方案，�
 ## 下一步
 
 - `page-tech.md` 审核完成 → `$frontend page-build`
-- `page-build` 完成且基建 Review 通过 → 由用户进入 `figmaSync plan`
+- `page-build` 完成且基建 Review 通过 → 由用户进入 `figma-sync plan`
 - 基建 Review 未通过 → 保留问题与实际验证结果，修复后重新执行确认范围
 
 ## 明确不做
 
 - 不做 PRD↔UI 语义检查：该能力属于独立 Review 流程。
-- 不做最终视觉还原：本工作流只产出可交接基建，视觉实现由 `figmaSync` 承担。
+- 不做最终视觉还原：本工作流只产出可交接基建，视觉实现由 `figma-sync` 承担。
 - 不生成或修改后端接口：接口事实来自后端契约或仓库，前端流程不得反向臆造。
 - 不在未确认文件计划时写代码：`page-build` 的写入必须经过人工确认。
 
@@ -77,6 +77,7 @@ description: 前端研发执行工作流。适用于生成页面技术方案，�
 必须读取：
 
 - [references/page-tech.md](./references/page-tech.md)
+- [references/mermaid.md](./references/mermaid.md)
 - [templates/page-tech.md](./templates/page-tech.md)
 
 生成后使用 [scripts/check_page_tech_doc.mjs](./scripts/check_page_tech_doc.mjs) 做文档静态检查。

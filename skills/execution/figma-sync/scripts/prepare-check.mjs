@@ -1,18 +1,20 @@
 /**
  * Prepare Check
  *
- * 检查 figmaSync 原生 CSS 工作流依赖的技术栈与资源。分级输出：
+ * 检查 figma-sync 原生 CSS 工作流依赖的技术栈与资源。分级输出：
  *   - blocker: 缺失会阻塞 plan/apply
  *   - warning: 不影响运行但建议修复
  *   - info:    诊断信息
  *
  * 用法:
- *   pnpm figma:prepare
- *   pnpm figma:prepare --json
+ *   node prepare-check.mjs
+ *   node prepare-check.mjs --json
  */
 import { execSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+
+import { SKILL_ROOT } from './_shared/runtime-paths.mjs'
 
 const ROOT = process.cwd()
 
@@ -22,8 +24,7 @@ const CHECKS = [
   checkRequiredDeps,
   checkRequiredDevDeps,
   checkThemeCss,
-  checkPackageScripts,
-  checkGitignore,
+  checkBundledScripts,
   checkApexUiAvailable,
   checkCommonComponentSources,
   checkAssetSources,
@@ -162,50 +163,33 @@ function checkThemeCss() {
   return { level: 'info', name: 'theme-css', message: 'theme/dark CSS variables 源 OK' }
 }
 
-const REQUIRED_SCRIPTS = ['figma:report', 'figma:verify-plan']
-
-function checkPackageScripts() {
-  const pkg = readPackageJson()
-  const scripts = pkg.scripts ?? {}
-  return REQUIRED_SCRIPTS.map((name) =>
-    scripts[name]
-      ? { level: 'info', name: `script:${name}`, message: `script "${name}" OK` }
-      : {
-          level: 'blocker',
-          name: `script:${name}`,
-          message: `package.json scripts 缺少 "${name}"`,
-          fix: '参考 figmaSync SKILL.md 速查表补齐 scripts'
-        }
-  )
-}
-
-const REQUIRED_GITIGNORE = [
-  '.agent/skills/figmaSync/.session-log.jsonl',
-  '.agent/skills/figmaSync/session-report-plan.md',
-  '.agent/skills/figmaSync/session-report-apply.md'
+const REQUIRED_BUNDLED_SCRIPTS = [
+  'figma-sync-report.mjs',
+  'icon-inventory.mjs',
+  'lookup-var.mjs',
+  'match-token.mjs',
+  'prepare-check.mjs',
+  'verify-plan.mjs'
 ]
 
-function checkGitignore() {
-  const p = path.join(ROOT, '.gitignore')
-  if (!fs.existsSync(p)) {
-    return {
-      level: 'warning',
-      name: 'gitignore',
-      message: '.gitignore 不存在',
-      fix: '至少忽略 figmaSync session 文件'
-    }
-  }
-  const text = fs.readFileSync(p, 'utf-8')
-  const missing = REQUIRED_GITIGNORE.filter((line) => !text.includes(line))
+function checkBundledScripts() {
+  const scriptsDir = path.join(SKILL_ROOT, 'scripts')
+  const missing = REQUIRED_BUNDLED_SCRIPTS.filter(
+    (name) => !fs.existsSync(path.join(scriptsDir, name))
+  )
   if (missing.length > 0) {
     return {
-      level: 'warning',
-      name: 'gitignore',
-      message: `.gitignore 缺项：${missing.join(', ')}`,
-      fix: '把缺失行追加到 .gitignore'
+      level: 'blocker',
+      name: 'bundled-scripts',
+      message: `Skill 内置脚本缺失：${missing.join(', ')}`,
+      fix: '重新安装完整的 figma-sync Skill，不要在消费项目中手工补同名脚本'
     }
   }
-  return { level: 'info', name: 'gitignore', message: '.gitignore OK' }
+  return {
+    level: 'info',
+    name: 'bundled-scripts',
+    message: `Skill 内置脚本 ${REQUIRED_BUNDLED_SCRIPTS.length} 个，路径可用`
+  }
 }
 
 function checkApexUiAvailable() {

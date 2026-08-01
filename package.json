@@ -11,12 +11,17 @@
     "src",
     "skills",
     "tools",
+    "HUMAN_AGENT_WORKFLOW.md",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
   ],
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0",
+    "mermaid": "11.16.0"
   },
   "publishConfig": {
     "access": "public"
