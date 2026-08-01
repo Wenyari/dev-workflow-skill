@@ -1,6 +1,6 @@
 ---
 name: backend
-description: 后端研发执行工作流。适用于生成后端技术方案、判断当前交付阶段，以及为已实现接口生成或执行集成测试并输出正式报告；不虚构尚未建设的后端代码生成和交付 Review 能力。
+description: 面向任意后端语言和框架的研发执行工作流。适用于生成后端技术方案、判断当前交付阶段，以及根据仓库原生测试惯例为已实现接口生成或执行接口测试并输出正式报告；不虚构尚未建设的后端代码生成和交付 Review 能力。
 ---
 
 # 后端研发工作流
@@ -16,7 +16,7 @@ description: 后端研发执行工作流。适用于生成后端技术方案、�
 
 ## 这个 skill 解决什么问题
 
-基于需求、接口和仓库事实生成可审核的后端技术方案，并在接口实现存在后生成或执行接口集成测试、说明验证边界和正式结果。
+基于需求、接口和仓库事实生成可审核的后端技术方案，并在接口实现存在后按项目真实语言、框架和测试运行器生成或执行接口测试，说明测试层级、验证边界和正式结果。
 
 ## 什么时候用
 
@@ -41,7 +41,7 @@ description: 后端研发执行工作流。适用于生成后端技术方案、�
 | 产物 | 位置 | 下游消费者 |
 |---|---|---|
 | `api-tech.md` | 用户确认的项目文档目录 | 后端技术评审 / 人工实现 |
-| `*_test.go` 等接口测试代码（仅 `generate`） | 后端仓库内与项目惯例一致的位置 | `$backend integration-test run` / Code Review |
+| 项目原生接口测试代码（仅 `generate`） | 后端仓库内与语言、框架和既有测试惯例一致的位置 | `$backend integration-test run` / Code Review |
 | `backend-integration-test-report.md` | 用户确认的项目文档目录 | 开发者自查 / Code Review / 提测审核 |
 | 阶段与缺口说明 | 对话或评审记录 | 开发者 / 后续研发阶段 |
 
@@ -96,6 +96,7 @@ L3 的 PRD Review 存在阻塞项时不得生成 `api-tech.md`；严重项必须
 必须读取：
 
 - [references/integration-test.md](./references/integration-test.md)
+- [references/integration-test-stack.md](./references/integration-test-stack.md)
 - [references/integration-test-run.md](./references/integration-test-run.md)
 - [templates/backend-integration-test-report.md](./templates/backend-integration-test-report.md)
 
@@ -108,6 +109,7 @@ L3 的 PRD Review 存在阻塞项时不得生成 `api-tech.md`；严重项必须
 必须读取：
 
 - [references/integration-test.md](./references/integration-test.md)
+- [references/integration-test-stack.md](./references/integration-test-stack.md)
 - [references/integration-test-generate.md](./references/integration-test-generate.md)
 - [references/integration-test-run.md](./references/integration-test-run.md)
 - [templates/backend-integration-test-report.md](./templates/backend-integration-test-report.md)
