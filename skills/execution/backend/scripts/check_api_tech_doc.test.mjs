@@ -164,6 +164,38 @@ test('第二个接口不完整时逐条报错', () => {
   assert.ok(r.issues.some((i) => i.includes('接口「删除') && i.includes('错误码')))
 })
 
+test('更新类接口缺少并发控制时报错', () => {
+  const md = GOOD.replace('列表查询 · POST /api/x', '更新记录 · PATCH /api/x/{id}')
+  const r = checkApiTechDoc(md)
+
+  assert.ok(r.issues.some((i) => i.includes('更新类接口') && i.includes('并发控制')))
+})
+
+test('POST 状态变更路径也按更新类接口检查', () => {
+  const md = GOOD.replace('列表查询 · POST /api/x', '状态操作 · POST /api/x/changeStatus')
+  const r = checkApiTechDoc(md)
+
+  assert.ok(r.issues.some((i) => i.includes('更新类接口') && i.includes('并发控制')))
+})
+
+test('更新类接口使用 expectedUpdatedAt 时通过', () => {
+  const md = GOOD
+    .replace('列表查询 · POST /api/x', '更新记录 · PATCH /api/x/{id}')
+    .replace('- 无副作用。', '- 更新名称。\n\n**并发控制**：请求携带 expectedUpdatedAt，数据库条件更新失败时返回并发冲突。')
+  const r = checkApiTechDoc(md)
+
+  assert.equal(r.ok, true, JSON.stringify(r.issues))
+})
+
+test('更新类接口可以说明不采用乐观锁的依据与替代保护', () => {
+  const md = GOOD
+    .replace('列表查询 · POST /api/x', '启用记录 · POST /api/x/enable')
+    .replace('- 无副作用。', '- 切换启用状态。\n\n**并发控制**：不采用乐观锁；操作按目标状态幂等写入，并通过数据库行锁串行化同一记录。')
+  const r = checkApiTechDoc(md)
+
+  assert.equal(r.ok, true, JSON.stringify(r.issues))
+})
+
 test('核心流程、数据模型、接口设计必须按顺序出现', () => {
   const flowStart = GOOD.indexOf('# 核心流程 / 时序')
   const modelStart = GOOD.indexOf('# 数据模型 / 数据库设计')
@@ -177,10 +209,25 @@ test('核心流程、数据模型、接口设计必须按顺序出现', () => {
   assert.ok(r.issues.some((i) => i.includes('章节顺序错误')))
 })
 
-test('核心流程缺少主图时报错', () => {
+test('核心流程缺少主图和无需配图原因时报错', () => {
   const md = GOOD.replace(/\*\*图示目标\*\*[\s\S]*?\*\*关键结论 \/ 不变量\*\*[\s\S]*?- 服务 A 负责发起请求，服务 B 负责处理。/, '仅用文字描述流程。')
   const r = checkApiTechDoc(md)
-  assert.ok(r.issues.some((i) => i.includes('缺少 Mermaid 主图')))
+  assert.ok(r.issues.some((i) => i.includes('Mermaid 主图或非空的“无需配图原因”')))
+})
+
+test('简单方案可以只提供无需配图原因', () => {
+  const md = GOOD.replace(
+    /\*\*图示目标\*\*[\s\S]*?\*\*关键结论 \/ 不变量\*\*[\s\S]*?- 服务 A 负责发起请求，服务 B 负责处理。/,
+    '**无需配图原因**：单表无状态 CRUD，字段表和接口契约已足以完成评审。'
+  )
+  const r = checkApiTechDoc(md)
+  assert.equal(r.ok, true, JSON.stringify(r.issues))
+})
+
+test('不能同时提供 Mermaid 图和无需配图原因', () => {
+  const md = GOOD.replace('# 数据模型 / 数据库设计', '**无需配图原因**：不需要图。\n\n# 数据模型 / 数据库设计')
+  const r = checkApiTechDoc(md)
+  assert.ok(r.issues.some((i) => i.includes('不能同时包含')))
 })
 
 test('一张有效主图即可通过，不强制附加图', () => {

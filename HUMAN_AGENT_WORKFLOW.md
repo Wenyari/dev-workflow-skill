@@ -73,7 +73,7 @@ flowchart TD
 |---|---|---|---|---|---|
 |L0 快速协作|文案、CSS spacing、单字段展示、明显 bug、单文件小修|读代码 \-\> 复述计划 \-\> 修改 \-\> 验证 \-\> 摘要|20%|80%|否|
 |L1 轻量流程|单组件、单接口、小交互、已有页面局部增强|Mini Intake \-\> Mini Plan \-\> 修改 \-\> 验证|35%|65%|通常不需要|
-|L2 标准流程|新页面、列表表单、Figma 视觉落地、多接口页面|Context Intake \-\> page\-tech \-\> contract\-check \-\> page\-build \-\> figmaSync|45%|55%|需要|
+|L2 标准流程|新页面、列表表单、Figma 视觉落地、多接口页面|Context Intake \-\> page\-tech \-\> contract\-check \-\> page\-build \-\> figma-sync|45%|55%|需要|
 |L3 完整流程|权限复杂、跨页面联动、公共组件改动、复杂状态、架构调整|九阶段完整流程 \+ 回滚规则 \+ review 节点|55%|45%|必须|
 
 
@@ -221,8 +221,8 @@ $frontend page-tech
 $frontend page-build · Contract Check
 $frontend page-build · Build
 $frontend page-build · Foundation Review
-figmaSync plan
-figmaSync apply
+figma-sync plan
+figma-sync apply
 Human 验收
 ```
 
@@ -266,8 +266,8 @@ flowchart LR
     D --> E["frontend · page-build · Contract Check"]
     E --> F["frontend · page-build · Build"]
     F --> G["frontend · page-build · Foundation Review"]
-    G --> H["figmaSync plan"]
-    H --> I["figmaSync apply 与验收"]
+    G --> H["figma-sync plan"]
+    H --> I["figma-sync apply 与验收"]
 ```
 
 
@@ -281,8 +281,8 @@ flowchart LR
 |page\-build · Contract Check|检查方案是否可落地|Agent|20%|80%|是|
 |page\-build · Build|创建页面基建文件|Agent|25%|75%|是|
 |page\-build · Foundation Review|复核实际改动并生成基建快照|Human \+ Agent|50%|50%|是|
-|figmaSync plan|生成视觉实施计划|Agent|30%|70%|是|
-|figmaSync apply 与验收|实施视觉并验收体验|Agent 执行，Human 验收|45%|55%|是|
+|figma-sync plan|生成视觉实施计划|Agent|30%|70%|是|
+|figma-sync apply 与验收|实施视觉并验收体验|Agent 执行，Human 验收|45%|55%|是|
 
 
 
@@ -444,7 +444,7 @@ flowchart LR
 
 - 类型定义必须能支撑后续接口联调。
 
-- 可以加入 `TODO(figmaSync)` 标记视觉待落地位置。
+- 可以加入 `TODO(figma-sync)` 标记视觉待落地位置。
 
 - 可以加入 `TODO(api)` 标记接口待联调位置。
 
@@ -490,7 +490,7 @@ flowchart LR
 
 - 禁止人工手写或手改。
 
-- 每次 figmaSync plan 前必须重新生成或重新扫描。
+- 每次 figma-sync plan 前必须重新生成或重新扫描。
 
 - 如果快照与上一次不一致，Agent 必须提示 Human 确认影响。
 
@@ -520,11 +520,11 @@ flowchart LR
 
 - 状态归属。
 
-- figmaSync 允许修改的文件。
+- figma-sync 允许修改的文件。
 
-- figmaSync 禁止修改的文件。
+- figma-sync 禁止修改的文件。
 
-### **5\.6 figmaSync plan**
+### **5\.6 figma-sync plan**
 
 
 
@@ -572,7 +572,7 @@ flowchart LR
 
 - 不因为 Figma 图层结构而重拆业务组件。
 
-### **5\.7 figmaSync apply 与验收**
+### **5\.7 figma-sync apply 与验收**
 
 
 
@@ -596,7 +596,7 @@ flowchart LR
 
 - Human 负责体验验收和最终放行。
 
-- 验收不通过时，回到 figmaSync plan 或更早阶段定位原因。
+- 验收不通过时，回到 figma-sync plan 或更早阶段定位原因。
 
 ## **6\. 回滚与增量执行**
 
@@ -618,7 +618,7 @@ flowchart LR
 
 - page\-build 只创建缺失文件，不覆盖已存在文件。
 
-- figmaSync plan 只追加新节点计划，不重写已审核章节。
+- figma-sync plan 只追加新节点计划，不重写已审核章节。
 
 - Agent 必须说明新增内容和不受影响内容。
 
@@ -638,9 +638,9 @@ flowchart LR
 
 - contract\-check 发现路由、接口、类型不一致，回滚到 page\-tech。
 
-- figmaSync apply 发现基建缺失，回滚到 page\-build 增量执行。
+- figma-sync apply 发现基建缺失，回滚到 page\-build 增量执行。
 
-- 验收发现体验方向错误，回滚到 figmaSync plan。
+- 验收发现体验方向错误，回滚到 figma-sync plan。
 
 回滚记录：
 

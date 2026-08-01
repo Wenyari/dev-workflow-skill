@@ -47,6 +47,55 @@ async function writeFile(from, to) {
   await fs.copyFile(from, to)
 }
 
+// 复制单个源文件到目标文件，沿用与目录复制相同的冲突策略。
+export async function copyFile(srcAbs, destAbs, { conflict = CONFLICT.SKIP, onConflict, state = {} } = {}) {
+  let sourceStat
+  try {
+    sourceStat = await fs.stat(srcAbs)
+  } catch {
+    throw new Error(`源文件不存在：${srcAbs}`)
+  }
+  if (!sourceStat.isFile()) {
+    throw new Error(`源路径不是文件：${srcAbs}`)
+  }
+
+  const stats = { copied: 0, skipped: 0, overwritten: 0 }
+  const exists = await pathExists(destAbs)
+  if (!exists) {
+    await writeFile(srcAbs, destAbs)
+    stats.copied++
+    return stats
+  }
+
+  let mode = conflict
+  if (mode === CONFLICT.PROMPT) {
+    if (state.restOverride) {
+      mode = state.restOverride
+    } else {
+      const decision = await onConflict(destAbs)
+      if (decision === CONFLICT_DECISION.SKIP_REST) {
+        state.restOverride = CONFLICT.SKIP
+        mode = CONFLICT.SKIP
+      } else if (decision === CONFLICT_DECISION.OVERWRITE_REST) {
+        state.restOverride = CONFLICT.OVERWRITE
+        mode = CONFLICT.OVERWRITE
+      } else if (decision === CONFLICT_DECISION.OVERWRITE_ONE) {
+        mode = CONFLICT.OVERWRITE
+      } else {
+        mode = CONFLICT.SKIP
+      }
+    }
+  }
+
+  if (mode === CONFLICT.OVERWRITE) {
+    await writeFile(srcAbs, destAbs)
+    stats.overwritten++
+  } else {
+    stats.skipped++
+  }
+  return stats
+}
+
 // 复制单个源目录到目标目录，返回统计。
 // state 让「本次全部这样」的决定跨目录延续；调用方在整个安装流程内共享一个 state 对象。
 export async function copyDir(srcAbs, destAbs, { conflict = CONFLICT.SKIP, onConflict, state = {} } = {}) {
@@ -58,38 +107,10 @@ export async function copyDir(srcAbs, destAbs, { conflict = CONFLICT.SKIP, onCon
   for (const rel of files) {
     const from = path.join(srcAbs, rel)
     const to = path.join(destAbs, rel)
-    const exists = await pathExists(to)
-    if (!exists) {
-      await writeFile(from, to)
-      stats.copied++
-      continue
-    }
-    // 冲突分派
-    let mode = conflict
-    if (mode === CONFLICT.PROMPT) {
-      if (state.restOverride) {
-        mode = state.restOverride
-      } else {
-        const decision = await onConflict(to)
-        if (decision === CONFLICT_DECISION.SKIP_REST) {
-          state.restOverride = CONFLICT.SKIP
-          mode = CONFLICT.SKIP
-        } else if (decision === CONFLICT_DECISION.OVERWRITE_REST) {
-          state.restOverride = CONFLICT.OVERWRITE
-          mode = CONFLICT.OVERWRITE
-        } else if (decision === CONFLICT_DECISION.OVERWRITE_ONE) {
-          mode = CONFLICT.OVERWRITE
-        } else {
-          mode = CONFLICT.SKIP
-        }
-      }
-    }
-    if (mode === CONFLICT.OVERWRITE) {
-      await writeFile(from, to)
-      stats.overwritten++
-    } else {
-      stats.skipped++
-    }
+    const fileStats = await copyFile(from, to, { conflict, onConflict, state })
+    stats.copied += fileStats.copied
+    stats.skipped += fileStats.skipped
+    stats.overwritten += fileStats.overwritten
   }
   return stats
 }

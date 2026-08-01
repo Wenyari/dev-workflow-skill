@@ -1,4 +1,4 @@
-# `figmaSync plan <figma-url>`
+# `figma-sync plan <figma-url>`
 
 输入 Figma URL（含 `node-id`），输出可审核的落地计划：
 
@@ -11,7 +11,7 @@
 
 ## 代码事实优先原则
 
-`figmaSync plan` 必须以真实代码文件为事实来源，不能根据 Figma 图层或
+`figma-sync plan` 必须以真实代码文件为事实来源，不能根据 Figma 图层或
 `page-tech.md` 重新拆业务结构。
 
 必须读取：
@@ -48,7 +48,7 @@
 ### Step 1 — Session 边界
 
 ```bash
-pnpm figma:report --reset
+node "{figma-sync-skill-dir}/scripts/figma-sync-report.mjs" --reset
 ```
 
 清空 `.session-log.jsonl`，避免上一轮命中数据污染本次报告。
@@ -84,7 +84,7 @@ sed -n '1,220p' <target-route-dir>/constants.ts 2>/dev/null
 `foundation-summary.md`，必须读取它并说明其是否最新。
 
 如果缺少或无法确认 `foundation-summary.md` 为最新版本，停止 `plan`，提示用户先完成
-`$frontend page-build` 的 Foundation Review。`figmaSync` 不直接运行 frontend
+`$frontend page-build` 的 Foundation Review。`figma-sync` 不直接运行 frontend
 目录中的脚本；两个 skill 只通过 `foundation-summary.md` 交接。
 
 ### Step 3 — 询问用户存放位置
@@ -101,11 +101,7 @@ sed -n '1,220p' <target-route-dir>/constants.ts 2>/dev/null
 
 ### Step 4 — Figma MCP 试探
 
-```
-mcp__figma-remote-mcp__whoami
-```
-
-失败则中断，提示用户登录 Figma MCP。
+使用当前环境实际提供的 Figma 身份检查能力（通常名为 `whoami`）试探，不写死 MCP server 名称。失败则中断，提示用户登录 Figma MCP。
 
 ### Step 5 — 解析 Figma 节点
 
@@ -127,7 +123,7 @@ mcp__figma-remote-mcp__whoami
 运行：
 
 ```bash
-node .agent/skills/figmaSync/scripts/icon-inventory.mjs --pretty
+node "{figma-sync-skill-dir}/scripts/icon-inventory.mjs" --pretty
 ```
 
 扫描范围只允许来自真实存在的目录：
@@ -218,7 +214,7 @@ PLAN.md 的 `## 2. 组件映射决策` 必须体现最终归属；`## 5. CSS 草
 - 每个拆分出的子模块/组件所对应的文件路径及 CSS 拆分安排。
 - 现有基建事实来源：route、components、service、types、constants 或
   `foundation-summary.md`。
-- figmaSync 允许修改和禁止修改的范围。
+- figma-sync 允许修改和禁止修改的范围。
 
 ### Step 9 — CSS 变量匹配
 
@@ -281,7 +277,7 @@ designContextStatus 取值约定：
   gap: var(--spacing-12);
 }
 
-/* TODO(figmaSync): unmatched border color #d7d9df from node 10:18; needs user confirmation */
+/* TODO(figma-sync): unmatched border color #d7d9df from node 10:18; needs user confirmation */
 ```
 
 ### Step 11 — 计算 frontmatter 锚点
@@ -323,7 +319,7 @@ plannedAt: <ISO 时间戳>
 落盘 PLAN.md 和 figma-plan.css 后立即跑：
 
 ```bash
-pnpm figma:verify-plan <path/to/PLAN.md>
+node "{figma-sync-skill-dir}/scripts/verify-plan.mjs" "{plan-md-path}"
 ```
 
 FAIL 必须修正后再继续。
@@ -339,10 +335,10 @@ FAIL 必须修正后再继续。
 ### Step 14 — 生成 session 报告
 
 ```bash
-pnpm figma:report \
+node "{figma-sync-skill-dir}/scripts/figma-sync-report.mjs" \
   --command=plan \
-  --plan=<PLAN.md 路径> \
-  --target-dir=<PLAN.md 所在目录>
+  --plan="{plan-md-path}" \
+  --target-dir="{plan-directory}"
 ```
 
 最终回复必须包含：

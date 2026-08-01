@@ -1,6 +1,6 @@
 # 原生 CSS 草案模式
 
-figmaSync plan 阶段生成 `figma-plan.css`，用于让用户在编码前审核样式结构。
+figma-sync plan 阶段生成 `figma-plan.css`，用于让用户在编码前审核样式结构。
 
 ## 1. 页面根与区块 class
 
@@ -98,7 +98,7 @@ figmaSync plan 阶段生成 `figma-plan.css`，用于让用户在编码前审核
 无法匹配 `/theme` 的样式必须写 TODO 注释，等待用户审核。
 
 ```css
-/* TODO(figmaSync): unmatched color #123456 from node 10:18; needs user confirmation */
+/* TODO(figma-sync): unmatched color #123456 from node 10:18; needs user confirmation */
 .client-page__custom-card {
   border-color: #123456;
 }

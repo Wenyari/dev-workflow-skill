@@ -1,6 +1,6 @@
 # 后端技术方案 Mermaid 规范
 
-Mermaid 图用于降低技术评审的理解成本，不用于装饰文档。每份后端技术方案在「核心流程 / 时序」中至少保留一张主图；主图类型根据核心技术问题选择，不固定为时序图。其他图只有在回答新的独立评审问题时才增加。
+Mermaid 图用于降低技术评审的理解成本，不用于装饰文档。方案命中选图条件时，在「核心流程 / 时序」中至少保留一张主图；主图类型根据核心技术问题选择，不固定为时序图。其他图只有在回答新的独立评审问题时才增加。
 
 ## 选图流程
 
@@ -15,7 +15,9 @@ Mermaid 图用于降低技术评审的理解成本，不用于装饰文档。每
 | 一次业务操作如何读写、聚合和补偿多张表 | `flowchart LR` / `flowchart TD` 表数据流转图 | 跨表事务、派生数据、审计记录、补偿或回收任务 |
 | 条件、幂等、重试和异常如何分支 | `flowchart TD` 业务流程图 | 三类以上分支或存在并发、重试、降级 |
 
-不满足上述触发条件时，不追加对应图。默认先生成一张主图；复杂方案通常控制在 1–3 张，超过时逐图判断是否能合并或删除，但不设置绝对数量上限。
+命中任一触发条件时，先生成一张回答最重要评审问题的主图。复杂方案通常控制在 1–3 张，超过时逐图判断是否能合并或删除，但不设置绝对数量上限。
+
+所有触发条件都不满足时，不为通过模板检查而生成图；在「核心流程 / 时序」中写一条非空的 **无需配图原因**，具体说明为何文字和表格已足以完成评审。「有 Mermaid 图」与「无需配图原因」只能二选一。
 
 ## 每张图的交付契约
 
@@ -64,10 +66,12 @@ flowchart LR
   subgraph A["领域 A · 资源所有者"]
     A1[核心服务]:::domain
   end
+
   subgraph B["领域 B · 业务所有者"]
     B1[业务服务]:::domain
     B2[共享 Adapter]:::adapter
   end
+
   EXT[外部系统]:::external
 
   A1 -->|提供资源标识与状态| B1
@@ -150,6 +154,7 @@ stateDiagram-v2
   classDef active fill:#dcfce7,stroke:#22c55e,color:#14532d
   classDef terminal fill:#f1f5f9,stroke:#64748b,color:#1e293b
   classDef risk fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
+
   class PENDING,REVOKING pending
   class ACTIVE active
   class REJECTED,REVOKED terminal
@@ -162,8 +167,8 @@ ER 图只回答表之间的静态关系，不表达请求顺序、跨表写入�
 
 ### 选择模板
 
-- 3–6 张核心表：使用“核心字段彩色 ER 图”。
-- 超过 6 张表或关系密集：按领域拆图，或使用“纯关系彩色 ER 图”。
+- 3–6 张核心表：使用“核心字段 ER 图”。
+- 超过 6 张表或关系密集：按领域拆图，或使用“纯关系 ER 图”。
 - 只有简单单表 CRUD，或简单外键已能用一句话说明：不画 ER 图。
 
 ### 防拥挤规则
@@ -174,9 +179,11 @@ ER 图只回答表之间的静态关系，不表达请求顺序、跨表写入�
 - 超长物理表名使用短实体别名，图后补充“实体别名—物理表名”映射。
 - 链式关系优先 `direction LR`；中心表关联多个子表时优先 `direction TB`。
 - 不使用 Mermaid init 配置强制像素间距，避免飞书与其他渲染器版本不一致。
-- 详细 ER 图需要着色时，在关系定义后使用逐实体 `style`；不要把属性块与多条 `classDef` 混用，避免 Mermaid parser 兼容问题。
+- ER 图不使用 `classDef` / `class`；实体角色通过命名和图后文字说明，避免混入 ER 语法不支持的样式指令。
 
-### 核心字段彩色 ER 图模板
+### 核心字段 ER 图模板
+
+只保留理解实体关系所需的关键字段；通过基数和实线/虚线表达关系性质，并在图后说明主数据、过程数据、派生数据和审计记录等实体角色。
 
 ```mermaid
 erDiagram
@@ -187,18 +194,21 @@ erDiagram
     string owner_id UK
     string status
   }
+
   REQUEST["Business Request"] {
     string id PK
     string master_id FK
     string approval_status
     string grant_status
   }
+
   PROJECTION["Current Projection"] {
     string id PK
     string master_id FK
     string content_hash
     string sync_status
   }
+
   AUDIT["Operation Record"] {
     string id PK
     string request_id FK
@@ -209,18 +219,14 @@ erDiagram
   MASTER ||--o{ REQUEST : "发起"
   MASTER ||--o| PROJECTION : "聚合"
   REQUEST ||--o{ AUDIT : "记录"
-
-  style MASTER fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,stroke-width:2px
-  style REQUEST fill:#fef3c7,stroke:#f59e0b,color:#78350f,stroke-width:2px
-  style PROJECTION fill:#dcfce7,stroke:#22c55e,color:#14532d,stroke-width:2px
-  style AUDIT fill:#f3e8ff,stroke:#a855f7,color:#581c87,stroke-width:2px
 ```
 
-### 纯关系彩色 ER 图模板
+### 纯关系 ER 图模板
 
 ```mermaid
 erDiagram
   direction TB
+
   MASTER["Master Entity"]
   REQUEST["Business Request"]
   PROJECTION["Current Projection"]
@@ -231,17 +237,6 @@ erDiagram
   MASTER ||--o| PROJECTION : "聚合"
   REQUEST ||--o{ AUDIT : "记录"
   CONFIG ||--o{ REQUEST : "约束"
-
-  classDef master fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a
-  classDef transaction fill:#fef3c7,stroke:#f59e0b,color:#78350f
-  classDef projection fill:#dcfce7,stroke:#22c55e,color:#14532d
-  classDef audit fill:#f3e8ff,stroke:#a855f7,color:#581c87
-  classDef config fill:#f1f5f9,stroke:#64748b,color:#1e293b
-  class MASTER master
-  class REQUEST transaction
-  class PROJECTION projection
-  class AUDIT audit
-  class CONFIG config
 ```
 
 ## 表数据流转图
@@ -268,6 +263,7 @@ flowchart LR
     AGG -->|upsert version / hash| POLICY[(聚合结果表)]:::projection
     POLICY -->|更新生效状态| REQ
   end
+
   REQ -->|追加操作记录| AUDIT[(操作记录表)]:::audit
 ```
 
@@ -304,7 +300,8 @@ flowchart TD
 
 ## 生成前自检
 
-- 核心流程是否已有一张能够代表本方案技术重点的主图？
+- 是否逐项核对选图条件，并在「主图」与「无需配图原因」之间只保留一种交付？
+- 命中条件时，核心流程是否已有一张能够代表本方案技术重点的主图？
 - 每张附加图是否回答了主图没有回答的新问题？
 - 删除任一附加图后，是否会丢失重要评审信息？不会则删除。
 - 图中的模块、表、状态、接口和依赖是否都有需求或仓库事实依据？

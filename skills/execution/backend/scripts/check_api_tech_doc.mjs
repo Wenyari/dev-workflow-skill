@@ -86,6 +86,29 @@ function hasNonemptyErrorCodes(section) {
   return /\*\*错误码\*\*\s*[\uff1a:]\s*\S+/.test(section)
 }
 
+function isUpdateApiEntry(title) {
+  if (/\b(?:PUT|PATCH)\b/i.test(title)) return true
+
+  const displayName = title.split('·')[0].trim()
+  if (/^(?:更新|编辑|修改|变更|启用|禁用|调整|切换)/.test(displayName)) return true
+
+  return /\bPOST\b.*\/(?:update|edit|modify|change[-_]?status|set[-_]?status|enable|disable)(?:\/|\b)/i.test(
+    title
+  )
+}
+
+function hasConcurrencyControl(section) {
+  const match = /\*\*并发控制\*\*\s*[\uff1a:]\s*([^\n]+)/.exec(section)
+  if (!match) return false
+
+  const statement = match[1].trim()
+  if (!statement || /^<[^>]+>$/.test(statement) || statement === '无') return false
+
+  return /expectedUpdatedAt|expectedVersion|\bversion\b|版本号|乐观锁|If-Match|ETag|\bCAS\b|compare-and-swap|条件更新|行锁|悲观锁|串行化|serializable|不采用乐观锁|无需乐观锁/i.test(
+    statement
+  )
+}
+
 function getProseWithoutFences(markdown) {
   return markdown.replace(/```[^\n]*\n[\s\S]*?```/g, '')
 }
@@ -102,6 +125,9 @@ function hasDiagramConclusion(segment) {
   return /^\s*[-*]\s+\S+/.test(body)
 }
 
+function hasNoDiagramReason(section) {
+  return /\*\*无需配图原因\*\*\s*[\uff1a:]\s*\S+/.test(section)
+}
 
 function getPreviousHeadingEnd(markdown, position) {
   const prefix = markdown.slice(0, position)
@@ -167,6 +193,11 @@ export function checkApiTechDoc(markdown, options = {}) {
         issues.push(`${prefix}缺少入参 DTO 或出参 data 的 TypeScript 代码块`)
       }
       if (!hasBoldLabel(entry.content, '说明')) issues.push(`${prefix}缺少“说明”`)
+      if (isUpdateApiEntry(entry.title) && !hasConcurrencyControl(entry.content)) {
+        issues.push(
+          `${prefix}属于更新类接口，缺少可复核的“并发控制”；请说明 expectedUpdatedAt / version 等冲突检测语义，或不采用乐观锁的依据与替代保护`
+        )
+      }
       if (!hasNonemptyErrorCodes(entry.content)) issues.push(`${prefix}缺少非空的“错误码”`)
     }
   }
@@ -186,8 +217,15 @@ export function checkApiTechDoc(markdown, options = {}) {
   }
 
   const flowSection = getSection(markdown, '核心流程 / 时序')
-  if (flowSection && extractMermaidBlocks(flowSection).length === 0) {
-    issues.push('核心流程 / 时序缺少 Mermaid 主图')
+  if (flowSection) {
+    const flowMermaidCount = extractMermaidBlocks(flowSection).length
+    const noDiagramReason = hasNoDiagramReason(flowSection)
+    if (flowMermaidCount === 0 && !noDiagramReason) {
+      issues.push('核心流程 / 时序必须提供 Mermaid 主图或非空的“无需配图原因”')
+    }
+    if (flowMermaidCount > 0 && noDiagramReason) {
+      issues.push('核心流程 / 时序不能同时包含 Mermaid 图和“无需配图原因”')
+    }
   }
 
   const mermaidBlocks = inspectMermaidMarkdown(markdown).diagrams

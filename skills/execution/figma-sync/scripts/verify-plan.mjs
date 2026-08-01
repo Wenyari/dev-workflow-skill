@@ -19,7 +19,7 @@
  *   4. figma-plan.css 是否存在，且不包含 Panda CSS 相关内容
  *
  * 用法:
- *   pnpm figma:verify-plan path/to/PLAN.md
+ *   node "{figma-sync-skill-dir}/scripts/verify-plan.mjs" path/to/PLAN.md
  *
  * 退出码:
  *   0 = 全通过 / 仅 warning
@@ -35,7 +35,9 @@ const APEX_UI_DIST = 'node_modules/@frontend/apex-ui--react/dist/llm'
 function main() {
   const planPath = process.argv[2]
   if (!planPath || !fs.existsSync(planPath)) {
-    console.error('[verify-plan] usage: pnpm figma:verify-plan <path/to/PLAN.md>')
+    console.error(
+      '[verify-plan] usage: node "{figma-sync-skill-dir}/scripts/verify-plan.mjs" <path/to/PLAN.md>'
+    )
     process.exit(1)
   }
 

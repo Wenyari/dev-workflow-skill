@@ -168,7 +168,7 @@ ${renderTable(typeRows, '| - | 未发现类型导出 |')}
 |---|---|
 ${renderTable(constRows, '| - | 未发现常量导出 |')}
 
-## 7. figmaSync 允许修改范围
+## 7. figma-sync 允许修改范围
 
 - 布局。
 - CSS。
@@ -176,7 +176,7 @@ ${renderTable(constRows, '| - | 未发现常量导出 |')}
 - 局部展示结构。
 - PLAN.md 和 figma-plan.css。
 
-## 8. figmaSync 禁止修改范围
+## 8. figma-sync 禁止修改范围
 
 - 路由路径。
 - service 契约。

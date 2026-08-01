@@ -2,7 +2,7 @@
  * Match Token
  *
  * 用法:
- *   node .agent/skills/figmaSync/scripts/match-token.mjs "<value>" [--type=color|number]
+ *   node "{figma-sync-skill-dir}/scripts/match-token.mjs" "<value>" [--type=color|number]
  *
  * 行为:
  *   1. 加载 theme/dark CSS token 源

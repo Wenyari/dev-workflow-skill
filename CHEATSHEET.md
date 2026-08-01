@@ -16,15 +16,15 @@
 |---|---|---|---|
 | `$backend api-tech` | 生成后端技术方案；不生成后端业务代码 | PRD / 后端仓库 | `api-tech.md` |
 | `$backend integration-test run [scope]` | 执行已有接口集成测试；缺省 scope 时先根据代码变更识别并等待确认 | 后端仓库 / 已有测试 | `backend-integration-test-report.md` |
-| `$backend integration-test generate [scope]` | 为缺失接口生成或补充测试；写入前确认文件、用例和命令 | 后端接口实现 / 契约 | `*_test.go` + `backend-integration-test-report.md` |
+| `$backend integration-test generate [scope]` | 为缺失接口生成或补充测试；写入前确认文件、用例和命令 | 后端接口实现 / 契约 | 项目原生测试文件 + `backend-integration-test-report.md` |
 
-## figmaSync · 开发层
+## figma-sync · 开发层
 
 | 命令 | 用途 | 前置产物 | 输出产物 |
 |---|---|---|---|
-| `figmaSync prepare` | 检查环境 | — | 检查结果 |
-| `figmaSync plan <figma-url>` | 生成落地方案 | Figma URL + `foundation-summary.md` | `PLAN.md`, `figma-plan.css` |
-| `figmaSync apply` | 实施编码 | 已审 `PLAN.md` | 页面 CSS / 组件代码 |
+| `figma-sync prepare` | 检查环境 | — | 检查结果 |
+| `figma-sync plan <figma-url>` | 生成落地方案 | Figma URL + `foundation-summary.md` | `PLAN.md`, `figma-plan.css` |
+| `figma-sync apply` | 实施编码 | 已审 `PLAN.md` | 页面 CSS / 组件代码 |
 
 ## 评审层
 

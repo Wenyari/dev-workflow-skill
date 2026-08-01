@@ -1,14 +1,14 @@
 ---
-name: figmaSync
+name: figma-sync
 description:
-  Figma → 原生 CSS 落地规划工作流。命令路由：`figmaSync prepare`
-  检查环境；`figmaSync plan <figma-url>` 先读取真实页面基建和
+  Figma → 原生 CSS 落地规划工作流。命令路由：`figma-sync prepare`
+  检查环境；`figma-sync plan` 接收 Figma URL，先读取真实页面基建和
   foundation-summary，再分析设计稿，匹配 /theme CSS 变量、 Apex UI、common
-  component 与 assets，并落地 PLAN.md + figma-plan.css 草案； `figmaSync apply
+  component 与 assets，并落地 PLAN.md + figma-plan.css 草案； `figma-sync apply
   [path]` 根据已审核 PLAN.md 和 CSS 草案实施编码。
 ---
 
-# Figma to Native CSS (`/figmaSync`)
+# Figma to Native CSS (`/figma-sync`)
 
 ## 对齐边诊断
 
@@ -25,7 +25,7 @@ description:
 
 ## 什么时候用
 
-- 用户显式输入 `figmaSync prepare / plan / apply`
+- 用户显式输入 `figma-sync prepare / plan / apply`
 - 用户提供 Figma URL 并要求"还原视觉 / 生成页面样式"
 - 页面基建就绪，进入视觉落地阶段
 
@@ -47,8 +47,8 @@ description:
 
 ## 下一步
 
-- `prepare` 通过 → `figmaSync plan <figma-url>`
-- `plan` 输出 `PLAN.md` 人工评审后 → `figmaSync apply`
+- `prepare` 通过 → `figma-sync plan <figma-url>`
+- `plan` 输出 `PLAN.md` 人工评审后 → `figma-sync apply`
 - `apply` 完成 → 自测 / 联调
 
 ## 明确不做
@@ -64,16 +64,18 @@ description:
 
 此技能用于把 Figma 业务设计稿转换为可审核、可落地的 React + 原生 CSS 方案。
 
+命令中的 `{figma-sync-skill-dir}` 表示当前已加载 `SKILL.md` 所在目录的绝对路径。执行脚本时替换为真实路径；不要假定 Skill 安装在 `.agent`、`.agents` 或 `.claude` 中的某一个固定位置。
+
 核心原则：
 
 - 执行 admin-fe 任务时必须遵守项目根目录 `ADMIN_FE_WORKFLOW.md`。
-- L0/L1 小需求不强制进入 figmaSync；只有 Figma 视觉落地、新页面或页面级视觉重构才进入 plan/apply。
+- L0/L1 小需求不强制进入 figma-sync；只有 Figma 视觉落地、新页面或页面级视觉重构才进入 plan/apply。
 - 代码事实优先于设计稿推断；plan 阶段必须读取目标页面 route、components、service、types、constants 和最新
   `foundation-summary.md`。
 - 样式优先复用 `/theme` 中已有 CSS variables。
 - 能用 Apex UI props 解决的视觉，不写 CSS 覆盖。
 - 能复用 common component、业务组件、icons/assets 的，不重新造。
-- `figmaSync` 只补视觉、布局、Apex
+- `figma-sync` 只补视觉、布局、Apex
   UI 选型、CSS 和局部展示细节；不能重新规划路由、重写 service 契约、改变核心状态模型或因为 Figma 图层结构重拆业务组件。
 - `plan` 阶段必须同时产出 `PLAN.md` 和
   `figma-plan.css`，便于用户在编码前审核样式结构。
@@ -83,12 +85,12 @@ description:
 
 | 用户输入                            | 跳到                                         | 用途                                     |
 | ----------------------------------- | -------------------------------------------- | ---------------------------------------- |
-| `figmaSync prepare`                 | [chapters/prepare.md](./chapters/prepare.md) | 检查技术栈、/theme、Apex UI 与资产可用性 |
-| `figmaSync plan <figma-url>`        | [chapters/plan.md](./chapters/plan.md)       | 分析设计稿，落地 PLAN.md + CSS 审核草案  |
-| `figmaSync apply [path/to/PLAN.md]` | [chapters/apply.md](./chapters/apply.md)     | 根据已审核 PLAN.md 和 CSS 草案实施页面   |
+| `figma-sync prepare`                 | [chapters/prepare.md](./chapters/prepare.md) | 检查技术栈、/theme、Apex UI 与资产可用性 |
+| `figma-sync plan <figma-url>`        | [chapters/plan.md](./chapters/plan.md)       | 分析设计稿，落地 PLAN.md + CSS 审核草案  |
+| `figma-sync apply [path/to/PLAN.md]` | [chapters/apply.md](./chapters/apply.md)     | 根据已审核 PLAN.md 和 CSS 草案实施页面   |
 | 未指明命令，仅给 Figma 链接         | 询问用户是 `plan` 还是 `apply`               | —                                        |
 
-第一次使用必须先跑 `figmaSync prepare`。
+第一次使用必须先跑 `figma-sync prepare`。
 
 ## 0. CSS 变量体系一览
 
@@ -162,7 +164,7 @@ description:
 如果 Figma CSS 含 `var(--xxx, fallback)`，运行：
 
 ```bash
-node .agent/skills/figmaSync/scripts/lookup-var.mjs "var(--fill-neutral-primary, #090A0B)"
+node "{figma-sync-skill-dir}/scripts/lookup-var.mjs" "var(--fill-neutral-primary, #090A0B)"
 ```
 
 成功输出示例：
@@ -186,7 +188,7 @@ node .agent/skills/figmaSync/scripts/lookup-var.mjs "var(--fill-neutral-primary,
 仅当设计师把值写死为裸 `#hex`、`rgb()` 或 `Npx` 时运行：
 
 ```bash
-node .agent/skills/figmaSync/scripts/match-token.mjs "<value>"
+node "{figma-sync-skill-dir}/scripts/match-token.mjs" "<value>"
 ```
 
 成功输出推荐的 CSS variable 与 `/theme` 路径。命中后仍然在 `figma-plan.css`
@@ -279,7 +281,7 @@ slot。
 
 ## 4. CSS 草案规则
 
-`figmaSync plan` 必须在 PLAN.md 同目录生成：
+`figma-sync plan` 必须在 PLAN.md 同目录生成：
 
 ```text
 figma-plan.css
@@ -295,7 +297,7 @@ figma-plan.css
 - 未命中变量的注释，格式为：
 
 ```css
-/* TODO(figmaSync): unmatched color #123456 from node 1:2; needs user confirmation */
+/* TODO(figma-sync): unmatched color #123456 from node 1:2; needs user confirmation */
 ```
 
 该文件禁止包含：
@@ -308,10 +310,10 @@ figma-plan.css
 
 ### 任务开始
 
-每次 figmaSync 任务启动前必须清空旧 session 记录：
+每次 figma-sync 任务启动前必须清空旧 session 记录：
 
 ```bash
-pnpm figma:report --reset
+node "{figma-sync-skill-dir}/scripts/figma-sync-report.mjs" --reset
 ```
 
 ### plan 收尾
@@ -319,8 +321,8 @@ pnpm figma:report --reset
 必须运行：
 
 ```bash
-pnpm figma:verify-plan <path/to/PLAN.md>
-pnpm figma:report --command=plan --plan=<PLAN.md 路径> --target-dir=<PLAN.md 所在目录>
+node "{figma-sync-skill-dir}/scripts/verify-plan.mjs" "{plan-md-path}"
+node "{figma-sync-skill-dir}/scripts/figma-sync-report.mjs" --command=plan --plan="{plan-md-path}" --target-dir="{plan-directory}"
 ```
 
 ### apply 收尾
@@ -328,7 +330,7 @@ pnpm figma:report --command=plan --plan=<PLAN.md 路径> --target-dir=<PLAN.md �
 必须运行：
 
 ```bash
-pnpm figma:report --command=apply --plan=<PLAN.md 路径> --target-dir=<PLAN.md 所在目录>
+node "{figma-sync-skill-dir}/scripts/figma-sync-report.mjs" --command=apply --plan="{plan-md-path}" --target-dir="{plan-directory}"
 pnpm typecheck
 pnpm format:check
 pnpm lint
@@ -340,10 +342,10 @@ pnpm lint
 
 | 命令                                                          | 用途                                       |
 | ------------------------------------------------------------- | ------------------------------------------ |
-| `pnpm figma:prepare`                                          | 检查 /theme、Apex UI、common/assets 可用性 |
-| `pnpm figma:report --reset`                                   | 清空本次 session 记录                      |
-| `node .agent/skills/figmaSync/scripts/lookup-var.mjs "--xxx"` | CSS variable → /theme 路径                 |
-| `node .agent/skills/figmaSync/scripts/match-token.mjs "#xxx"` | 裸值 → 推荐 CSS variable                   |
-| `node .agent/skills/figmaSync/scripts/icon-inventory.mjs`     | 扫描 icon/assets                           |
-| `pnpm figma:verify-plan <PLAN.md>`                            | 校验 PLAN.md 与 figma-plan.css             |
-| `pnpm figma:report --command=plan ...`                        | 生成 plan session report                   |
+| `node "{figma-sync-skill-dir}/scripts/prepare-check.mjs"` | 检查 /theme、Apex UI、common/assets 可用性 |
+| `node "{figma-sync-skill-dir}/scripts/figma-sync-report.mjs" --reset` | 清空本次 session 记录 |
+| `node "{figma-sync-skill-dir}/scripts/lookup-var.mjs" "--xxx"` | CSS variable → /theme 路径 |
+| `node "{figma-sync-skill-dir}/scripts/match-token.mjs" "#xxx"` | 裸值 → 推荐 CSS variable |
+| `node "{figma-sync-skill-dir}/scripts/icon-inventory.mjs"` | 扫描 icon/assets |
+| `node "{figma-sync-skill-dir}/scripts/verify-plan.mjs" "{plan-md-path}"` | 校验 PLAN.md 与 figma-plan.css |
+| `node "{figma-sync-skill-dir}/scripts/figma-sync-report.mjs" --command=plan ...` | 生成 plan session report |
