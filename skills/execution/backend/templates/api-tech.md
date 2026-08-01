@@ -12,6 +12,46 @@
 - 涉及的服务 / 模块。
 - 明确不做的部分（非目标）。
 
+# 核心流程 / 时序
+<!-- 【必写】 -->
+
+说明关键业务流程、调用链、事务边界与幂等 / 并发。
+
+<!-- 至少生成一张 Mermaid 主图。根据核心评审问题选择模块边界图、sequenceDiagram、stateDiagram-v2、表数据流转图或业务流程图；不要机械生成所有图型。正式文档删除本注释并插入真实 Mermaid 源码。 -->
+
+**图示目标**：<这张主图要回答的核心评审问题>
+
+<!-- 在此插入一张基于真实需求和仓库事实生成的 Mermaid 主图。 -->
+
+**关键结论 / 不变量**
+
+- <事务边界、所有权、状态约束、一致性或补偿规则>
+
+<!-- 只有存在主图未回答的独立评审问题时，才按相同结构增加附加图。 -->
+
+# 数据模型 / 数据库设计
+<!-- 【必写】 -->
+
+## <实体 / 表名>
+
+> 集合 <name>（用途）。extends Base: sys_status；timestamps。
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| _id | ObjectId | 是 | 主键 |
+| name | string | 是 | 名称，查重唯一 |
+| createdAt | number | 是 | 创建时间，epoch ms |
+
+```typescript
+interface Entity {
+  _id: string
+  name: string
+  createdAt: number // epoch ms
+}
+```
+
+索引与 migration 影响：说明新增/变更的索引、唯一约束、迁移注意点。
+
 # 接口设计
 <!-- 【必写】 -->
 
@@ -58,88 +98,6 @@ interface ExampleData {
 **错误码**：`40001` 参数校验失败 ｜ `40301` 登录态失效
 
 ---
-
-# 数据模型 / 数据库设计
-<!-- 【必写】 -->
-
-## <实体 / 表名>
-
-> 集合 <name>（用途）。extends Base: sys_status；timestamps。
-
-| 字段 | 类型 | 必填 | 说明 |
-| --- | --- | --- | --- |
-| _id | ObjectId | 是 | 主键 |
-| name | string | 是 | 名称，查重唯一 |
-| createdAt | number | 是 | 创建时间，epoch ms |
-
-```typescript
-interface Entity {
-  _id: string
-  name: string
-  createdAt: number // epoch ms
-}
-```
-
-索引与 migration 影响：说明新增/变更的索引、唯一约束、迁移注意点。
-
-# 核心流程 / 时序
-<!-- 【必写】 -->
-
-说明关键业务流程、调用链、事务边界与幂等 / 并发。状态流转用 Mermaid（源码）。生成正式文档时按实际场景保留必要图，不要机械保留所有示例。
-
-**主链路时序图**
-
-```mermaid
-sequenceDiagram
-  autonumber
-  actor U as 用户浏览器
-  participant FE as xxx-portal · 前端
-  participant BE as xxx-server · 后端
-  participant AD as admin-be · 管理后台
-
-  rect rgb(219, 234, 254)
-  Note over U,BE: 阶段 1 · 入口 / 初始化（说明边界）
-  U->>FE: 进入页面 / 触发操作
-  FE->>BE: check-session / load-profile
-  BE-->>FE: { profileStatus }
-  end
-
-  rect rgb(254, 243, 199)
-  Note over U,BE: 阶段 2 · 暂存 / 校验（说明数据落点）
-  U->>FE: 填写信息
-  FE->>BE: save-draft / validate
-  BE->>BE: 参数校验 / 幂等检查
-  BE-->>FE: { saved: true }
-  end
-
-  rect rgb(220, 252, 231)
-  Note over U,AD: 阶段 3 · 提交 / 生效（说明事务与外部依赖）
-  U->>FE: 点击提交
-  FE->>BE: submit
-  BE->>AD: AdminClient.submit（x-signature 验签）
-  AD->>AD: 查重 / 状态机 / 审计
-  AD-->>BE: { status }
-  BE-->>FE: { code, data }
-  end
-```
-
-**关键分支流程图**（存在事务、幂等、异常分支时保留）
-
-```mermaid
-flowchart TD
-  classDef entry fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
-  classDef success fill:#dcfce7,stroke:#22c55e,color:#14532d
-  classDef warn fill:#fef3c7,stroke:#f59e0b,color:#78350f
-  classDef risk fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
-
-  A[接收提交请求]:::entry --> B{幂等键存在?}
-  B -->|是| C[返回已有处理结果]:::warn
-  B -->|否| D[参数与权限校验]
-  D --> E{校验通过?}
-  E -->|否| F[返回业务错误码]:::risk
-  E -->|是| G[开启事务并写入主表]
-  G --> H[提交事务]:::success
-```
 
 # 依赖与非功能性
 <!-- 【可选】 -->

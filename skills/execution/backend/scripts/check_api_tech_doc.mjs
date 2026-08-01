@@ -1,12 +1,14 @@
 import { readFileSync } from 'node:fs'
 
 const REQUIRED_SECTIONS = [
-  '接口设计',
-  '数据模型 / 数据库设计',
   '核心流程 / 时序',
+  '数据模型 / 数据库设计',
+  '接口设计',
   '边界与异常',
   '风险与待确认项'
 ]
+
+const ORDERED_DESIGN_SECTIONS = ['核心流程 / 时序', '数据模型 / 数据库设计', '接口设计']
 
 const OPTIONAL_SECTIONS = ['背景与目标', '范围与非目标', '依赖与非功能性', '完成标准']
 
@@ -16,6 +18,11 @@ function escapeRegExp(value) {
 
 function hasSection(markdown, title) {
   return new RegExp(`^#{1,3}\\s+${escapeRegExp(title)}\\s*$`, 'm').test(markdown)
+}
+
+function getSectionStart(markdown, title) {
+  const match = new RegExp(`^#{1,3}\\s+${escapeRegExp(title)}\\s*$`, 'm').exec(markdown)
+  return match ? match.index : -1
 }
 
 function getSection(markdown, title) {
@@ -47,8 +54,59 @@ function hasTsBlock(section) {
   return /```(typescript|ts)[\s\S]*?```/.test(section)
 }
 
-function hasMermaid(section) {
-  return /```mermaid[\s\S]*?```/.test(section)
+function getMermaidBlocks(markdown) {
+  const blocks = []
+  const pattern = /```mermaid[^\n]*\n([\s\S]*?)```/g
+  let match
+
+  while ((match = pattern.exec(markdown)) !== null) {
+    blocks.push({
+      source: match[1].trim(),
+      start: match.index,
+      end: pattern.lastIndex
+    })
+  }
+
+  return blocks
+}
+
+function getMermaidType(source) {
+  const firstLine = source.split('\n').map((line) => line.trim()).find(Boolean) || ''
+
+  if (/^sequenceDiagram\b/.test(firstLine)) return 'sequenceDiagram'
+  if (/^flowchart\s+(?:TD|TB|BT|LR|RL)\b/.test(firstLine)) return 'flowchart'
+  if (/^stateDiagram-v2\b/.test(firstLine)) return 'stateDiagram-v2'
+  if (/^erDiagram\b/.test(firstLine)) return 'erDiagram'
+  return ''
+}
+
+function hasStructuralStatement(source, type) {
+  const body = source
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('%%'))
+    .slice(1)
+    .join('\n')
+
+  if (type === 'sequenceDiagram') return /(?:->>|-->>|-\)|--\))/.test(body)
+  if (type === 'flowchart') return /(?:-->|---|-.->|==>)/.test(body)
+  if (type === 'stateDiagram-v2') return /-->/.test(body)
+  if (type === 'erDiagram') {
+    return /(?:\|\||o\{|o\||\}\||\{o|\|o).*(?:--|\.\.).*(?:\|\||o\{|o\||\}\||\{o|\|o)/.test(body)
+  }
+  return false
+}
+
+function hasDiagramGoal(segment) {
+  return /\*\*(?:主图)?图示目标\*\*\s*[：:]\s*\S+/.test(segment)
+}
+
+function hasDiagramConclusion(segment) {
+  const heading = /\*\*关键结论(?:\s*\/\s*不变量)?\*\*/.exec(segment)
+  if (!heading) return false
+
+  const body = segment.slice(heading.index + heading[0].length)
+  return /^\s*[-*]\s+\S+/.test(body)
 }
 
 export function checkApiTechDoc(markdown, options = {}) {
@@ -58,6 +116,19 @@ export function checkApiTechDoc(markdown, options = {}) {
   for (const title of REQUIRED_SECTIONS) {
     if (!hasSection(markdown, title)) {
       issues.push(`缺少必写章节：${title}`)
+    }
+  }
+
+  const orderedStarts = ORDERED_DESIGN_SECTIONS.map((title) => ({
+    title,
+    start: getSectionStart(markdown, title)
+  })).filter((item) => item.start >= 0)
+
+  for (let index = 1; index < orderedStarts.length; index += 1) {
+    const previous = orderedStarts[index - 1]
+    const current = orderedStarts[index]
+    if (previous.start > current.start) {
+      issues.push(`章节顺序错误：${previous.title} 应早于 ${current.title}`)
     }
   }
 
@@ -92,8 +163,32 @@ export function checkApiTechDoc(markdown, options = {}) {
   }
 
   const flowSection = getSection(markdown, '核心流程 / 时序')
-  if (flowSection && !hasMermaid(flowSection)) {
-    issues.push('核心流程 / 时序缺少 Mermaid 图')
+  if (flowSection && getMermaidBlocks(flowSection).length === 0) {
+    issues.push('核心流程 / 时序缺少 Mermaid 主图')
+  }
+
+  const mermaidBlocks = getMermaidBlocks(markdown)
+  for (let index = 0; index < mermaidBlocks.length; index += 1) {
+    const block = mermaidBlocks[index]
+    const type = getMermaidType(block.source)
+    const previousEnd = index === 0 ? 0 : mermaidBlocks[index - 1].end
+    const nextStart = index === mermaidBlocks.length - 1 ? markdown.length : mermaidBlocks[index + 1].start
+    const before = markdown.slice(previousEnd, block.start)
+    const after = markdown.slice(block.end, nextStart)
+    const label = `第 ${index + 1} 张 Mermaid 图`
+
+    if (!type) {
+      issues.push(`${label}类型不受支持，仅支持 sequenceDiagram、flowchart、stateDiagram-v2、erDiagram`)
+    } else if (!hasStructuralStatement(block.source, type)) {
+      issues.push(`${label}缺少有效的关系、交互或状态流转，不能只保留图型空壳`)
+    }
+
+    if (!hasDiagramGoal(before)) {
+      issues.push(`${label}前缺少非空的“图示目标”`)
+    }
+    if (!hasDiagramConclusion(after)) {
+      issues.push(`${label}后缺少非空的“关键结论 / 不变量” bullet`)
+    }
   }
 
   const riskSection = getSection(markdown, '风险与待确认项')
