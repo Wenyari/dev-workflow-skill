@@ -26,8 +26,45 @@ export function extractMermaidBlocks(markdown) {
   return blocks
 }
 
+function getMermaidDefinitionLines(source) {
+  const lines = source.split('\n')
+  let index = 0
+
+  while (index < lines.length && !lines[index].trim()) index += 1
+
+  if (lines[index]?.trim() === '---') {
+    index += 1
+    while (index < lines.length && lines[index].trim() !== '---') index += 1
+    if (index >= lines.length) return []
+    index += 1
+  }
+
+  while (index < lines.length) {
+    const line = lines[index].trim()
+    if (!line) {
+      index += 1
+      continue
+    }
+    if (/^%%\{/.test(line)) {
+      do {
+        const directiveLine = lines[index].trim()
+        index += 1
+        if (/%%\s*$/.test(directiveLine)) break
+      } while (index < lines.length)
+      continue
+    }
+    if (line.startsWith('%%')) {
+      index += 1
+      continue
+    }
+    break
+  }
+
+  return lines.slice(index)
+}
+
 export function getMermaidType(source) {
-  const firstLine = source.split('\n').map((line) => line.trim()).find(Boolean) || ''
+  const firstLine = getMermaidDefinitionLines(source).map((line) => line.trim()).find(Boolean) || ''
 
   if (/^sequenceDiagram\b/.test(firstLine)) return 'sequenceDiagram'
   if (/^flowchart\s+(?:TD|TB|BT|LR|RL)\b/.test(firstLine)) return 'flowchart'
@@ -39,8 +76,7 @@ export function getMermaidType(source) {
 export function hasMermaidStructure(source, type = getMermaidType(source)) {
   if (!type) return false
 
-  const body = source
-    .split('\n')
+  const body = getMermaidDefinitionLines(source)
     .map((line) => line.trim())
     .filter((line) => line && !line.startsWith('%%'))
     .slice(1)

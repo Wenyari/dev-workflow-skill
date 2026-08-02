@@ -9,7 +9,8 @@ const dom = new JSDOM('<!doctype html><html><body></body></html>')
 Object.defineProperties(globalThis, {
   window: { value: dom.window, configurable: true },
   document: { value: dom.window.document, configurable: true },
-  navigator: { value: dom.window.navigator, configurable: true }
+  navigator: { value: dom.window.navigator, configurable: true },
+  Option: { value: dom.window.Option, configurable: true }
 })
 const { default: mermaid } = await import('mermaid')
 
@@ -116,7 +117,7 @@ test('Mermaid 参考文件保留六类可复用模板', () => {
 
 test('Mermaid 参考文件的全部模板通过官方 parser', async () => {
   const sources = getMermaidSources(MERMAID_REFERENCE)
-  assert.equal(sources.length, 7)
+  assert.equal(sources.length, 8)
 
   for (const source of sources) {
     await assert.doesNotReject(() => mermaid.parse(source), source)

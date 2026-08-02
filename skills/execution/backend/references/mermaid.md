@@ -84,13 +84,26 @@ flowchart LR
 调用链、多服务协作、外部副作用默认用 `sequenceDiagram`：
 
 - 使用 `autonumber`。
-- 用户或外部操作者使用 `actor`；服务、任务和外部系统使用 `participant`。
+- 用户或外部操作者使用 `actor`；业务模块、独立服务、任务、数据存储和外部系统使用 `participant`。
 - participant 别名使用业务可读名称，不固定要求浏览器、前端或管理后台。
-- 按业务阶段使用 `rect rgb(...)` 分组，每阶段 4–8 条主要交互。
-- 使用 `alt` / `else` 表达失败和补偿，使用 `opt` 表达可选路径。
+- 使用 `alt` / `else` 表达失败和补偿，使用 `opt` 表达最多发生一次的可选路径，使用 `loop` 表达满足条件时可重复执行的重试。
 - 明确标出事务提交点、外部副作用、幂等键、回调或 pull 边界。
+- 使用 `activate` / `deactivate` 时必须成对出现，只突出跨多条消息且确有处理跨度的调用。
 
-### 紧凑模板
+这里的“参与方”泛指时序中的人、模块、服务、任务、存储、适配器和外部系统；“责任域”表示职责、所有权或系统边界，不等同于微服务或独立部署单元。
+
+### 时序模板选型
+
+| 模板 | 主要评审问题 | 典型触发条件 | 颜色语义 |
+| --- | --- | --- | --- |
+| 阶段型紧凑时序图 | 调用按什么顺序发生，事务和异常在哪里 | 通常 3–5 个参与方、1–2 个责任域，调用顺序比边界更重要 | `rect` 表示校验、事务、外部副作用等业务阶段 |
+| 分域型协作时序图 | 调用跨越了哪些责任边界，各方分别承担什么职责 | 5 个以上参与方，或至少 3 个责任域，包含审批、账号域、适配层、数据层或外部供应商 | `box` 表示使用方、内部域、数据层、适配层和外部系统 |
+
+参与方数量只用于辅助判断，不作为硬阈值。即使只有 4 个参与方，只要跨越 3 个需要评审的责任域，也使用分域型模板；即使超过 5 个参与方，如果评审只关心单一事务的先后顺序，也可以继续使用紧凑模板。
+
+同一张图只选择一种主颜色语义：使用彩色 `rect` 表达阶段时，不再为每个参与域分配彩色 `box`；使用彩色 `box` 表达责任域时，不再用多组彩色 `rect` 表达阶段，可通过 `Note`、空行、`alt`、`opt` 和 `loop` 表达流程结构。
+
+### 阶段型紧凑模板
 
 ```mermaid
 sequenceDiagram
@@ -125,6 +138,109 @@ sequenceDiagram
     API->>DB: 记录待重试 / 待补偿
     API-->>C: 返回处理中或业务失败
   end
+  end
+```
+
+### 分域型协作模板
+
+分域型模板使用固定的浅色责任域：蓝色表示使用与审批方，青色表示核心业务域，紫色表示共享账号或支撑域，灰色表示数据层，黄色表示内部适配层，橙色表示外部系统。主题配置使用 Mermaid 10.5+ 推荐的 YAML frontmatter；已有文档中的 `%%{init}%%` 可以继续读取，但新文档不再新增该弃用写法。
+
+```mermaid
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: "Arial, sans-serif"
+    primaryTextColor: "#1F2937"
+    lineColor: "#64748B"
+    signalColor: "#475569"
+    signalTextColor: "#334155"
+    labelBoxBkgColor: "#EEF2FF"
+    labelBoxBorderColor: "#818CF8"
+    labelTextColor: "#3730A3"
+    loopTextColor: "#3730A3"
+    activationBkgColor: "#DBEAFE"
+    activationBorderColor: "#3B82F6"
+    sequenceNumberColor: "#FFFFFF"
+---
+sequenceDiagram
+  autonumber
+
+  box rgb(239, 246, 255) 使用与审批方
+    actor U as 使用方
+    actor A as 审批方
+  end
+
+  box rgb(240, 253, 250) 核心业务域
+    participant S as 授权服务
+  end
+
+  box rgb(245, 243, 255) 共享账号域
+    participant ACC as 账号服务
+  end
+
+  box rgb(248, 250, 252) 数据层
+    participant DB as 授权数据库
+  end
+
+  box rgb(254, 252, 232) 供应商接入层
+    participant AD as 供应商 Adapter
+  end
+
+  box rgb(255, 247, 237) 外部供应商
+    participant EXT as 供应商系统
+  end
+
+  U->>S: 提交资源、动作和有效期
+  activate S
+  S->>ACC: 查询使用方的有效外部账号
+  activate ACC
+  ACC-->>S: 返回账号标识和有效状态
+  deactivate ACC
+  S->>DB: 创建待审批申请
+  S-->>U: 返回申请编号和待审批状态
+  deactivate S
+
+  A->>S: 审批通过
+  activate S
+  S->>DB: 更新审批结果并创建待接入授权
+  S->>AD: 创建或更新账号聚合策略
+  activate AD
+  AD->>EXT: 调用供应商策略 API
+  activate EXT
+  alt 首次接入成功
+    EXT-->>AD: 返回成功和供应商版本
+    AD-->>S: 返回标准结果
+    S->>DB: 更新为 ACTIVE 并记录版本
+  else 首次接入失败
+    EXT-->>AD: 返回失败或超时
+    AD-->>S: 返回标准错误
+    S->>DB: 更新为 FAILED 并记录原因
+  end
+  deactivate EXT
+  deactivate AD
+  deactivate S
+
+  loop 授权为 FAILED 且审批方继续重试
+    A->>S: 发起重新接入
+    activate S
+    S->>DB: 条件更新 FAILED → PROVISIONING
+    S->>AD: 重新创建或更新聚合策略
+    activate AD
+    AD->>EXT: 重试供应商策略 API
+    activate EXT
+    alt 重新接入成功
+      EXT-->>AD: 返回成功和供应商版本
+      AD-->>S: 返回标准结果
+      S->>DB: 更新为 ACTIVE 并记录版本
+    else 重新接入失败
+      EXT-->>AD: 返回失败或超时
+      AD-->>S: 返回标准错误
+      S->>DB: 恢复为 FAILED 并更新原因
+    end
+    deactivate EXT
+    deactivate AD
+    deactivate S
   end
 ```
 

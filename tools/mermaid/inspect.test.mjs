@@ -45,6 +45,37 @@ test('只识别约定支持的四类 Mermaid 图', () => {
   assert.equal(getMermaidType('gantt\n  title x'), null)
 })
 
+test('跳过 frontmatter、init directive 和注释后识别真实图型', () => {
+  const examples = [
+    `---
+config:
+  theme: base
+---
+sequenceDiagram
+  A->>B: request`,
+    `%%{init: {"theme": "base"}}%%
+sequenceDiagram
+  A->>B: request`,
+    `%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "signalColor": "#475569"
+  }
+}}%%
+sequenceDiagram
+  A->>B: request`,
+    `%% 说明主调用链
+sequenceDiagram
+  A->>B: request`
+  ]
+
+  for (const source of examples) {
+    assert.equal(getMermaidType(source), 'sequenceDiagram')
+    assert.equal(hasMermaidStructure(source), true)
+    assert.equal(inspectMermaidMarkdown(`\`\`\`mermaid\n${source}\n\`\`\``).ok, true)
+  }
+})
+
 test('区分有效结构、空壳图和伪造连线', () => {
   assert.equal(hasMermaidStructure('sequenceDiagram\n  A->>B: x'), true)
   assert.equal(hasMermaidStructure('flowchart LR\n  A --> B'), true)
