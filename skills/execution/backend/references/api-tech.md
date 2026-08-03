@@ -21,9 +21,9 @@ controller / service / dto / entity 代码文件）。
 
 必写章节（总是生成）：
 
-- 接口设计
-- 数据模型 / 数据库设计
 - 核心流程 / 时序
+- 数据模型 / 数据库设计
+- 接口设计
 - 边界与异常
 - 风险与待确认项
 
@@ -53,6 +53,12 @@ controller / service / dto / entity 代码文件）。
 - 实体说明（collection、extends 等）写在表格上方的**引用块** `> …`。
 - TypeScript interface：可空字段用 `?`，时间等注明单位（如 `// epoch ms`）。
 
+TypeScript interface 是用于技术评审的语言中立结构表达，不表示项目必须使用 TypeScript：
+
+- 字段名、可空性、枚举、嵌套关系和时间单位必须与真实契约一致。
+- 仓库不是 TypeScript 时，在表格或紧邻说明中标注关键的原生类型、精度、序列化或零值语义差异。
+- 不得声称仓库存在虚构的 TypeScript DTO / entity；代码事实引用仍使用项目原生类型和真实文件路径。
+
 ## 接口呈现硬规则
 
 接口设计章节每个接口条目按以下结构、label 全部加粗：
@@ -61,100 +67,27 @@ controller / service / dto / entity 代码文件）。
 2. **入参**：4 列表格（参数、类型、必填、说明）**+** TypeScript DTO interface。
 3. **出参**：TypeScript data interface（描述 `data` 结构），不贴 JSON 示例。
 4. **说明**：用 bullet 列要点（副作用、事务、mock 口径等）。
-5. **错误码**：内联文本，如 `` `40001` 参数校验失败 ｜ `40301` 登录态失效 ``；有业务码则补全。
+5. **并发控制**：仅更新类接口必写。明确 `expectedUpdatedAt`、`expectedVersion`、`If-Match`、CAS / 条件更新等冲突检测语义；不采用乐观锁时写明依据、覆盖风险和替代保护，不能只写“无”。
+6. **错误码**：内联文本，如 `` `40001` 参数校验失败 ｜ `40301` 登录态失效 ``；有业务码则补全。
 
 ## 章节规则
 
-- 接口设计：先用引用块写统一约定（方法、Content-Type、返回体、鉴权、时间单位），再逐接口按上面的接口呈现硬规则写。
-- 数据模型 / 数据库设计：每个实体 / 表给字段表格 + TS，并说明索引与 migration 影响；仓库可用时基于真实 entity /
-  schema，不可用时标记为待确认。
-- 核心流程 / 时序：业务流程超过 4 步或多服务调用时画 Mermaid（`sequenceDiagram` /
-  `flowchart`），说明事务边界与幂等 / 并发。
+- 核心流程 / 时序：先按 `mermaid.md` 判断是否命中选图条件。命中时至少保留一张 Mermaid 主图，未命中时写非空的「无需配图原因」；两者二选一。同时说明事务边界与幂等 / 并发。
+- 数据模型 / 数据库设计：基于核心流程明确实体、关系、状态落点和数据变更；每个实体 / 表给字段表格 + TS，并说明索引与 migration 影响；仓库可用时基于真实 entity / schema，不可用时标记为待确认。
+- 接口设计：基于已明确的流程和数据结构定义接口契约；先用引用块写统一约定（方法、Content-Type、返回体、鉴权、时间单位），再逐接口按上面的接口呈现硬规则写。`PUT`、`PATCH`，以及名称或路径明确表示更新、编辑、修改、状态变更的接口必须包含非空的「并发控制」。
 - 边界与异常：覆盖空数据、失败、无权限、重复提交、并发冲突、部分数据缺失、回滚 / 重试 / 降级。
 - 风险与待确认项：必写，收敛 PRD / 接口 / 仓库代码冲突，每条具体到可直接提问。
 
-## Mermaid 风格规则
+## Mermaid 图示规则
 
-Mermaid 图必须提高技术评审效率，不做装饰。生成时优先保证语义清晰，其次保证层次和可读性。
+生成技术方案时必须读取 [mermaid.md](./mermaid.md)，先识别评审问题，再选择最少且足够的图：
 
-### sequenceDiagram 调用链模板
-
-接口调用链、多服务协作、前后端链路默认用 `sequenceDiagram`，并遵守：
-
-- 开头使用 `autonumber`。
-- 用户端用 `actor`，系统和服务用 `participant`。
-- participant 别名使用业务可读名称，例如 `supplier-portal · 前端`、`supplier-server · 门户后端`。
-- 按业务阶段使用 `rect rgb(...)` 分组，每个阶段用 `Note over` 写清阶段名和边界。
-- 阶段颜色使用柔和浅色，推荐：
-  - 蓝色 `rgb(219, 234, 254)`：入口 / 登录 / 初始化。
-  - 黄色 `rgb(254, 243, 199)`：填写 / 暂存 / 草稿。
-  - 绿色 `rgb(220, 252, 231)`：提交 / 成功 / 主链路完成。
-  - 紫色 `rgb(243, 232, 255)`：审核 / 回流 / 异步状态。
-  - 红色 `rgb(254, 226, 226)`：失败 / 驳回 / 异常分支。
-- 每个阶段 4-8 条交互为宜；超过 8 条时拆阶段，不把所有细节堆进一块。
-- 消息文案写业务动作和关键接口名，不写长 JSON。
-- 必须表达信任边界、签名验签、事务边界、状态机、回调 / pull 模式等关键架构约束。
-
-示例结构：
-
-```mermaid
-sequenceDiagram
-  autonumber
-  actor U as 用户浏览器
-  participant FE as xxx-portal · 前端
-  participant BE as xxx-server · 后端
-  participant AD as admin-be · 管理后台
-
-  rect rgb(219, 234, 254)
-  Note over U,BE: 阶段 1 · 入口 / 登录（止于门户）
-  U->>FE: 进入页面
-  FE->>BE: check-session
-  BE-->>FE: { profileStatus }
-  end
-
-  rect rgb(220, 252, 231)
-  Note over U,AD: 阶段 2 · 提交（后端签名访问管理后台）
-  U->>FE: 点击提交
-  FE->>BE: submit-profile
-  BE->>AD: AdminClient.submit（x-signature 验签）
-  AD-->>BE: { auditStatus: PENDING }
-  BE-->>FE: SUBMITTED
-  end
-```
-
-### flowchart 业务流程模板
-
-事务分支、幂等、异常处理、状态判断默认用 `flowchart TD`，并遵守：
-
-- 使用 `subgraph` 表达层次：入口、校验、核心处理、外部依赖、结果。
-- 节点文本保持短句，复杂规则放正文，不塞进节点。
-- 使用 `classDef` 区分类型：入口/成功/风险/外部依赖。
-- 分支条件写在连线上，避免多个菱形连续堆叠。
-
-示例结构：
-
-```mermaid
-flowchart TD
-  classDef entry fill:#dbeafe,stroke:#60a5fa,color:#1e3a8a
-  classDef success fill:#dcfce7,stroke:#22c55e,color:#14532d
-  classDef warn fill:#fef3c7,stroke:#f59e0b,color:#78350f
-  classDef risk fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
-
-  A[接收提交请求]:::entry --> B{幂等键存在?}
-  B -->|是| C[返回已有处理结果]:::warn
-  B -->|否| D[参数与权限校验]
-  D --> E{校验通过?}
-  E -->|否| F[返回业务错误码]:::risk
-  E -->|是| G[开启事务并写入主表]
-  G --> H[提交事务]:::success
-```
-
-### 图放在哪些章节
-
-- `核心流程 / 时序`：至少保留一张 Mermaid 图。主链路优先 `sequenceDiagram`；存在复杂分支时补充 `flowchart TD`。
-- `数据模型 / 数据库设计`：只有实体关系复杂时补充 `erDiagram`，不要替代表格 + TypeScript。
-- `边界与异常`：异常路径多于 3 类时可补充异常流程 `flowchart TD`。
-- `依赖与非功能性`：存在 MQ、缓存、第三方服务、回调 / pull 策略时可补充依赖链路图。
+- `核心流程 / 时序` 命中选图条件时至少保留一张主图；未命中时写「无需配图原因」。
+- 默认先生成一张主图；附加图只有在回答新的独立评审问题时才增加。
+- 每张图必须依次包含 **图示目标**、Mermaid 源码和 **关键结论 / 不变量**。
+- `erDiagram` 只表达静态表关系；跨表查询、写入、聚合和补偿使用表数据流转图，两者按场景独立选择。
+- 数据模型中的 Mermaid 图不能替代字段表格和 TypeScript interface。
+- 不按固定图数量或固定图型凑齐模板，也不为单表 CRUD、简单外键或普通服务分层追加装饰图。
 
 ## 飞书上下文规则
 
@@ -169,5 +102,4 @@ flowchart TD
 node <agent-root>/skills/execution/backend/scripts/check_api_tech_doc.mjs --file <markdown-file> --optional "<本次选中的可选章节，逗号分隔>"
 ```
 
-自检覆盖：必写章节齐全、选中可选章节存在、数据模型含表格 + TS、接口设计含表格与 TS 代码块、核心流程含
-Mermaid、风险与待确认项非空、标题为 `#`/`##`/`###` 且无手写序号。脚本输出 JSON，最终回复只摘必要状态。
+自检覆盖：必写章节齐全、核心流程 → 数据模型 → 接口设计的顺序正确、选中可选章节存在、每个数据实体含表格 + TS、每个接口条目包含完整呈现要素、更新类接口包含可复核的并发控制策略、核心流程在主图与「无需配图原因」之间二选一、已有 Mermaid 图类型受支持且包含图示目标与关键结论、无模板占位符、风险与待确认项非空、标题为 `#`/`##`/`###` 且无手写序号。脚本输出 JSON，最终回复只摘必要状态。

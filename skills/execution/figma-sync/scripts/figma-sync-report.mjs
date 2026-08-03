@@ -1,14 +1,14 @@
 /**
  * Figma Sync Report
  *
- * 把本次 figmaSync 任务的「AI 做了什么」与「产物长什么样」交叉量化输出。
+ * 把本次 figma-sync 任务的「AI 做了什么」与「产物长什么样」交叉量化输出。
  *
  * 用法:
- *   pnpm figma:report                                # 默认 plan 命令、写到 .agent/skills/figmaSync/
- *   pnpm figma:report --command=plan|apply           # 报告文件名前缀：session-report-<command>.md
- *   pnpm figma:report --target-dir=src/foo           # 同时把报告复制一份到指定目录
- *   pnpm figma:report --plan=src/foo/PLAN.md         # 解析该 PLAN.md §4 表格，统计 variables 来源
- *   pnpm figma:report --reset                        # 清空 session log（任务开始时调）
+ *   node figma-sync-report.mjs                                  # 默认 plan 命令、写到临时 session 目录
+ *   node figma-sync-report.mjs --command=plan|apply             # 报告文件名前缀：session-report-<command>.md
+ *   node figma-sync-report.mjs --target-dir=src/foo             # 同时把报告复制一份到指定目录
+ *   node figma-sync-report.mjs --plan=src/foo/PLAN.md           # 解析该 PLAN.md §4 表格，统计 variables 来源
+ *   node figma-sync-report.mjs --reset                          # 清空 session log（任务开始时调）
  *
  * 主指标（新版排序）：
  *   1. 硬编码计数（产物侧）—— 需要解释
@@ -24,8 +24,9 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { readSessionLog, resetSessionLog } from './_shared/session-log.mjs'
+import { resolveSessionReportDir } from './_shared/runtime-paths.mjs'
 
-const DEFAULT_REPORT_DIR = '.agent/skills/figmaSync'
+const DEFAULT_REPORT_DIR = resolveSessionReportDir()
 const FAST_PATH_LOW_THRESHOLD = 0.5
 
 function parseArgs(argv) {
@@ -226,7 +227,7 @@ function renderReport({
   forbiddenFiles
 }) {
   const lines = []
-  lines.push(`# figmaSync Session Report (${command}) — ${generatedAt}`)
+  lines.push(`# figma-sync Session Report (${command}) — ${generatedAt}`)
   lines.push('')
 
   lines.push('## Review 摘要')

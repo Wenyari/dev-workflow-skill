@@ -255,7 +255,7 @@ node_modules/@frontend/apex-ui--react/dist/index.d.ts
 文件改动后，输出：
 
 - 已创建或修改文件。
-- 每个文件保留的 `TODO(api)` 和 `TODO(figmaSync)`。
+- 每个文件保留的 `TODO(api)` 和 `TODO(figma-sync)`。
 - 未验证内容。
 - 建议下一步执行的检查。
 

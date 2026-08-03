@@ -1,6 +1,6 @@
-# `figmaSync apply [path/to/PLAN.md]`
+# `figma-sync apply [path/to/PLAN.md]`
 
-基于 `figmaSync plan` 产出的 PLAN.md 与 `figma-plan.css` 实施页面编码。
+基于 `figma-sync plan` 产出的 PLAN.md 与 `figma-plan.css` 实施页面编码。
 
 ## apply 边界
 
@@ -50,7 +50,7 @@ apply 阶段只能实施已审核 PLAN.md 覆盖的视觉和布局内容，并�
 ### Step 3 — Session 边界
 
 ```bash
-pnpm figma:report --reset
+node "{figma-sync-skill-dir}/scripts/figma-sync-report.mjs" --reset
 ```
 
 ### Step 4 — 复述关键决策
@@ -132,7 +132,7 @@ PLAN.md `## 9. 盲区与待补调` 若有 `TOO_LARGE_SKIPPED` 节点：
 按顺序执行：
 
 ```bash
-pnpm figma:report --command=apply --plan=<PLAN.md 路径> --target-dir=<PLAN.md 同目录>
+node "{figma-sync-skill-dir}/scripts/figma-sync-report.mjs" --command=apply --plan="{plan-md-path}" --target-dir="{plan-directory}"
 pnpm typecheck
 pnpm format:check
 pnpm lint

@@ -20,25 +20,28 @@ npx @dev-workflow/skill
 装完的目录结构（以 Claude Code 为例）：
 
 ```
-.claude/
-├── skills/
-│   ├── execution/
-│   │   ├── SKILL.md
-│   │   └── {frontend, backend, figmaSync, devFlow}/
-│   ├── review/
-│   │   ├── SKILL.md
-│   │   └── {prd-review, prd-ui-check, frontend-code-review, code-structure-review}/
-└── tools/{lark, product-design-specs}/
+.
+├── HUMAN_AGENT_WORKFLOW.md
+└── .claude/
+    ├── skills/
+    │   ├── execution/
+    │   │   ├── SKILL.md
+    │   │   └── {frontend, backend, figma-sync, devFlow}/
+    │   └── review/
+    │       ├── SKILL.md
+    │       └── {prd-review, prd-ui-check, frontend-code-review, code-structure-review}/
+    └── tools/{lark, product-design-specs}/
 ```
 
 `execution/SKILL.md` 和 `review/SKILL.md` 是分类导航入口，用于先识别任务类型，再加载对应子技能。
 
-**装完请手动做两件事**：
+安装器会把 [`HUMAN_AGENT_WORKFLOW.md`](./HUMAN_AGENT_WORKFLOW.md) 一并复制到目标项目根目录；它与 skill 文件共用所选的冲突策略，不会静默覆盖已有版本。
 
-1. `git add .claude && git commit -m "chore: install @dev-workflow/skill"`（跟随仓库走，团队共享同一版本）
-2. 从本仓库把 [`HUMAN_AGENT_WORKFLOW.md`](./HUMAN_AGENT_WORKFLOW.md) 复制到目标项目根目录 —— `frontend` / `backend` / `prd-review` 依赖它判断 L0/L1/L2/L3 分档；CLI 检测到缺失会打印警告，但不会代你搬。
+**装完请手动提交**：`git add .claude HUMAN_AGENT_WORKFLOW.md && git commit -m "chore: install @dev-workflow/skill"`（跟随仓库走，团队共享同一版本）。
 
-**升级**：重跑 `npx @dev-workflow/skill`，冲突策略选「全部覆盖」即可。npm 缓存会自动拉最新版；固定版本用 `npx @dev-workflow/skill@0.1.0`。
+**升级**：重跑 `npx @dev-workflow/skill`，冲突策略选「全部覆盖」即可。npm 缓存会自动拉最新版；固定版本用 `npx @dev-workflow/skill@x.y.z`。
+
+**命名迁移**：当前版本已将 `figmaSync` 直接迁移为 `figma-sync`。安装器发现旧 `skills/execution/figmaSync/` 目录时会停止，不会自动删除或合并；请先手动处理旧目录，再重新安装。
 
 ## 发新版本（维护者）
 
@@ -88,7 +91,7 @@ skills/
 └── execution/      开发层：方案生成 + 代码落地
 │   ├── frontend/               前端方案 → 页面基建 → Foundation Review
 │   ├── backend/                后端方案 + 接口测试生成 / 执行 + 正式报告
-│   ├── figmaSync/              Figma → 原生 CSS
+│   ├── figma-sync/              Figma → 原生 CSS
 │   └── devFlow/                旧 devFlow 命令兼容导航
 
 tools/              共享能力（不对用户暴露）

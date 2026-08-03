@@ -43,7 +43,7 @@ description: 研发执行技能导航。用户要拆分前端工作量、生成�
 - 前端工作量拆分、技术方案或页面基建 → [frontend/SKILL.md](./frontend/SKILL.md)
 - 后端技术方案或阶段判断 → [backend/SKILL.md](./backend/SKILL.md)
 - 明确要求后端接口测试 → [backend/SKILL.md](./backend/SKILL.md) 的 `integration-test` 阶段
-- 明确要求 Figma 视觉还原 → [figmaSync/SKILL.md](./figmaSync/SKILL.md)
+- 明确要求 Figma 视觉还原 → [figma-sync/SKILL.md](./figma-sync/SKILL.md)
 
 ## 明确不做
 
@@ -62,7 +62,7 @@ description: 研发执行技能导航。用户要拆分前端工作量、生成�
 | 前端方案检查、页面基建或基建 Review | `frontend` → `page-build` |
 | 后端技术方案或后端阶段判断 | `backend` |
 | 后端接口测试生成或执行 | `backend` → `integration-test` |
-| Figma 视觉还原 | `figmaSync` |
+| Figma 视觉还原 | `figma-sync` |
 
 ## 路由规则
 

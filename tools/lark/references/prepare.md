@@ -3,6 +3,8 @@
 `prepare`
 用于说明研发 skill 使用飞书读写能力前需要配置的环境变量和权限准备。它只负责给用户清晰的准备清单，不负责读取或发布飞书文档。
 
+命令中的 `{lark-tool-dir}` 表示当前已加载 `tools/lark` 目录的绝对路径。执行脚本时替换为真实路径，不要假定固定的 agent 安装目录。
+
 ## 定位
 
 - 输入：用户要求初始化、准备环境，或询问飞书配置。
@@ -75,10 +77,10 @@ FEISHU_WIKI_PARENT_NODE_TOKEN
 
 建议把变量配置在本机 shell 环境、CI secret 或 Codex 运行环境中，不要提交到仓库。
 
-本机全局配置优先写入：
+使用 zsh 时，本机用户级配置可以写入：
 
 ```text
-/Users/wenjin/.zshenv
+~/.zshenv
 ```
 
 `.zshenv` 会在 zsh 启动时读取，适合给本机终端、Codex 运行环境和 Node 脚本提供全局环境变量。
@@ -86,7 +88,7 @@ FEISHU_WIKI_PARENT_NODE_TOKEN
 示例：
 
 ```bash
-# /Users/wenjin/.zshenv
+# ~/.zshenv
 export FEISHU_APP_ID="cli_xxx"
 export FEISHU_APP_SECRET="***"
 export FEISHU_WIKI_PARENT_NODE_TOKEN="xxx"
@@ -95,7 +97,7 @@ export FEISHU_WIKI_PARENT_NODE_TOKEN="xxx"
 如果只读取飞书文档：
 
 ```bash
-# /Users/wenjin/.zshenv
+# ~/.zshenv
 export FEISHU_APP_ID="cli_xxx"
 export FEISHU_APP_SECRET="***"
 ```
@@ -103,7 +105,7 @@ export FEISHU_APP_SECRET="***"
 修改后，新启动的 zsh 会自动读取；当前终端如需立即生效，可以执行：
 
 ```bash
-source /Users/wenjin/.zshenv
+source ~/.zshenv
 ```
 
 ## 权限准备
@@ -127,13 +129,13 @@ source /Users/wenjin/.zshenv
 检查目标文档或 Wiki 父节点权限时，优先使用脚本：
 
 ```bash
-node .agent/tools/lark/scripts/lark_check_permissions.mjs --url "飞书链接"
+node "{lark-tool-dir}/scripts/lark_check_permissions.mjs" --url "飞书链接"
 ```
 
 检查默认 Wiki 父节点权限时：
 
 ```bash
-node .agent/tools/lark/scripts/lark_check_permissions.mjs
+node "{lark-tool-dir}/scripts/lark_check_permissions.mjs"
 ```
 
 ## 输出要求

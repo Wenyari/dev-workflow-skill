@@ -16,14 +16,14 @@
 ### 我要写代码
 
 - 根据已审方案**创建页面基建** → `$frontend page-build`，内部完成契约检查、确认、验证和 Foundation Review
-- 还原 **Figma 视觉稿** → `figmaSync plan` → `figmaSync apply`
+- 还原 **Figma 视觉稿** → `figma-sync plan` → `figma-sync apply`
 - 生成 **API 骨架代码** → ❌ 目前不支持，`api-tech` 只出方案
 
 ### 我要执行测试
 
 - 已指定**接口、包、测试文件或测试名称** → `$backend integration-test run <scope>`
 - 未指定范围，希望根据**当前代码变更自动识别接口集成测试** → `$backend integration-test run`，确认候选清单后再执行
-- 接口缺少 `*_test.go` 或已有场景不完整 → `$backend integration-test generate <scope>`，确认文件与用例计划后生成并验证
+- 接口缺少项目原生测试文件或已有场景不完整 → `$backend integration-test generate <scope>`，确认文件与用例计划后生成并验证
 - 统计单元测试覆盖率、管理 Postman/Apipost 截图 → ❌ 当前 skill 不负责
 
 ### 我要检查一致性
@@ -42,10 +42,10 @@
 
 ## 常见困惑
 
-### 我有 Figma 链接，该跑 `page-build` 还是 `figmaSync`？
+### 我有 Figma 链接，该跑 `page-build` 还是 `figma-sync`？
 
 - 如果**页面基建还没搭**（route / components / service 没建）→ 先 `page-build`
-- 如果**页面基建已就绪**，只是要还原视觉 → 直接 `figmaSync plan`
+- 如果**页面基建已就绪**，只是要还原视觉 → 直接 `figma-sync plan`
 - 判断方法：项目里有没有 `foundation-summary.md`？没有 → 先走前一步
 
 ### 我该走 `page-tech` 还是直接 `page-build`？

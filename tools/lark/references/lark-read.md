@@ -3,6 +3,8 @@
 `lark-read`
 用于读取飞书云文档、Wiki 文档或文档链接，并将内容转换为后续研发工作流可用的上下文。它只负责读取和整理上下文，不负责生成最终技术方案，也不负责发布文档。
 
+命令中的 `{lark-tool-dir}` 表示当前已加载 `tools/lark` 目录的绝对路径。执行脚本时替换为真实路径，不要假定固定的 agent 安装目录。
+
 ## 定位
 
 - 输入：飞书文档链接、Wiki 链接、Docx 链接或用户指定的飞书文档 token。
@@ -48,7 +50,7 @@ FEISHU_APP_SECRET
 优先使用脚本，不要现场重写飞书读取逻辑。
 
 ```bash
-node .agent/tools/lark/scripts/lark_read_docx.mjs \
+node "{lark-tool-dir}/scripts/lark_read_docx.mjs" \
   --url "https://example.feishu.cn/wiki/xxxx" \
   --section "客户管理" \
   --level 3
@@ -58,7 +60,7 @@ node .agent/tools/lark/scripts/lark_read_docx.mjs \
 `--sections`，不要对同一个飞书文档并发执行多个读取命令：
 
 ```bash
-node .agent/tools/lark/scripts/lark_read_docx.mjs \
+node "{lark-tool-dir}/scripts/lark_read_docx.mjs" \
   --url "https://example.feishu.cn/wiki/xxxx" \
   --sections "客户管理,新增客户（create-client）,客户列表查询（client-list）"
 ```
@@ -81,7 +83,7 @@ node .agent/tools/lark/scripts/lark_read_docx.mjs \
 需要预检查权限时，先运行：
 
 ```bash
-node .agent/tools/lark/scripts/lark_check_permissions.mjs --url "飞书链接"
+node "{lark-tool-dir}/scripts/lark_check_permissions.mjs" --url "飞书链接"
 ```
 
 只有脚本不满足任务时，才临时补充读取逻辑，并把可复用能力沉淀回脚本。

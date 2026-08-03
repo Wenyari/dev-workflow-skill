@@ -18,7 +18,7 @@ $frontend page-build                   # 契约检查 → 确认 → 基建 → 
 
 **产物链**：`page-tech.md` → `contract-report.md` → 页面基建代码 → `foundation-summary.md`
 
-**下一步**：视觉还原走 `figmaSync plan <figma-url>`。
+**下一步**：视觉还原走 `figma-sync plan <figma-url>`。
 
 ---
 
@@ -27,10 +27,10 @@ $frontend page-build                   # 契约检查 → 确认 → 基建 → 
 前提：页面基建已就绪（`foundation-summary.md` 已存在）。
 
 ```
-figmaSync prepare                     # 第一次使用必跑
-figmaSync plan <figma-url>            # 输出 PLAN.md + figma-plan.css 草案
+figma-sync prepare                     # 第一次使用必跑
+figma-sync plan <figma-url>            # 输出 PLAN.md + figma-plan.css 草案
 # → 人工审核 PLAN.md
-figmaSync apply                       # 落地页面 CSS
+figma-sync apply                       # 落地页面 CSS
 ```
 
 **产物链**：`PLAN.md` + `figma-plan.css` → 页面 CSS / 组件代码
@@ -97,7 +97,7 @@ $backend integration-test generate <interface / package>
 # → 生成测试、运行最小验证、输出正式报告
 ```
 
-**产物链**：接口实现 / 代码变更 → `*_test.go` → `backend-integration-test-report.md`
+**产物链**：接口实现 / 代码变更 → 项目原生测试文件 → `backend-integration-test-report.md`
 
 `run` 不会自动写测试；`generate` 也会先展示计划，得到人工确认后才修改文件。
 

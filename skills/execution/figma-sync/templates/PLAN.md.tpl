@@ -23,7 +23,7 @@ status: planned # planned | applied | superseded
 
 # PLAN: <页面/特性名>
 
-> 本文档由 `figmaSync plan` 生成。plan 阶段同时生成 `figma-plan.css` 作为审核草案。
+> 本文档由 `figma-sync plan` 生成。plan 阶段同时生成 `figma-plan.css` 作为审核草案。
 > 该 CSS 草案不在 plan 阶段接入业务代码；apply 阶段需在用户确认后迁移为正式 CSS。
 
 ## 1. 视觉结构
@@ -55,14 +55,14 @@ status: planned # planned | applied | superseded
 
 ## 2.5 Icon 资产匹配
 
-> 本章节由 `figmaSync plan` 根据 Figma 节点语义与仓库 icon inventory 生成。若仓库没有
+> 本章节由 `figma-sync plan` 根据 Figma 节点语义与仓库 icon inventory 生成。若仓库没有
 > `assets/`、`icons/`、`public/`、`src/**/assets/`、`src/**/icons/` 中的可用 icon，
 > 必须在表格中写明，并让用户确认其他 icon 导入方案或确认不关心 icon。
 
 Icon inventory:
 
 ```json
-<node .agent/skills/figmaSync/scripts/icon-inventory.mjs --pretty 的输出摘要>
+<node "{figma-sync-skill-dir}/scripts/icon-inventory.mjs" --pretty 的输出摘要>
 ```
 
 | Figma 节点 | nodeId | 语义     | 匹配仓库 icon              | 匹配依据                | 状态 | 用户确认 |
@@ -88,12 +88,12 @@ Icon inventory:
   - types：
   - constants：
   - foundation-summary：
-- **figmaSync 允许修改范围**：
+- **figma-sync 允许修改范围**：
   - 布局。
   - CSS。
   - Apex UI 组件选型和 props。
   - 局部展示结构。
-- **figmaSync 禁止修改范围**：
+- **figma-sync 禁止修改范围**：
   - 路由路径。
   - service 契约。
   - API 请求基础封装。
@@ -175,7 +175,7 @@ CSS 草案文件：`./figma-plan.css`
 | 2   | 将 `figma-plan.css` 迁移为正式 CSS 文件         | route.css / styles.css  | format:check pass     | ✅          |
 | 3   | 拼装 Apex UI 与 common component                | route.tsx               | dev 视觉 OK           | ✅          |
 | 4   | 拼装自定义区块并绑定 className                  | route.tsx + CSS         | dev 视觉 OK           | ✅          |
-| 5   | 收尾跑 `pnpm figma:report --command=apply ...` | session-report-apply.md | 硬编码待确认项已解释 | —           |
+| 5   | 收尾跑内置 `figma-sync-report.mjs --command=apply ...` | session-report-apply.md | 硬编码待确认项已解释 | —           |
 
 > 「独立 commit = ✅」的行做完后，AI 必须停下等用户测试再进入下一行。
 
@@ -196,7 +196,7 @@ CSS 草案文件：`./figma-plan.css`
 
 ## 9. 实施偏离记录
 
-> 由 `figmaSync apply` 在执行过程中追加。如无偏离，保留本章节但留空。
+> 由 `figma-sync apply` 在执行过程中追加。如无偏离，保留本章节但留空。
 
 - <ISO 时间戳> · <章节> · <原决策> → <新决策> · 原因：<一句话>
 
@@ -216,7 +216,7 @@ CSS 草案文件：`./figma-plan.css`
 
 ## 12. 反向校验
 
-> 由 `pnpm figma:verify-plan` 跑出后，AI 把结果摘要写到这里。warning 项必须
+> 由 Skill 内置 `verify-plan.mjs` 跑出后，AI 把结果摘要写到这里。warning 项必须
 > 在这里说明意图，否则 review 时无法判断是否可接受。
 
 - CSS variable 校验：✅ N 行已检查

@@ -1,20 +1,23 @@
-// 主流程：选 agent → 选冲突策略 → 展示计划 → 确认 → 复制 → 后置检查。
+// 主流程：选 agent → 选冲突策略 → 展示计划 → 确认 → 复制。
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { AGENTS, AGENT_ORDER } from './agents.mjs'
-import { copyDir, CONFLICT, CONFLICT_DECISION } from './copy.mjs'
+import { copyDir, copyFile, CONFLICT, CONFLICT_DECISION } from './copy.mjs'
 import { select, confirm, closePrompts } from './prompts.mjs'
 
-const COPY_PLAN = [
-  { srcRel: 'skills/execution', destRel: 'skills/execution' },
-  { srcRel: 'skills/review', destRel: 'skills/review' },
-  { srcRel: 'tools/lark', destRel: 'tools/lark' },
-  { srcRel: 'tools/product-design-specs', destRel: 'tools/product-design-specs' }
-]
+export const HAW_FILENAME = 'HUMAN_AGENT_WORKFLOW.md'
+export const LEGACY_FIGMA_SKILL_DIR = path.join('skills', 'execution', 'figmaSync')
+export const FIGMA_SKILL_DIR = path.join('skills', 'execution', 'figma-sync')
 
-// 提示消费者：SKILL.md 里引用了根目录 HUMAN_AGENT_WORKFLOW.md，用户仓库根缺这个文件时打印警告。
-const HAW_FILENAME = 'HUMAN_AGENT_WORKFLOW.md'
+export const COPY_PLAN = [
+  { kind: 'dir', target: 'agent', srcRel: 'skills/execution', destRel: 'skills/execution' },
+  { kind: 'dir', target: 'agent', srcRel: 'skills/review', destRel: 'skills/review' },
+  { kind: 'dir', target: 'agent', srcRel: 'tools/lark', destRel: 'tools/lark' },
+  { kind: 'dir', target: 'agent', srcRel: 'tools/mermaid', destRel: 'tools/mermaid' },
+  { kind: 'dir', target: 'agent', srcRel: 'tools/product-design-specs', destRel: 'tools/product-design-specs' },
+  { kind: 'file', target: 'workspace', srcRel: HAW_FILENAME, destRel: HAW_FILENAME }
+]
 
 export const DEV_WORKFLOW_LOGO = `
 [38;5;45m██████╗ [38;5;51m███████╗[38;5;87m██╗   ██╗[0m       [38;5;45m██╗    ██╗ [38;5;51m██████╗ [38;5;87m██████╗ [38;5;123m██╗  ██╗[38;5;159m███████╗[38;5;195m██╗      ██████╗ ██╗    ██╗[0m
@@ -30,13 +33,42 @@ function packageRoot() {
   return path.resolve(here, '..', '..')
 }
 
-async function pathExists(p) {
+async function entryExists(entryPath) {
   try {
-    await fs.access(p)
+    await fs.lstat(entryPath)
     return true
-  } catch {
-    return false
+  } catch (error) {
+    if (error?.code === 'ENOENT') return false
+    throw error
   }
+}
+
+export async function findWorkspaceRoot(startDir) {
+  let current = path.resolve(startDir)
+  while (true) {
+    if (await entryExists(path.join(current, '.git'))) return current
+    const parent = path.dirname(current)
+    if (parent === current) return null
+    current = parent
+  }
+}
+
+export async function inspectLegacySkillInstall(targetAbs) {
+  const legacyAbs = path.resolve(targetAbs, LEGACY_FIGMA_SKILL_DIR)
+  const canonicalAbs = path.resolve(targetAbs, FIGMA_SKILL_DIR)
+  const [legacyExists, canonicalExists] = await Promise.all([
+    entryExists(legacyAbs),
+    entryExists(canonicalAbs)
+  ])
+  return { legacyAbs, canonicalAbs, legacyExists, canonicalExists }
+}
+
+export function buildCopyPlan({ cwd, targetAbs, pkgRoot = packageRoot() }) {
+  return COPY_PLAN.map(item => ({
+    ...item,
+    srcAbs: path.resolve(pkgRoot, item.srcRel),
+    destAbs: path.resolve(item.target === 'workspace' ? cwd : targetAbs, item.destRel)
+  }))
 }
 
 export async function run() {
@@ -51,6 +83,22 @@ async function runInner() {
   console.log(DEV_WORKFLOW_LOGO)
   console.log('📦 @dev-workflow/skill installer')
 
+  const launchCwd = process.cwd()
+  const detectedRoot = await findWorkspaceRoot(launchCwd)
+  const cwd = detectedRoot ?? launchCwd
+  if (detectedRoot && detectedRoot !== launchCwd) {
+    console.log(`📍 已从当前子目录定位到仓库根目录：${detectedRoot}`)
+  } else if (!detectedRoot) {
+    const useCurrentDir = await confirm(
+      `? 未检测到 Git 仓库，是否仍安装到当前目录 ${launchCwd}？`,
+      { defaultYes: false }
+    )
+    if (!useCurrentDir) {
+      console.log('\n已取消，未做任何改动。')
+      return
+    }
+  }
+
   const agentId = await select(
     '? 目标 agent：',
     AGENT_ORDER.map(id => ({
@@ -61,8 +109,21 @@ async function runInner() {
     { defaultIndex: 0 }
   )
   const agent = AGENTS[agentId]
-  const cwd = process.cwd()
   const targetAbs = path.resolve(cwd, agent.targetDir)
+
+  const legacy = await inspectLegacySkillInstall(targetAbs)
+  if (legacy.legacyExists) {
+    console.log('')
+    console.log(`⛔ 检测到旧 Skill 目录：${path.relative(cwd, legacy.legacyAbs)}`)
+    if (legacy.canonicalExists) {
+      console.log(`   新目录也已存在：${path.relative(cwd, legacy.canonicalAbs)}`)
+      console.log('   为避免加载两份视觉同步 Skill，安装器不会自动合并或删除目录。')
+    } else {
+      console.log(`   当前版本已迁移为：${path.relative(cwd, legacy.canonicalAbs)}`)
+      console.log('   请先手动迁移或移除旧目录，再重新运行安装器并选择合适的冲突策略。')
+    }
+    return
+  }
 
   const conflictMode = await select(
     '? 冲突策略（目标文件已存在时）：',
@@ -75,9 +136,11 @@ async function runInner() {
   )
 
   console.log('')
-  console.log(`📂 将复制以下内容到 ${agent.targetDir}：`)
-  for (const item of COPY_PLAN) {
-    console.log(`  ${item.srcRel}/  →  ${agent.targetDir}${item.destRel}/`)
+  const plan = buildCopyPlan({ cwd, targetAbs })
+  console.log('📂 将复制以下内容：')
+  for (const item of plan) {
+    const suffix = item.kind === 'dir' ? '/' : ''
+    console.log(`  ${item.srcRel}${suffix}  →  ${path.relative(cwd, item.destAbs)}${suffix}`)
   }
 
   const ok = await confirm('? 确认开始？', { defaultYes: false })
@@ -86,14 +149,12 @@ async function runInner() {
     return
   }
 
-  const pkgRoot = packageRoot()
   const total = { copied: 0, skipped: 0, overwritten: 0 }
   const state = {}
-  for (const item of COPY_PLAN) {
-    const src = path.join(pkgRoot, item.srcRel)
-    const dest = path.join(targetAbs, item.destRel)
+  for (const item of plan) {
     process.stdout.write(`  ↳ ${item.destRel} ... `)
-    const stats = await copyDir(src, dest, {
+    const copy = item.kind === 'file' ? copyFile : copyDir
+    const stats = await copy(item.srcAbs, item.destAbs, {
       conflict: conflictMode,
       state,
       onConflict: filePath => askConflict(filePath)
@@ -108,19 +169,8 @@ async function runInner() {
   console.log(`✅ 已安装到 ${agent.targetDir}`)
   console.log(`   合计：新增 ${total.copied}，跳过 ${total.skipped}，覆盖 ${total.overwritten}`)
 
-  // 后置检查：目标仓库根是否有 HUMAN_AGENT_WORKFLOW.md
-  const hawPath = path.resolve(cwd, HAW_FILENAME)
-  const hasHaw = await pathExists(hawPath)
-  if (!hasHaw) {
-    console.log('')
-    console.log(`⚠️  未在仓库根目录发现 ${HAW_FILENAME}`)
-    console.log(`   frontend / backend / prd-review 等 skill 依赖它判断 L0/L1/L2/L3 分档`)
-    console.log(`   请从 dev-workflow-skill 源仓库获取并放到项目根目录`)
-    console.log(`   https://github.com/Wenyari/dev-workflow-skill/blob/main/${HAW_FILENAME}`)
-  }
-
   console.log('')
-  console.log(`建议：git add ${agent.targetDir} && git commit -m "chore: install @dev-workflow/skill"`)
+  console.log(`建议：git add ${agent.targetDir} ${HAW_FILENAME} && git commit -m "chore: install @dev-workflow/skill"`)
 }
 
 async function askConflict(filePath) {
